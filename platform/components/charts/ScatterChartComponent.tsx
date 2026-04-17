@@ -61,7 +61,7 @@ export function PriceScatterChart({ data, height = 300, xLabel = 'Market Avg', y
           data={data}
           fill="#1a5c3a"
           opacity={0.7}
-          shape={(props: Record<string, unknown>) => {
+          shape={(props: unknown) => {
             const { cx, cy, payload } = props as { cx: number; cy: number; payload: ScatterPoint }
             const color = TAG_COLORS[(payload as ScatterPoint).tag ?? ''] ?? '#1a5c3a'
             return <circle cx={cx} cy={cy} r={4} fill={color} fillOpacity={0.75} />
