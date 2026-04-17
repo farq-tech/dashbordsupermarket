@@ -1,0 +1,20 @@
+========================================
+الحل السريع لمشكلة البيانات = 0
+========================================
+
+المشكلة: المكتبات غير مثبتة أو BASE_URL غير مفعّل
+
+الحل:
+
+1. ثبّت المكتبات:
+   pip install httpx pandas python-dotenv tenacity tqdm openpyxl
+
+2. فعّل BASE_URL في ملف .env:
+   VITE_API_BASE_URL=https://api.fustog.app/api/v1
+
+3. شغل السكربت الأصلي:
+   python scripts\scrape_products_prices_compare.py
+
+الملفات ستكون في مجلد data/
+
+========================================

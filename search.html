@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fustog - بحث المنتجات ومقارنة الأسعار</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+.header {
+  background: linear-gradient(135deg, #1e40af, #7c3aed);
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.header h1 { font-size: 28px; color: #fff; margin-bottom: 4px; }
+.header p { color: #c7d2fe; font-size: 14px; }
+.search-box {
+  max-width: 700px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.search-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 18px;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  background: #1e293b;
+  color: #f1f5f9;
+  outline: none;
+  transition: border-color 0.2s;
+  text-align: right;
+}
+.search-input:focus { border-color: #6366f1; }
+.search-input::placeholder { color: #64748b; }
+.filters {
+  max-width: 700px;
+  margin: 0 auto 16px;
+  padding: 0 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.filter-btn.active, .filter-btn:hover {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+.stats {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.results {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+.product-card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #334155;
+  transition: border-color 0.2s;
+}
+.product-card:hover { border-color: #4f46e5; }
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-store { background: #1e3a5f; color: #60a5fa; }
+.tag-store.panda { background: #064e3b; color: #34d399; }
+.tag-store.tamimi { background: #4c1d95; color: #a78bfa; }
+.tag-category { background: #3f3f46; color: #a1a1aa; }
+.tag-brand { background: #713f12; color: #fbbf24; }
+.tag-size { background: #1e293b; color: #94a3b8; border: 1px solid #475569; }
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #22c55e;
+}
+.price-old {
+  font-size: 14px;
+  color: #ef4444;
+  text-decoration: line-through;
+}
+.currency { font-size: 14px; color: #86efac; margin-right: 2px; }
+.barcode { font-size: 11px; color: #475569; font-family: monospace; }
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+}
+.no-results h3 { font-size: 20px; margin-bottom: 8px; color: #94a3b8; }
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6366f1;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+.compare-table th {
+  background: #334155;
+  padding: 10px;
+  text-align: right;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.compare-table td {
+  padding: 10px;
+  border-bottom: 1px solid #1e293b;
+  font-size: 14px;
+}
+.compare-table tr:hover { background: #1e293b; }
+.lowest { color: #22c55e; font-weight: 700; }
+.quick-search {
+  max-width: 700px;
+  margin: 0 auto 20px;
+  padding: 0 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.quick-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.quick-btn:hover { background: #1e293b; border-color: #6366f1; }
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  background: #064e3b;
+  color: #34d399;
+  margin-top: 8px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.section-title {
+  font-size: 18px;
+  color: #94a3b8;
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #334155;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Fustog فستق</h1>
+  <p>بحث ومقارنة أسعار المنتجات في سوبرماركتات الرياض</p>
+  <div class="live-status"><span class="live-dot"></span> بيانات مباشرة من Panda و Tamimi</div>
+</div>
+
+<div class="search-box">
+  <input type="text" class="search-input" id="searchInput"
+    placeholder="ابحث عن منتج... مثال: زيت عافية، أرز أبو كاس، حليب المراعي"
+    autofocus>
+</div>
+
+<div class="quick-search">
+  <button class="quick-btn" onclick="quickSearch('زيت عافية ذرة')">زيت عافية</button>
+  <button class="quick-btn" onclick="quickSearch('ابو كاس بسمتي')">رز أبو كاس</button>
+  <button class="quick-btn" onclick="quickSearch('حليب المراعي')">حليب المراعي</button>
+  <button class="quick-btn" onclick="quickSearch('مازولا')">مازولا</button>
+  <button class="quick-btn" onclick="quickSearch('فيري')">فيري</button>
+  <button class="quick-btn" onclick="quickSearch('بيبسي')">بيبسي</button>
+  <button class="quick-btn" onclick="quickSearch('دجاج')">دجاج</button>
+  <button class="quick-btn" onclick="quickSearch('سكر')">سكر</button>
+  <button class="quick-btn" onclick="quickSearch('قهوة')">قهوة</button>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-store="all" onclick="setFilter('all')">الكل</button>
+  <button class="filter-btn" data-store="panda" onclick="setFilter('panda')">Panda</button>
+  <button class="filter-btn" data-store="tamimi" onclick="setFilter('tamimi')">Tamimi</button>
+</div>
+
+<div class="stats" id="stats"></div>
+<div class="results" id="results">
+  <div class="loading" id="loading">جاري تحميل البيانات...</div>
+</div>
+
+<script>
+let allProducts = [];
+let currentFilter = 'all';
+let searchTimeout;
+
+// Load data from CSV files
+async function loadData() {
+  try {
+    // Load Panda products
+    const pandaResp = await fetch('data/all_products_full.csv');
+    const pandaText = await pandaResp.text();
+    const pandaProducts = parseCSV(pandaText, 'panda');
+
+    // Load Tamimi products
+    const tamimiResp = await fetch('data/tamimi_products.csv');
+    const tamimiText = await tamimiResp.text();
+    const tamimiProducts = parseCSV(tamimiText, 'tamimi');
+
+    allProducts = [...pandaProducts, ...tamimiProducts];
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('stats').textContent =
+      `${allProducts.length.toLocaleString()} منتج من ${pandaProducts.length.toLocaleString()} Panda + ${tamimiProducts.length.toLocaleString()} Tamimi`;
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:#ef4444">خطأ في تحميل البيانات. تأكد من تشغيل الصفحة عبر HTTP server</p>' +
+      '<p style="color:#64748b;font-size:12px;margin-top:8px">شغّل: python -m http.server 8080 ثم افتح http://localhost:8080/search.html</p>';
+  }
+}
+
+function parseCSV(text, defaultStore) {
+  const lines = text.split('\n');
+  if (lines.length < 2) return [];
+
+  const header = lines[0].split(',');
+  const products = [];
+
+  // Find column indices
+  const cols = {};
+  header.forEach((h, i) => {
+    const lower = h.trim().toLowerCase().replace(/"/g, '');
+    cols[lower] = i;
+  });
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    // Smart CSV parsing (handle commas in quoted fields)
+    const values = smartSplit(line);
+
+    let product = {};
+    if (defaultStore === 'panda') {
+      product = {
+        id: values[0] || '',
+        barcode: values[1] || '',
+        name: values[2] || '',
+        name_en: values[3] || '',
+        category_id: values[4] || '',
+        category: values[5] || '',
+        brand: values[8] || '',
+        price: parseFloat(values[11]) || 0,
+        sale_price: parseFloat(values[12]) || 0,
+        currency: values[13] || 'SAR',
+        size: values[14] || '',
+        unit: values[15] || '',
+        store: 'panda',
+        store_name: 'Panda',
+      };
+    } else if (defaultStore === 'tamimi') {
+      product = {
+        id: values[0] || '',
+        barcode: values[cols['barcode']] || values[17] || '',
+        name: values[2] || '',
+        name_en: values[2] || '',
+        category_id: values[4] || '',
+        category: values[5] || '',
+        brand: values[7] || '',
+        price: parseFloat(values[cols['price']] || values[19]) || 0,
+        sale_price: parseFloat(values[cols['saleprice']] || values[20]) || 0,
+        currency: values[cols['currency']] || values[21] || 'SAR',
+        size: values[cols['size']] || values[22] || '',
+        unit: '',
+        store: 'tamimi',
+        store_name: 'Tamimi',
+      };
+    }
+
+    if (product.name && product.name.length > 2 && product.price > 0) {
+      products.push(product);
+    }
+  }
+  return products;
+}
+
+function smartSplit(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function search(query) {
+  if (!query || query.length < 2) {
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('stats').textContent =
+      `${allProducts.length.toLocaleString()} منتج جاهز للبحث`;
+    return;
+  }
+
+  const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  let results = allProducts.filter(p => {
+    const text = `${p.name} ${p.name_en} ${p.brand} ${p.category} ${p.barcode}`.toLowerCase();
+    return terms.every(t => text.includes(t));
+  });
+
+  // Apply store filter
+  if (currentFilter !== 'all') {
+    results = results.filter(p => p.store === currentFilter);
+  }
+
+  // Sort by price
+  results.sort((a, b) => (a.price || 999999) - (b.price || 999999));
+
+  // Limit display
+  const displayed = results.slice(0, 100);
+
+  // Group by product name for comparison
+  const grouped = groupByProduct(results);
+
+  let html = '';
+
+  // Show comparison table if results from multiple stores
+  const stores = [...new Set(results.map(p => p.store))];
+  if (stores.length > 1 && grouped.length > 0 && grouped.length <= 20) {
+    html += '<div class="section-title">مقارنة الأسعار بين المتاجر</div>';
+    html += '<table class="compare-table"><tr><th>المنتج</th>';
+    stores.forEach(s => html += `<th>${s === 'panda' ? 'Panda' : 'Tamimi'}</th>`);
+    html += '</tr>';
+
+    grouped.forEach(g => {
+      html += `<tr><td>${g.name}</td>`;
+      const prices = {};
+      g.items.forEach(item => {
+        if (!prices[item.store] || item.price < prices[item.store]) {
+          prices[item.store] = item.price;
+        }
+      });
+      const allPrices = Object.values(prices).filter(p => p > 0);
+      const minPrice = Math.min(...allPrices);
+
+      stores.forEach(s => {
+        const p = prices[s];
+        if (p) {
+          const isLowest = p === minPrice && allPrices.length > 1;
+          html += `<td class="${isLowest ? 'lowest' : ''}">${p.toFixed(2)} ريال${isLowest ? ' ✓' : ''}</td>`;
+        } else {
+          html += '<td style="color:#475569">-</td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</table>';
+  }
+
+  // Show individual cards
+  html += `<div class="section-title">النتائج (${results.length})</div>`;
+
+  if (displayed.length === 0) {
+    html += '<div class="no-results"><h3>لا توجد نتائج</h3><p>جرب كلمات بحث مختلفة</p></div>';
+  }
+
+  displayed.forEach(p => {
+    const storeClass = p.store === 'panda' ? 'panda' : 'tamimi';
+    const displayPrice = p.sale_price && p.sale_price > 0 && p.sale_price < p.price ? p.sale_price : p.price;
+    const hasDiscount = p.sale_price && p.sale_price > 0 && p.sale_price < p.price;
+
+    html += `
+    <div class="product-card">
+      <div class="product-name">${escapeHtml(p.name)}</div>
+      <div class="product-meta">
+        <span class="tag tag-store ${storeClass}">${p.store_name}</span>
+        ${p.category ? `<span class="tag tag-category">${escapeHtml(p.category)}</span>` : ''}
+        ${p.brand ? `<span class="tag tag-brand">${escapeHtml(p.brand)}</span>` : ''}
+        ${p.size ? `<span class="tag tag-size">${escapeHtml(p.size)} ${escapeHtml(p.unit)}</span>` : ''}
+      </div>
+      <div class="price-row">
+        <span class="price">${displayPrice.toFixed(2)} <span class="currency">ريال</span></span>
+        ${hasDiscount ? `<span class="price-old">${p.price.toFixed(2)}</span>` : ''}
+        ${p.barcode ? `<span class="barcode">${escapeHtml(p.barcode)}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  if (results.length > 100) {
+    html += `<p style="text-align:center;color:#64748b;padding:20px">عرض أول 100 من ${results.length} نتيجة</p>`;
+  }
+
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('stats').textContent =
+    `${results.length} نتيجة من ${allProducts.length.toLocaleString()} منتج`;
+}
+
+function groupByProduct(results) {
+  // Group similar products for comparison
+  const groups = {};
+  results.forEach(p => {
+    // Normalize name for grouping
+    const key = p.barcode || p.name.replace(/\s+/g, ' ').trim().substring(0, 50);
+    if (!groups[key]) {
+      groups[key] = { name: p.name, items: [] };
+    }
+    groups[key].items.push(p);
+  });
+
+  // Only return groups with items from multiple stores
+  return Object.values(groups).filter(g => {
+    const stores = new Set(g.items.map(i => i.store));
+    return stores.size > 1;
+  }).slice(0, 20);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function quickSearch(query) {
+  document.getElementById('searchInput').value = query;
+  search(query);
+}
+
+function setFilter(store) {
+  currentFilter = store;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.store === store);
+  });
+  const query = document.getElementById('searchInput').value;
+  if (query) search(query);
+}
+
+// Search on input with debounce
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => search(this.value), 200);
+});
+
+// Enter key
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    clearTimeout(searchTimeout);
+    search(this.value);
+  }
+});
+
+// Load data on page load
+loadData();
+</script>
+</body>
+</html>
