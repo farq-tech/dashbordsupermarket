@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const section = searchParams.get('section') || 'all'
 
     const bundle = await getDataBundle()
-    const cacheInfo = getCacheInfo()
+    const { last_updated: _cache_last_updated, ...cacheInfo } = getCacheInfo()
     const retailers = retailersFromStores(bundle.stores)
 
     if (section === 'stores') {
