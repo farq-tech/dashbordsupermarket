@@ -1,3 +1,28 @@
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node / Next
+node_modules/
+.next/
+out/
+.turbo/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Data exports (huge / local-only)
+data/
+*.zip
+
+# Cursor
+.cursor/
 # Environment variables
 .env
 .env.local

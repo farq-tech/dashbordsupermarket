@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Brand */
+  --color-brand: #043434;
+  --color-brand-hover: #065151;
+  --color-accent: #75F0A8;
+
+  /* Neutrals */
+  --color-text-primary: #2D2E2E;
+  --color-text-secondary: #355273;
+  --color-border: #EAEDF1;
+  --color-bg: #FCFCFC;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F4F8FB;
+  --color-surface-hover: #EFF8F2;
+
+  /* Layout */
+  --color-sidebar-bg: var(--color-surface);
+  --color-topbar-bg: var(--color-surface);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-brand: 'Futura', 'Inter', system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;  /* 12px */
+  --radius-lg: 1.25rem;  /* 20px */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+}
+
+/* RTL support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f2;
+}
+::-webkit-scrollbar-thumb {
+  background: #c8d6cc;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ab5a0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Card hover */
+.card-hover {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+  box-shadow: 0 8px 30px rgba(15, 61, 39, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Number font */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tag colors */
+.tag-overpriced { background: #fee2e2; color: #dc2626; }
+.tag-underpriced { background: #dcfce7; color: #16a34a; }
+.tag-competitive { background: #dbeafe; color: #2563eb; }
+.tag-opportunity { background: #fef9c3; color: #ca8a04; }
+.tag-risk { background: #ffedd5; color: #ea580c; }
+.tag-not_stocked { background: #f3f4f6; color: #6b7280; }
