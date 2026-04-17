@@ -45,12 +45,43 @@ export function getRetailerByKey(store_key: number): Retailer | undefined {
   return RETAILERS.find(r => r.store_key === store_key)
 }
 
+export function retailersFromStores(stores: StoreRow[]): Retailer[] {
+  // Convert CSV store rows into UI retailers for the dashboard.
+  // If the stores file is missing or incomplete, fall back to the static list.
+  const derived = stores
+    .filter(s => typeof s.store_key === 'number' && s.store_key > 0)
+    .map((s) => {
+      const brandEn = (s.retailer_brand_en || s.store_name_en || `Store ${s.store_key}`).trim()
+      const brandAr = (s.retailer_brand_ar || s.store_name_ar || brandEn).trim()
+      const nameEn = (s.store_name_en || brandEn).trim()
+      const nameAr = (s.store_name_ar || brandAr).trim()
+      const letter = (brandEn[0] || 'S').toUpperCase()
+      return {
+        store_key: s.store_key,
+        rid: s.rid || s.store_key,
+        name_ar: nameAr,
+        name_en: nameEn,
+        brand_ar: brandAr,
+        brand_en: brandEn,
+        // Keep existing palette if unknown; UI still works.
+        color: '#1a5c3a',
+        logo_letter: letter,
+      } satisfies Retailer
+    })
+
+  // Deduplicate by store_key while preserving order
+  const seen = new Set<number>()
+  const uniq = derived.filter(r => (seen.has(r.store_key) ? false : (seen.add(r.store_key), true)))
+  return uniq.length > 0 ? uniq : RETAILERS
+}
+
 export function computeRetailerKPIs(
   storeKey: number,
   prices: PriceRow[],
   matching: MatchingRow[],
+  retailers: Retailer[] = RETAILERS,
 ): RetailerKPIs {
-  const retailer = RETAILERS.find(r => r.store_key === storeKey)!
+  const retailer = retailers.find(r => r.store_key === storeKey) ?? retailers[0]!
   const myPrices = prices.filter(p => p.StoreKey === storeKey)
   const myPriceMap = new Map<number, number>()
   myPrices.forEach(p => myPriceMap.set(p.FID, p.Price))
@@ -233,8 +264,8 @@ export function getTopCategories(kpis: RetailerKPIs): CategoryKPI[] {
     .slice(0, 8)
 }
 
-export function getMarketSummary(prices: PriceRow[], matching: MatchingRow[]) {
-  const retailerStats = RETAILERS.map(r => {
+export function getMarketSummary(prices: PriceRow[], matching: MatchingRow[], retailers: Retailer[] = RETAILERS) {
+  const retailerStats = retailers.map(r => {
     const rPrices = prices.filter(p => p.StoreKey === r.store_key)
     const rMap = new Map<number, number>()
     rPrices.forEach(p => rMap.set(p.FID, p.Price))

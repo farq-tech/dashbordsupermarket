@@ -3,7 +3,9 @@ import path from 'path'
 import { parseCsv, num, int } from './csvParser'
 import type { DataBundle, StoreRow, PriceRow, MatchingRow } from './types'
 
-const DATA_DIR = path.join(process.cwd(), '..', 'data')
+// In production (Vercel), we bundle a snapshot under platform/data/.
+// In local dev, this also works when running from platform/.
+const DATA_DIR = path.join(process.cwd(), 'data')
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour
 
 interface CacheState {

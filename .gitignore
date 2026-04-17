@@ -21,6 +21,12 @@ Thumbs.db
 data/
 *.zip
 
+# Allow bundling a public demo snapshot for Vercel
+!platform/data/
+!platform/data/**
+!platform/app/api/data/
+!platform/app/api/data/**
+
 # Cursor
 .cursor/
 # Environment variables

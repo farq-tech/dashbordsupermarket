@@ -24,6 +24,7 @@ export interface DashboardData {
 interface AppState {
   lang: 'ar' | 'en'
   dir: 'rtl' | 'ltr'
+  retailers: Retailer[]
   selectedRetailer: Retailer | null
   dashboardData: DashboardData | null
   loading: boolean
@@ -42,16 +43,11 @@ interface AppState {
   forceRefresh: () => Promise<void>
 }
 
-export const RETAILER_LIST: Retailer[] = [
-  { store_key: 2, rid: 2, name_ar: 'الرياض - العالية بلازا', name_en: 'Riyadh - Alia Plaza', brand_ar: 'بنده', brand_en: 'Panda', color: '#E53E3E', logo_letter: 'P' },
-  { store_key: 5, rid: 5, name_ar: 'أسواق العثيم - الرياض', name_en: 'Othaim Markets - Riyadh', brand_ar: 'أسواق العثيم', brand_en: 'Othaim', color: '#2B6CB0', logo_letter: 'E' },
-  { store_key: 6, rid: 6, name_ar: 'لولو هايبر ماركت - الرياض', name_en: 'LuLu Hyper Market - Riyadh', brand_ar: 'لولو', brand_en: 'LuLu', color: '#276749', logo_letter: 'L' },
-]
-
 export const useAppStore = create<AppState>((set, get) => ({
   lang: 'ar',
   dir: 'rtl',
-  selectedRetailer: RETAILER_LIST[0],
+  retailers: [],
+  selectedRetailer: null,
   dashboardData: null,
   loading: false,
   refreshing: false,
@@ -81,13 +77,21 @@ export const useAppStore = create<AppState>((set, get) => ({
   resetFilters: () => set({ filters: { category: '', brand: '', tag: '' } }),
 
   fetchData: async (storeKey?: number) => {
-    const key = storeKey ?? get().selectedRetailer?.store_key ?? 2
+    const key = storeKey ?? get().selectedRetailer?.store_key ?? get().retailers?.[0]?.store_key ?? 1
     set({ loading: true, error: null })
     try {
       const res = await fetch(`/api/data?store_key=${key}&section=all`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data: DashboardData = await res.json()
-      set({ dashboardData: data, loading: false, lastUpdated: data.last_updated })
+      const retailers = data.retailers || []
+      const selected = retailers.find(r => r.store_key === key) || retailers[0] || null
+      set({
+        dashboardData: data,
+        retailers,
+        selectedRetailer: selected,
+        loading: false,
+        lastUpdated: data.last_updated,
+      })
     } catch (e) {
       set({ loading: false, error: (e as Error).message })
     }
