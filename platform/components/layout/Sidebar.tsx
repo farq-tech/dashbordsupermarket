@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAppStore, RETAILER_LIST } from '@/store/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/components/ui/cn'
 import {
   LayoutDashboard, Store, BarChart2, DollarSign, Map, Users, Tag, Lightbulb, Bell
@@ -20,7 +20,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { lang, selectedRetailer, setRetailer, dashboardData } = useAppStore()
+  const { lang, retailers, selectedRetailer, setRetailer, dashboardData } = useAppStore()
   const alertsCount = dashboardData?.alerts?.length ?? 0
 
   return (
@@ -39,15 +39,15 @@ export function Sidebar() {
             style={{ background: 'var(--color-brand)' }}
           >
             <span className="font-bold text-sm" style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-brand)' }}>
-              F
+              S
             </span>
           </div>
           <div>
             <p className="font-bold text-sm leading-tight" style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}>
-              Farq
+              Supermarket
             </p>
             <p className="text-xs" style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}>
-              Partners
+              Intelligence
             </p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export function Sidebar() {
           {lang === 'ar' ? 'السلسلة' : 'Chain'}
         </p>
         <div className="space-y-1">
-          {RETAILER_LIST.map(r => (
+          {retailers.map(r => (
             <button
               key={r.store_key}
               onClick={() => setRetailer(r)}
