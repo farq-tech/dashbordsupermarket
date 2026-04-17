@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fustog - كل المصادر</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#0a0a1a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:20px;text-align:center;border-bottom:2px solid #e94560}
+.header h1{font-size:26px;color:#e94560}
+.header p{color:#64748b;font-size:13px;margin-top:4px}
+.main{max-width:1100px;margin:0 auto;padding:16px}
+.search-bar{position:sticky;top:0;z-index:10;background:#0a0a1a;padding:12px 0;border-bottom:1px solid #1e293b}
+.search-input{width:100%;padding:14px 20px;border-radius:10px;border:2px solid #334155;background:#1e293b;color:#f1f5f9;font-size:16px;outline:none}
+.search-input:focus{border-color:#e94560}
+.search-input::placeholder{color:#64748b}
+.sources-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.src-chip{padding:6px 14px;border-radius:20px;border:1px solid #334155;background:#0f172a;color:#94a3b8;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:5px;transition:all .15s;user-select:none}
+.src-chip:hover{border-color:#e94560}
+.src-chip.active{border-color:#22c55e;color:#22c55e;background:#022c22}
+.src-chip.loading{border-color:#3b82f6;color:#3b82f6;animation:chipPulse 1s infinite}
+.src-chip.error{border-color:#475569;color:#475569}
+.src-chip .dot{width:7px;height:7px;border-radius:50%}
+.src-chip.active .dot{background:#22c55e}
+.src-chip.loading .dot{background:#3b82f6}
+.src-chip.error .dot{background:#ef4444}
+.src-chip .count{background:#1e293b;padding:1px 6px;border-radius:8px;font-size:10px;margin-right:4px}
+@keyframes chipPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.section{background:#1e293b;border-radius:12px;padding:16px;margin-top:16px;border:1px solid #334155}
+.section h2{font-size:15px;color:#94a3b8;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.stats-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.stat-card{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;min-width:120px;text-align:center}
+.stat-num{font-size:28px;font-weight:700;color:#e94560}
+.stat-label{font-size:11px;color:#64748b;margin-top:2px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;margin-top:10px}
+.cat-btn{padding:8px 6px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#cbd5e1;cursor:pointer;text-align:center;font-size:11px;transition:all .15s}
+.cat-btn:hover,.cat-btn.active{border-color:#e94560;color:#e94560}
+.cat-btn img{width:28px;height:28px;display:block;margin:0 auto 4px}
+.product-card{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:12px;margin-bottom:8px;transition:border .15s}
+.product-card:hover{border-color:#334155}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pc-name{font-size:14px;font-weight:600;color:#f1f5f9;line-height:1.4;flex:1}
+.pc-price{font-size:20px;font-weight:700;color:#22c55e;white-space:nowrap}
+.pc-price-old{font-size:12px;color:#ef4444;text-decoration:line-through;margin-right:4px}
+.pc-currency{font-size:11px;color:#86efac}
+.pc-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+.tag-panda{background:#064e3b;color:#34d399}
+.tag-tamimi{background:#4c1d95;color:#a78bfa}
+.tag-fustog{background:#7f1d1d;color:#fca5a5}
+.tag-lulu{background:#1e3a5f;color:#60a5fa}
+.tag-farm{background:#713f12;color:#fbbf24}
+.tag-cat{background:#27272a;color:#a1a1aa}
+.tag-brand{background:#422006;color:#fb923c}
+.tag-size{background:#1e293b;color:#64748b;border:1px solid #334155}
+.tag-barcode{background:#0f172a;color:#475569;font-family:monospace;font-size:9px}
+.log-box{background:#0a0a1a;border:1px solid #1e293b;border-radius:8px;padding:10px;font-family:monospace;font-size:11px;max-height:200px;overflow-y:auto;margin-top:10px}
+.log-line{padding:1px 0;color:#475569}
+.log-ok{color:#34d399}
+.log-err{color:#fca5a5}
+.log-req{color:#60a5fa}
+.log-info{color:#fbbf24}
+.empty-msg{text-align:center;padding:30px;color:#475569}
+.empty-msg h3{color:#64748b;font-size:16px;margin-bottom:4px}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.btn-primary{background:#e94560;color:#fff}
+.btn-primary:hover{background:#d63d56}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.results-count{color:#64748b;font-size:13px}
+.sort-btns{display:flex;gap:4px}
+.sort-btn{padding:4px 10px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#94a3b8;cursor:pointer;font-size:11px}
+.sort-btn.active{border-color:#e94560;color:#e94560}
+.compare-box{background:#0f172a;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:12px}
+.compare-box h3{color:#22c55e;font-size:14px;margin-bottom:8px}
+.compare-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e293b}
+.compare-row:last-child{border-bottom:none}
+.compare-store{font-size:13px;color:#cbd5e1}
+.compare-price{font-size:16px;font-weight:700}
+.compare-price.lowest{color:#22c55e}
+.compare-price.higher{color:#94a3b8}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Fustog فستق - كل المصادر</h1>
+  <p>بحث مباشر من جميع مصادر البيانات المتاحة</p>
+</div>
+
+<div class="main">
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput"
+      placeholder="ابحث عن منتج... زيت عافية، رز أبو كاس، حليب المراعي" autofocus>
+    <div class="sources-bar" id="sourcesBar"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- Fustog Categories -->
+  <div class="section" id="catSection" style="display:none">
+    <h2>📂 تصنيفات Fustog</h2>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="section">
+    <div class="results-header">
+      <h2>🛒 المنتجات</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="sort-btns">
+          <button class="sort-btn active" onclick="sortResults('price')">السعر ↑</button>
+          <button class="sort-btn" onclick="sortResults('name')">الاسم</button>
+          <button class="sort-btn" onclick="sortResults('store')">المتجر</button>
+        </div>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+    </div>
+    <div id="compareBox"></div>
+    <div id="resultsList"></div>
+  </div>
+
+  <!-- API Log -->
+  <div class="section">
+    <h2>📡 سجل API</h2>
+    <div class="log-box" id="logBox"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+const sources = {
+  fustog: { name: 'Fustog API', status: 'loading', count: 0, products: [], color: '#e94560' },
+  panda:  { name: 'Panda', status: 'loading', count: 0, products: [], color: '#34d399' },
+  tamimi: { name: 'Tamimi', status: 'loading', count: 0, products: [], color: '#a78bfa' },
+  lulu:   { name: 'Lulu', status: 'loading', count: 0, products: [], color: '#60a5fa' },
+  farm:   { name: 'Farm', status: 'loading', count: 0, products: [], color: '#fbbf24' },
+};
+let allProducts = [];
+let currentSort = 'price';
+let activeSource = 'all';
+let fustogCategories = [];
+let searchTimeout;
+
+// ============================================================
+// LZ-String Decompression
+// ============================================================
+const LZ_KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+const bRev = {};
+function gBV(a,c){if(!bRev[a]){bRev[a]={};for(let i=0;i<a.length;i++)bRev[a][a[i]]=i;}return bRev[a][c];}
+function lzD(input){if(!input)return"";input=input.replace(/\s/g,"");const gN=(i)=>gBV(LZ_KEY,input[i]);return _lzD(input.length,32,gN);}
+function _lzD(len,rv,gN){const d={};let eI=4,dS=4,nB=3,e="",r=[];let dV=gN(0),dP=rv,dI=1;for(let i=0;i<3;i++)d[i]=String.fromCharCode(i);let b=0,mx=4,pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;dV=gN(dI++);}b|=(rs>0?1:0)*pw;pw<<=1;}let nx=b,c;if(nx===0){b=0;mx=256;pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;dV=gN(dI++);}b|=(rs>0?1:0)*pw;pw<<=1;}c=String.fromCharCode(b);}else if(nx===1){b=0;mx=65536;pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;dV=gN(dI++);}b|=(rs>0?1:0)*pw;pw<<=1;}c=String.fromCharCode(b);}else return"";d[3]=c;let w=c;r.push(c);while(true){if(dI>len)return r.join("");b=0;mx=Math.pow(2,nB);pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;if(dI<len)dV=gN(dI++);else dV=0;}b|=(rs>0?1:0)*pw;pw<<=1;}let cc=b;if(cc===0){b=0;mx=256;pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;dV=gN(dI++);}b|=(rs>0?1:0)*pw;pw<<=1;}d[dS]=String.fromCharCode(b);cc=dS++;eI--;}else if(cc===1){b=0;mx=65536;pw=1;while(pw!==mx){let rs=dV&dP;dP>>=1;if(dP===0){dP=rv;dV=gN(dI++);}b|=(rs>0?1:0)*pw;pw<<=1;}d[dS]=String.fromCharCode(b);cc=dS++;eI--;}else if(cc===2)return r.join("");if(eI===0){eI=Math.pow(2,nB);nB++;}if(d[cc]!==undefined)e=d[cc];else if(cc===dS)e=w+w[0];else return"";r.push(e);d[dS++]=w+e[0];eI--;w=e;if(eI===0){eI=Math.pow(2,nB);nB++;}}}
+
+// ============================================================
+// Logging
+// ============================================================
+function log(msg, cls='') {
+  const el = document.getElementById('logBox');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + cls;
+  const t = new Date().toLocaleTimeString('en', {hour12:false});
+  line.textContent = `[${t}] ${msg}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ============================================================
+// Fetch helpers
+// ============================================================
+async function fustogFetch(endpoint, method='GET', params={}) {
+  const url = new URL('https://api.fustog.app/api/v1' + endpoint);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  log(`→ ${method} ${endpoint}`, 'log-req');
+  try {
+    const r = await fetch(url, { method, headers: {'Accept':'application/json,*/*','Accept-Encoding':'identity'} });
+    if (r.status === 200) {
+      const text = await r.text();
+      if (!text) { log(`← 200 empty`, 'log-info'); return null; }
+      try { const j = JSON.parse(text); log(`← 200 JSON ${text.length}b`, 'log-ok'); return j; }
+      catch { try { const d = lzD(text); const j = JSON.parse(d); log(`← 200 LZ ${d.length}b`, 'log-ok'); return j; }
+      catch { log(`← 200 unparseable ${text.length}b`, 'log-err'); return null; }}
+    } else { log(`← ${r.status}`, 'log-err'); return null; }
+  } catch(e) { log(`← ERR: ${e.message}`, 'log-err'); return null; }
+}
+
+function smartSplitCSV(line) {
+  const r = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') inQ = !inQ;
+    else if (ch === ',' && !inQ) { r.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  r.push(cur.trim());
+  return r;
+}
+
+// ============================================================
+// Source loaders
+// ============================================================
+async function loadFustog() {
+  const src = sources.fustog;
+  try {
+    // Categories
+    fustogCategories = await fustogFetch('/category/Categories') || [];
+    if (fustogCategories.length > 0) {
+      log(`Fustog: ${fustogCategories.length} categories`, 'log-ok');
+      renderCategories(fustogCategories);
+      document.getElementById('catSection').style.display = '';
+    }
+    // Retailer settings
+    const settings = await fustogFetch('/retailer/Settings');
+    if (settings) log(`Fustog retailers: ${Object.keys(settings).join(', ')}`, 'log-info');
+    // Products (try all categories)
+    let prods = [];
+    for (const cat of fustogCategories) {
+      const p = await fustogFetch('/product/ProductsByCategory', 'POST', {categoryId: cat.CID});
+      if (p && Array.isArray(p) && p.length > 0) prods.push(...p);
+    }
+    // Prices
+    const prices = await fustogFetch('/product/ItemsPrices', 'POST');
+    if (prices && prices.length > 0) {
+      log(`Fustog: ${prices.length} prices`, 'log-ok');
+      prods.push(...prices.map(p => ({...p, _source: 'fustog_price'})));
+    }
+    src.products = prods;
+    src.count = prods.length;
+    src.status = prods.length > 0 ? 'active' : 'error';
+    log(`Fustog: ${prods.length} products (DB ${prods.length === 0 ? 'empty' : 'has data'})`, prods.length ? 'log-ok' : 'log-info');
+  } catch(e) { src.status = 'error'; log(`Fustog: ${e.message}`, 'log-err'); }
+  updateUI();
+}
+
+async function loadPanda() {
+  const src = sources.panda;
+  try {
+    const resp = await fetch('data/all_products_full.csv');
+    if (!resp.ok) throw new Error('CSV not found');
+    const text = await resp.text();
+    const lines = text.split('\n');
+    log(`Panda CSV: ${lines.length} lines`, 'log-req');
+    const products = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const v = smartSplitCSV(lines[i]);
+      const price = parseFloat(v[11]);
+      if (!v[2] || !price) continue;
+      products.push({
+        name: v[2], barcode: v[1], category: v[5], brand: v[8],
+        price, salePrice: parseFloat(v[12]) || 0,
+        currency: v[13] || 'SAR', size: v[14], unit: v[15],
+        store: 'panda', storeName: 'Panda',
+      });
+    }
+    src.products = products;
+    src.count = products.length;
+    src.status = 'active';
+    log(`Panda: ${products.length} products loaded`, 'log-ok');
+  } catch(e) { src.status = 'error'; log(`Panda: ${e.message}`, 'log-err'); }
+  updateUI();
+}
+
+async function loadTamimi() {
+  const src = sources.tamimi;
+  try {
+    const resp = await fetch('data/tamimi_products.csv');
+    if (!resp.ok) throw new Error('CSV not found');
+    const text = await resp.text();
+    const lines = text.split('\n');
+    log(`Tamimi CSV: ${lines.length} lines`, 'log-req');
+    const products = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const v = smartSplitCSV(lines[i]);
+      const price = parseFloat(v[19]);
+      if (!v[2] || !price) continue;
+      products.push({
+        name: v[2], barcode: v[17] || '', category: v[5], brand: v[7],
+        price, salePrice: parseFloat(v[20]) || 0,
+        currency: v[21] || 'SAR', size: v[22] || '', unit: '',
+        store: 'tamimi', storeName: 'Tamimi',
+      });
+    }
+    src.products = products;
+    src.count = products.length;
+    src.status = 'active';
+    log(`Tamimi: ${products.length} products loaded`, 'log-ok');
+  } catch(e) { src.status = 'error'; log(`Tamimi: ${e.message}`, 'log-err'); }
+  updateUI();
+}
+
+async function loadLulu() {
+  const src = sources.lulu;
+  try {
+    const LULU = 'https://5082fcfb6f824fd085925566005cee41.lb.akinoncloud.com';
+    log(`Lulu: fetching stores...`, 'log-req');
+    const r = await fetch(LULU + '/stores/', {
+      headers: {'Accept':'application/json','x-app-type':'akinon-mobile','x-project-name':'rn-env'}
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const stores = d.results || [];
+      const saStores = stores.filter(s => JSON.stringify(s).toLowerCase().includes('riyadh') || JSON.stringify(s).toLowerCase().includes('الرياض'));
+      log(`Lulu: ${stores.length} stores (${saStores.length} Riyadh)`, 'log-ok');
+      // Store as products for display
+      src.products = stores.map(s => ({
+        name: s.name, store: 'lulu', storeName: 'Lulu',
+        category: 'Stores', brand: 'Lulu Hypermarket',
+        price: 0, size: s.township?.name || '', unit: '',
+      }));
+      src.count = stores.length;
+      src.status = 'active';
+    } else {
+      log(`Lulu: ${r.status}`, 'log-err');
+      src.status = 'error';
+    }
+    // Try config
+    const r2 = await fetch(LULU + '/config/', {
+      headers: {'Accept':'application/json','x-app-type':'akinon-mobile','x-project-name':'rn-env'}
+    });
+    if (r2.ok) { const cfg = await r2.json(); log(`Lulu config: currencies=${(cfg.available_currencies||[]).join(',')}`, 'log-info'); }
+  } catch(e) { src.status = 'error'; log(`Lulu: ${e.message}`, 'log-err'); }
+  updateUI();
+}
+
+async function loadFarm() {
+  const src = sources.farm;
+  try {
+    // Try loading farm auth token
+    const resp = await fetch('data/farm_auth.json');
+    if (!resp.ok) throw new Error('No auth token');
+    const auth = await resp.json();
+    const token = auth.result?.token;
+    if (!token) throw new Error('Invalid token');
+    log(`Farm: token loaded (user ${auth.result?.id})`, 'log-ok');
+
+    // Try /home endpoint
+    const r = await fetch('https://go.farm.com.sa/public/api/v1.0/home?lat=24.7136&lng=46.6753', {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'accept-language': 'ar',
+      }
+    });
+    const d = await r.json();
+    if (d.status?.success) {
+      log(`Farm: home data received!`, 'log-ok');
+      src.status = 'active';
+    } else {
+      log(`Farm: ${d.status?.otherTxt || 'no data'} (auth OK, location required)`, 'log-info');
+      src.status = 'error';
+      src.count = 0;
+      src.products = [{name: 'Farm API: Token valid, but "Customer Location is required"', store:'farm', storeName:'Farm', price:0, category:'Status'}];
+    }
+  } catch(e) {
+    src.status = 'error';
+    log(`Farm: ${e.message}`, 'log-err');
+  }
+  updateUI();
+}
+
+// ============================================================
+// UI Rendering
+// ============================================================
+function updateUI() {
+  // Sources bar
+  const bar = document.getElementById('sourcesBar');
+  let totalProducts = 0;
+  let html = `<div class="src-chip ${activeSource==='all'?'active':''}" onclick="filterSource('all')">
+    <span class="dot" style="background:#e94560"></span> الكل</div>`;
+  for (const [key, src] of Object.entries(sources)) {
+    totalProducts += src.count;
+    html += `<div class="src-chip ${src.status} ${activeSource===key?'active':''}" onclick="filterSource('${key}')">
+      <span class="dot"></span> ${src.name}
+      <span class="count">${src.count.toLocaleString()}</span>
+    </div>`;
+  }
+  bar.innerHTML = html;
+
+  // Stats
+  const statsEl = document.getElementById('statsRow');
+  const activeSources = Object.values(sources).filter(s => s.status === 'active').length;
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${totalProducts.toLocaleString()}</div><div class="stat-label">إجمالي المنتجات</div></div>
+    <div class="stat-card"><div class="stat-num">${activeSources}/${Object.keys(sources).length}</div><div class="stat-label">مصادر نشطة</div></div>
+    <div class="stat-card"><div class="stat-num">${fustogCategories.length}</div><div class="stat-label">تصنيفات Fustog</div></div>
+  `;
+
+  // Merge all products
+  allProducts = [];
+  for (const [key, src] of Object.entries(sources)) {
+    allProducts.push(...src.products);
+  }
+
+  // Auto-search if there's a query
+  const query = document.getElementById('searchInput').value;
+  if (query.length >= 2) search(query);
+}
+
+function renderCategories(cats) {
+  document.getElementById('catGrid').innerHTML = cats.map(c => `
+    <button class="cat-btn" onclick="searchCategory('${(c.TitleAR||c.TitleEN||'').replace(/'/g,'')}')"
+      title="${c.TitleEN}">
+      ${c.Icon ? `<img src="${c.Icon}" onerror="this.style.display='none'" alt="">` : ''}
+      ${c.TitleAR || c.TitleEN}
+    </button>
+  `).join('');
+}
+
+function search(query) {
+  if (!query || query.length < 2) {
+    document.getElementById('resultsList').innerHTML = '';
+    document.getElementById('compareBox').innerHTML = '';
+    document.getElementById('resultsCount').textContent = '';
+    return;
+  }
+
+  const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  let results = allProducts.filter(p => {
+    if (p.price === 0 && p.store !== 'lulu') return false; // skip non-priced except lulu stores
+    const text = `${p.name} ${p.brand||''} ${p.category||''} ${p.barcode||''} ${p.size||''}`.toLowerCase();
+    return terms.every(t => text.includes(t));
+  });
+
+  // Filter by source
+  if (activeSource !== 'all') {
+    results = results.filter(p => p.store === activeSource);
+  }
+
+  // Sort
+  if (currentSort === 'price') results.sort((a,b) => (a.price||999999)-(b.price||999999));
+  else if (currentSort === 'name') results.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  else if (currentSort === 'store') results.sort((a,b) => (a.store||'').localeCompare(b.store||''));
+
+  document.getElementById('resultsCount').textContent = `${results.length} نتيجة`;
+
+  // Price comparison box
+  const storesWithPrice = [...new Set(results.filter(p=>p.price>0).map(p=>p.store))];
+  if (storesWithPrice.length > 1) {
+    const byStore = {};
+    results.forEach(p => {
+      if (p.price > 0) {
+        if (!byStore[p.store] || p.price < byStore[p.store].price) {
+          byStore[p.store] = p;
+        }
+      }
+    });
+    const entries = Object.entries(byStore).sort((a,b) => a[1].price - b[1].price);
+    const lowest = entries[0][1].price;
+    let chtml = `<div class="compare-box"><h3>💰 مقارنة أقل سعر بين المتاجر</h3>`;
+    entries.forEach(([store, p]) => {
+      const isLowest = p.price === lowest;
+      chtml += `<div class="compare-row">
+        <span class="compare-store"><span class="tag tag-${store}">${p.storeName}</span> ${p.name.substring(0,50)}</span>
+        <span class="compare-price ${isLowest?'lowest':'higher'}">${p.price.toFixed(2)} ريال ${isLowest?'✓ الأرخص':''}</span>
+      </div>`;
+    });
+    chtml += '</div>';
+    document.getElementById('compareBox').innerHTML = chtml;
+  } else {
+    document.getElementById('compareBox').innerHTML = '';
+  }
+
+  // Product cards
+  const displayed = results.slice(0, 100);
+  if (displayed.length === 0) {
+    document.getElementById('resultsList').innerHTML = '<div class="empty-msg"><h3>لا توجد نتائج</h3><p>جرب كلمات مختلفة</p></div>';
+    return;
+  }
+
+  document.getElementById('resultsList').innerHTML = displayed.map(p => {
+    const dp = p.salePrice && p.salePrice > 0 && p.salePrice < p.price ? p.salePrice : p.price;
+    const hasDiscount = p.salePrice && p.salePrice > 0 && p.salePrice < p.price;
+    return `<div class="product-card">
+      <div class="pc-top">
+        <div class="pc-name">${esc(p.name)}</div>
+        ${p.price > 0 ? `<div class="pc-price">
+          ${hasDiscount ? `<span class="pc-price-old">${p.price.toFixed(2)}</span>` : ''}
+          ${dp.toFixed(2)} <span class="pc-currency">ريال</span>
+        </div>` : ''}
+      </div>
+      <div class="pc-meta">
+        <span class="tag tag-${p.store}">${p.storeName}</span>
+        ${p.category ? `<span class="tag tag-cat">${esc(p.category)}</span>` : ''}
+        ${p.brand ? `<span class="tag tag-brand">${esc(p.brand)}</span>` : ''}
+        ${p.size ? `<span class="tag tag-size">${esc(p.size)} ${esc(p.unit||'')}</span>` : ''}
+        ${p.barcode ? `<span class="tag tag-barcode">${esc(p.barcode)}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('') + (results.length > 100 ? `<p style="text-align:center;color:#475569;padding:16px">عرض 100 من ${results.length}</p>` : '');
+}
+
+function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+
+function filterSource(src) {
+  activeSource = src;
+  updateUI();
+  const q = document.getElementById('searchInput').value;
+  if (q) search(q);
+}
+
+function sortResults(by) {
+  currentSort = by;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(
+    by === 'price' ? 'السعر' : by === 'name' ? 'الاسم' : 'المتجر'
+  )));
+  const q = document.getElementById('searchInput').value;
+  if (q) search(q);
+}
+
+function searchCategory(name) {
+  document.getElementById('searchInput').value = name;
+  search(name);
+}
+
+// Search with debounce
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => search(this.value), 200);
+});
+
+// ============================================================
+// Init - load all sources in parallel
+// ============================================================
+log('Starting all data sources...', 'log-info');
+Promise.all([
+  loadFustog(),
+  loadPanda(),
+  loadTamimi(),
+  loadLulu(),
+  loadFarm(),
+]).then(() => {
+  log('All sources loaded!', 'log-ok');
+  updateUI();
+});
+</script>
+</body>
+</html>

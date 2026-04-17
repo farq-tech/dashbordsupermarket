@@ -1,0 +1,66 @@
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node / Next
+node_modules/
+.next/
+out/
+.turbo/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Data exports (huge / local-only)
+data/
+*.zip
+
+# Allow bundling a public demo snapshot for Vercel
+!platform/data/
+!platform/data/**
+!platform/data_restaurants/
+!platform/data_restaurants/**
+!platform/data_supermarket/
+!platform/data_supermarket/**
+!platform/app/api/data/
+!platform/app/api/data/**
+
+# Cursor
+.cursor/
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/

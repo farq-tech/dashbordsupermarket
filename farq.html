@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فرق - قارن أسعار البقالة</title>
+<style>
+:root {
+  --bg: #0b0f1a;
+  --card: #141b2d;
+  --card2: #1a2340;
+  --border: #1e2a45;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --accent: #22d3ee;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f59e0b;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
+  padding: 20px 16px 16px;
+  border-bottom: 2px solid var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 50%, rgba(34,211,238,0.05) 0%, transparent 50%);
+}
+.header-inner { position: relative; max-width: 900px; margin: 0 auto; }
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #0b0f1a; }
+.logo h1 { font-size: 28px; color: var(--accent); letter-spacing: -1px; }
+.logo h1 span { color: #818cf8; }
+.tagline { color: var(--text2); font-size: 13px; margin-bottom: 14px; }
+
+/* Search */
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%;
+  padding: 14px 48px 14px 20px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: #475569; }
+.search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 18px; pointer-events: none; }
+.search-clear { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); font-size: 20px; cursor: pointer; display: none; }
+
+/* Quick chips */
+.quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chip:hover, .chip.active { border-color: var(--accent); color: var(--accent); background: rgba(34,211,238,0.08); }
+
+/* Main */
+.main { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+/* Stats bar */
+.stats-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center;
+}
+.stat-badge {
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text2);
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-badge strong { color: var(--accent); font-size: 16px; }
+.store-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: white;
+  font-weight: 600;
+}
+
+/* Categories */
+.cats-section { margin-bottom: 16px; }
+.cats-scroll {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.cat-chip {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cat-chip:hover, .cat-chip.active { border-color: var(--accent); color: var(--accent); }
+.cat-chip .cnt { background: var(--card2); padding: 1px 6px; border-radius: 6px; font-size: 10px; margin-right: 4px; }
+
+/* Results header */
+.results-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; color: var(--text2); font-size: 13px;
+}
+.results-count strong { color: var(--accent); }
+
+/* Product Card */
+.product-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.product-card:hover { border-color: #334155; }
+
+.pc-top { display: flex; gap: 12px; align-items: flex-start; }
+.pc-img {
+  width: 72px; height: 72px; border-radius: 10px;
+  background: #1e293b; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.pc-img img { width: 100%; height: 100%; object-fit: contain; }
+.pc-info { flex: 1; min-width: 0; }
+.pc-name { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 2px; }
+.pc-name-en { font-size: 11px; color: var(--text2); direction: ltr; text-align: right; }
+.pc-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.pc-tag {
+  padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 500;
+  background: rgba(34,211,238,0.1); color: var(--accent);
+}
+.pc-tag.brand { background: rgba(129,140,248,0.1); color: #818cf8; }
+.pc-tag.size { background: rgba(249,115,22,0.1); color: #f97316; }
+.pc-tag.save { background: rgba(34,197,94,0.15); color: var(--green); }
+
+/* Price bars */
+.price-bars { margin-top: 10px; }
+.price-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; margin-bottom: 4px;
+  border-radius: 8px; background: var(--card2);
+  transition: background 0.15s;
+}
+.price-bar:first-child { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); }
+.price-bar .store-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.price-bar .store-name { font-size: 12px; color: var(--text2); min-width: 60px; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.price-bar:first-child .store-name { color: var(--green); font-weight: 600; }
+.price-bar .bar-track {
+  flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden;
+}
+.price-bar .bar-fill {
+  height: 100%; border-radius: 3px; transition: width 0.4s ease;
+}
+.price-bar:first-child .bar-fill { background: var(--green); }
+.price-bar .price-val {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  min-width: 60px; text-align: left; direction: ltr;
+}
+.price-bar:first-child .price-val { color: var(--green); }
+.price-bar .currency { font-size: 9px; color: var(--text2); font-weight: 400; }
+.price-bar .badge-best {
+  font-size: 9px; padding: 1px 6px; border-radius: 4px;
+  background: var(--green); color: #052e16; font-weight: 700;
+}
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: var(--text2); }
+.loading .spinner {
+  width: 32px; height: 32px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty state */
+.empty { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty h3 { color: var(--text2); font-size: 16px; margin-bottom: 6px; }
+.empty p { color: #475569; font-size: 13px; }
+
+/* Footer */
+.footer { text-align: center; padding: 30px; color: #334155; font-size: 11px; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .pc-img { width: 56px; height: 56px; }
+  .price-bar .store-name { min-width: 50px; max-width: 70px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">ف</div>
+      <h1>فرق <span>Grocery</span></h1>
+    </div>
+    <div class="tagline">قارن أسعار البقالة في الرياض - 7 متاجر، 4000+ منتج</div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" type="text" placeholder="ابحث عن منتج... مثال: حليب، زيت ذرة، رز بسمتي" autocomplete="off">
+      <span class="search-icon">&#128269;</span>
+      <button class="search-clear" id="clearBtn" onclick="clearSearch()">&times;</button>
+    </div>
+    <div class="quick-chips" id="quickChips">
+      <span class="chip" onclick="quickSearch('حليب')">حليب</span>
+      <span class="chip" onclick="quickSearch('زيت ذرة')">زيت ذرة</span>
+      <span class="chip" onclick="quickSearch('رز بسمتي')">رز بسمتي</span>
+      <span class="chip" onclick="quickSearch('دجاج')">دجاج</span>
+      <span class="chip" onclick="quickSearch('جبن')">جبن</span>
+      <span class="chip" onclick="quickSearch('شوكولاتة')">شوكولاتة</span>
+      <span class="chip" onclick="quickSearch('عصير')">عصير</span>
+      <span class="chip" onclick="quickSearch('شامبو')">شامبو</span>
+      <span class="chip" onclick="quickSearch('قهوة')">قهوة</span>
+      <span class="chip" onclick="quickSearch('بسكويت')">بسكويت</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-badge"><strong id="totalProducts">-</strong> منتج</div>
+    <div class="stat-badge"><strong id="totalCats">-</strong> قسم</div>
+    <span class="store-badge" style="background:#C53030">بنده إكسبريس</span>
+    <span class="store-badge" style="background:#E53E3E">بنده</span>
+    <span class="store-badge" style="background:#D69E2E">التميمي</span>
+    <span class="store-badge" style="background:#2F855A">السدحان</span>
+    <span class="store-badge" style="background:#7B2D8E">العثيم</span>
+    <span class="store-badge" style="background:#E31E24">لولو</span>
+    <span class="store-badge" style="background:#2C5282">كارفور</span>
+  </div>
+
+  <!-- Categories -->
+  <div class="cats-section">
+    <div class="cats-scroll" id="catsScroll"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-header" id="resultsHeader" style="display:none">
+    <span class="results-count">نتائج البحث: <strong id="resCount">0</strong></span>
+    <span id="resQuery"></span>
+  </div>
+
+  <div id="content">
+    <div class="empty">
+      <div class="empty-icon">&#128722;</div>
+      <h3>ابحث عن أي منتج لمقارنة الأسعار</h3>
+      <p>اكتب اسم المنتج بالعربي أو الإنجليزي</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  فرق Grocery &copy; 2026 - مقارنة أسعار البقالة في السعودية<br>
+  بيانات من: بنده إكسبريس، بنده، التميمي، السدحان، العثيم، لولو، كارفور
+</div>
+
+<script>
+const API = '';  // Same origin
+let searchTimer = null;
+let activeCategory = null;
+
+// Init
+document.addEventListener('DOMContentLoaded', async () => {
+  loadStats();
+  loadCategories();
+
+  const input = document.getElementById('searchInput');
+  input.addEventListener('input', () => {
+    document.getElementById('clearBtn').style.display = input.value ? 'block' : 'none';
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => doSearch(input.value), 300);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      clearTimeout(searchTimer);
+      doSearch(input.value);
+    }
+  });
+
+  // Load trending on start
+  loadTrending();
+});
+
+async function loadStats() {
+  try {
+    const r = await fetch(API + '/api/stats');
+    const data = await r.json();
+    document.getElementById('totalProducts').textContent = data.totalProducts.toLocaleString('ar-SA');
+    document.getElementById('totalCats').textContent = data.totalCategories;
+  } catch(e) {}
+}
+
+async function loadCategories() {
+  try {
+    const r = await fetch(API + '/api/categories');
+    const cats = await r.json();
+    const el = document.getElementById('catsScroll');
+    el.innerHTML = '<div class="cat-chip active" onclick="selectCategory(null, this)">الكل</div>';
+    cats.forEach(c => {
+      el.innerHTML += `<div class="cat-chip" onclick="selectCategory('${c.nameAr}', this)">${c.nameAr} <span class="cnt">${c.count}</span></div>`;
+    });
+  } catch(e) {}
+}
+
+async function loadTrending() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div>جاري التحميل...</div>';
+  try {
+    const r = await fetch(API + '/api/trending');
+    const data = await r.json();
+    document.getElementById('resultsHeader').style.display = 'flex';
+    document.getElementById('resCount').textContent = data.products.length;
+    document.getElementById('resQuery').textContent = 'أكبر فرق بالأسعار';
+    renderProducts(data.products);
+  } catch(e) {
+    content.innerHTML = '<div class="empty"><div class="empty-icon">&#9888;</div><h3>فشل الاتصال بالخادم</h3><p>تأكد أن server.py يعمل على المنفذ 8787</p></div>';
+  }
+}
+
+function quickSearch(term) {
+  document.getElementById('searchInput').value = term;
+  document.getElementById('clearBtn').style.display = 'block';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  doSearch(term);
+}
+
+function selectCategory(cat, el) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  doSearch(document.getElementById('searchInput').value || '');
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  activeCategory = null;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.cat-chip').classList.add('active');
+  loadTrending();
+}
+
+async function doSearch(query) {
+  if (!query && !activeCategory) { loadTrending(); return; }
+
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div>جاري البحث...</div>';
+
+  try {
+    let url = API + '/api/search?limit=100';
+    if (query) url += '&q=' + encodeURIComponent(query);
+    if (activeCategory) url += '&category=' + encodeURIComponent(activeCategory);
+
+    const r = await fetch(url);
+    const data = await r.json();
+
+    document.getElementById('resultsHeader').style.display = 'flex';
+    document.getElementById('resCount').textContent = data.total;
+    document.getElementById('resQuery').textContent = query ? `"${query}"` : activeCategory || '';
+
+    if (data.products.length === 0) {
+      content.innerHTML = '<div class="empty"><div class="empty-icon">&#128533;</div><h3>لا توجد نتائج</h3><p>جرب كلمات بحث مختلفة</p></div>';
+      return;
+    }
+
+    renderProducts(data.products);
+  } catch(e) {
+    content.innerHTML = '<div class="empty"><div class="empty-icon">&#9888;</div><h3>خطأ في الاتصال</h3></div>';
+  }
+}
+
+function renderProducts(products) {
+  const content = document.getElementById('content');
+  let html = '';
+
+  products.forEach(p => {
+    const maxPrice = p.highestPrice || 1;
+    const hasSavings = p.savings > 0;
+
+    html += `<div class="product-card">
+      <div class="pc-top">
+        <div class="pc-img">
+          ${p.image ? `<img src="${p.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : '&#128230;'}
+        </div>
+        <div class="pc-info">
+          <div class="pc-name">${p.nameAr}</div>
+          ${p.nameEn ? `<div class="pc-name-en">${p.nameEn}</div>` : ''}
+          <div class="pc-meta">
+            ${p.brandAr ? `<span class="pc-tag brand">${p.brandAr}</span>` : ''}
+            ${p.size ? `<span class="pc-tag size">${p.size} ${p.unit}</span>` : ''}
+            ${p.categoryAr ? `<span class="pc-tag">${p.categoryAr}</span>` : ''}
+            ${hasSavings ? `<span class="pc-tag save">وفر ${p.savings.toFixed(2)} ر.س</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="price-bars">`;
+
+    p.prices.forEach((sp, i) => {
+      const pct = (sp.price / maxPrice * 100).toFixed(0);
+      const isLowest = i === 0 && p.prices.length > 1;
+
+      html += `<div class="price-bar">
+        <div class="store-dot" style="background:${sp.storeColor}"></div>
+        <span class="store-name" title="${sp.storeNameAr}">${sp.storeNameAr}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${isLowest ? '#22c55e' : sp.storeColor}"></div>
+        </div>
+        <span class="price-val">${sp.price.toFixed(2)} <span class="currency">ر.س</span></span>
+        ${isLowest ? '<span class="badge-best">الأرخص</span>' : ''}
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  content.innerHTML = html;
+}
+</script>
+</body>
+</html>

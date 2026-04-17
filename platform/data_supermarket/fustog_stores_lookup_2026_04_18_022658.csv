@@ -1,0 +1,7 @@
+store_key,sid,rid,store_name_ar,store_name_en,retailer_brand_ar,retailer_brand_en,is_integration_ready
+1,20,1,الملقا V152,Al Malqa V152,,,False
+2,9,2,الرياض - العالية بلازا,Riyadh - Alia Plaza,بنده,Panda,True
+3,64,3,عقيق (عادي),Aqiq (Regular),,,False
+4,4,4,النفل,An Nafal - Riyadh,,,False
+5,1,5,أسواق العثيم - الرياض,Othaim Markets - Riyadh,أسواق العثيم,Othaim Markets,False
+6,1,6,لولو هايبر ماركت - الرياض,LuLu Hyper Market - Riyadh,لولو,LuLu,False

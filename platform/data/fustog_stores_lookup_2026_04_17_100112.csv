@@ -1,0 +1,8 @@
+store_key,sid,rid,store_name_ar,store_name_en,retailer_brand_ar,retailer_brand_en,is_integration_ready
+1,1,1,التطبيق الرسمي,Official App,التطبيق الرسمي,Official App,True
+2,2,2,هنقرستيشن,HungerStation,هنقرستيشن,HungerStation,True
+3,3,3,جاهز,Jahez,جاهز,Jahez,True
+4,4,4,ذا شفز,Chefz,ذا شفز,Chefz,True
+5,5,5,كيتا,Keeta,كيتا,Keeta,True
+6,6,6,تويو,ToYou,تويو,ToYou,True
+7,7,7,نينجا,Ninja,نينجا,Ninja,True
