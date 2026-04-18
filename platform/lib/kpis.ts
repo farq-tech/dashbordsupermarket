@@ -7,6 +7,7 @@ import type {
   CategoryKPI,
   ProductComparison,
 } from './types'
+import { getSupermarketChainDisplay } from './supermarketChainLabels'
 
 export const RETAILERS: Retailer[] = [
   {
@@ -45,17 +46,34 @@ export function getRetailerByKey(store_key: number): Retailer | undefined {
   return RETAILERS.find(r => r.store_key === store_key)
 }
 
-export function retailersFromStores(stores: StoreRow[]): Retailer[] {
+export type RetailersSourceMode = 'restaurants' | 'supermarket'
+
+export function retailersFromStores(
+  stores: StoreRow[],
+  options?: { source?: RetailersSourceMode },
+): Retailer[] {
+  const source = options?.source ?? 'restaurants'
   // Convert CSV store rows into UI retailers for the dashboard.
+  // Supermarket: فستق يعطي اسم فرع (حي، كود)؛ نعرض اسم السلسلة من supermarketChainLabels عندما يكون معرفاً.
   // If the stores file is missing or incomplete, fall back to the static list.
   const derived = stores
     .filter(s => typeof s.store_key === 'number' && s.store_key > 0)
     .map((s) => {
-      const brandEn = (s.retailer_brand_en || s.store_name_en || `Store ${s.store_key}`).trim()
-      const brandAr = (s.retailer_brand_ar || s.store_name_ar || brandEn).trim()
-      const nameEn = (s.store_name_en || brandEn).trim()
-      const nameAr = (s.store_name_ar || brandAr).trim()
-      const letter = (brandEn[0] || 'S').toUpperCase()
+      const branchAr = (s.store_name_ar || '').trim()
+      const branchEn = (s.store_name_en || '').trim()
+      const chain = source === 'supermarket' ? getSupermarketChainDisplay(s.store_key) : undefined
+
+      const brandEn = chain
+        ? chain.brand_en
+        : (s.retailer_brand_en || branchEn || `Store ${s.store_key}`).trim()
+      const brandAr = chain
+        ? chain.brand_ar
+        : (s.retailer_brand_ar || branchAr || brandEn).trim()
+      const nameEn = branchEn || brandEn
+      const nameAr = branchAr || brandAr
+      const letter = chain?.logo_letter ?? (brandEn[0] || 'S').toUpperCase()
+      const color = chain?.color ?? '#1a5c3a'
+
       return {
         store_key: s.store_key,
         rid: s.rid || s.store_key,
@@ -63,8 +81,7 @@ export function retailersFromStores(stores: StoreRow[]): Retailer[] {
         name_en: nameEn,
         brand_ar: brandAr,
         brand_en: brandEn,
-        // Keep existing palette if unknown; UI still works.
-        color: '#1a5c3a',
+        color,
         logo_letter: letter,
       } satisfies Retailer
     })

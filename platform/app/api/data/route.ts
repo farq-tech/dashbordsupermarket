@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
     const bundle = await getDataBundle(source)
     const { last_updated: _cache_last_updated, ...cacheInfo } = getCacheInfo(source)
-    const retailers = retailersFromStores(bundle.stores)
+    const retailers = retailersFromStores(bundle.stores, { source })
 
     if (section === 'stores') {
       return NextResponse.json({ stores: bundle.stores, ...cacheInfo })
