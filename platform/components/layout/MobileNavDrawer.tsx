@@ -14,11 +14,11 @@ export function MobileNavDrawer() {
     <Dialog.Root open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[1px] md:hidden"
+          className="print:hidden fixed inset-0 z-[60] bg-black/45 backdrop-blur-[1px] md:hidden"
           style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
         />
         <Dialog.Content
-          className="fixed inset-y-0 z-[61] flex w-[min(20rem,100vw)] max-w-full flex-col bg-[var(--color-sidebar-bg)] shadow-xl outline-none transition-transform duration-200 md:hidden"
+          className="print:hidden fixed inset-y-0 z-[61] flex w-[min(20rem,100vw)] max-w-full flex-col bg-[var(--color-sidebar-bg)] shadow-xl outline-none transition-transform duration-200 md:hidden"
           style={{
             right: 0,
             left: 'auto',

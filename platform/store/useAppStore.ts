@@ -4,6 +4,25 @@ import type { RetailerKPIs, ProductComparison, Recommendation, Alert, Retailer, 
 import { pushKpiSnapshot } from '@/lib/kpiSnapshotHistory'
 
 const DATA_SOURCE_STORAGE_KEY = 'dash_data_source'
+const DENSITY_STORAGE_KEY = 'dash_ui_density'
+
+export type UiDensity = 'comfortable' | 'compact'
+
+export function readStoredDensity(): UiDensity | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const v = localStorage.getItem(DENSITY_STORAGE_KEY)
+    if (v === 'comfortable' || v === 'compact') return v
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
+export function applyDensityToDom(density: UiDensity) {
+  if (typeof document === 'undefined') return
+  document.documentElement.dataset.density = density === 'compact' ? 'compact' : ''
+}
 
 export function readStoredDataSource(): 'restaurants' | 'supermarket' | null {
   if (typeof window === 'undefined') return null
@@ -57,6 +76,9 @@ interface AppState {
   desktopSidebarHidden: boolean
   setDesktopSidebarHidden: (hidden: boolean) => void
 
+  uiDensity: UiDensity
+  setUiDensity: (density: UiDensity) => void
+
   setLang: (lang: 'ar' | 'en') => void
   setDataSource: (source: 'restaurants' | 'supermarket') => void
   setRetailer: (retailer: Retailer) => void
@@ -84,6 +106,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMobileNavOpen: open => set({ mobileNavOpen: open }),
   desktopSidebarHidden: false,
   setDesktopSidebarHidden: hidden => set({ desktopSidebarHidden: hidden }),
+
+  uiDensity: 'comfortable',
+  setUiDensity: (density) => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(DENSITY_STORAGE_KEY, density)
+      }
+    } catch {
+      /* ignore */
+    }
+    applyDensityToDom(density)
+    set({ uiDensity: density })
+  },
 
   setLang: (lang) => {
     set({ lang, dir: lang === 'ar' ? 'rtl' : 'ltr' })

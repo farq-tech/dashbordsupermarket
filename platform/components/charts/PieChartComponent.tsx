@@ -1,5 +1,7 @@
 'use client'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { chartTooltipStyle } from '@/lib/chartTheme'
+import { useChartTheme } from '@/lib/useChartTheme'
 
 interface PieChartProps {
   data: { name: string; value: number; color: string }[]
@@ -12,6 +14,7 @@ interface PieChartProps {
 export function SimplePieChart({
   data, height = 240, innerRadius = 60, outerRadius = 90, showLegend = true,
 }: PieChartProps) {
+  const theme = useChartTheme()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
@@ -29,12 +32,7 @@ export function SimplePieChart({
           ))}
         </Pie>
         <Tooltip
-          contentStyle={{
-            borderRadius: 12,
-            border: '1px solid #eff0f6',
-            fontSize: 12,
-            boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
-          }}
+          contentStyle={chartTooltipStyle(theme)}
           formatter={(v: unknown) => [`${v}`, '']}
         />
         {showLegend && (

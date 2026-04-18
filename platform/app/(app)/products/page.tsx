@@ -110,7 +110,7 @@ function ProductsPageContent() {
   return (
     <div className="animate-fade-in">
       <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} />
-      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div className="page-shell">
 
         {deepLinkOnly && (
           <p
@@ -188,14 +188,14 @@ function ProductsPageContent() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-neutral-50 border-b border-neutral-100">
-                  <th className="text-start px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'المنتج' : 'Product'}</th>
-                  <th className="text-start px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'الصنف' : 'Category'}</th>
-                  <th className="text-end px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'سعرك' : 'Your Price'}</th>
-                  <th className="text-end px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
-                  <th className="text-end px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'الأرخص' : 'Lowest'}</th>
-                  <th className="text-end px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'فجوة %' : 'Gap %'}</th>
-                  <th className="text-center px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'الحالة' : 'Status'}</th>
-                  <th className="text-center px-4 py-3 font-semibold text-neutral-600 text-xs">{isAr ? 'التوصية' : 'Action'}</th>
+                  <th className="text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'المنتج' : 'Product'}</th>
+                  <th className="text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الصنف' : 'Category'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'سعرك' : 'Your Price'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الأرخص' : 'Lowest'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'فجوة %' : 'Gap %'}</th>
+                  <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الحالة' : 'Status'}</th>
+                  <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'التوصية' : 'Action'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -211,7 +211,7 @@ function ProductsPageContent() {
                         isHi && 'bg-blue-50 ring-2 ring-inset ring-blue-400',
                       )}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-[var(--density-table-cell-y)]">
                         <p className="font-medium text-neutral-800 leading-tight">
                           {isAr ? row.title_ar : row.title_en}
                         </p>
@@ -219,19 +219,19 @@ function ProductsPageContent() {
                           {isAr ? row.brand_ar : row.brand_en}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-500">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-xs text-neutral-500">
                         {isAr ? row.category_ar : row.category_en}
                       </td>
-                      <td className="px-4 py-3 text-end font-semibold tabular-nums text-neutral-900">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end font-semibold tabular-nums text-neutral-900">
                         {row.your_price !== null ? `${row.your_price.toFixed(2)}` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-end text-neutral-500 tabular-nums">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end text-neutral-500 tabular-nums">
                         {row.market_avg.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-end font-medium tabular-nums text-[color:var(--color-trend-up)]">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end font-medium tabular-nums text-[color:var(--color-trend-up)]">
                         {row.min_price.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-end">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end">
                         {row.your_price !== null ? (
                           <span className={`font-semibold tabular-nums text-sm ${
                             row.price_gap_pct > 10 ? 'text-red-600' :
@@ -241,10 +241,10 @@ function ProductsPageContent() {
                           </span>
                         ) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-center">
                         <TagBadge tag={row.tag} lang={lang} />
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-center">
                         <span
                           className="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
                           style={{ backgroundColor: `${action.color}15`, color: action.color }}
@@ -260,7 +260,7 @@ function ProductsPageContent() {
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-100">
+          <div className="flex items-center justify-between px-4 py-[var(--density-table-cell-y)] border-t border-neutral-100">
             <p className="text-xs text-neutral-400">
               {isAr ? `الصفحة ${effectivePage} من ${totalPages}` : `Page ${effectivePage} of ${totalPages}`}
             </p>

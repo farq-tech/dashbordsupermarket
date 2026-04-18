@@ -1,15 +1,20 @@
 import { cn } from './cn'
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardRootProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
+  /** Lighter shadow for sections inside another card */
+  elevation?: 'default' | 'nested'
 }
 
-export function Card({ className, children, ...props }: CardProps) {
+type CardSectionProps = React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }
+
+export function Card({ className, children, elevation = 'default', ...props }: CardRootProps) {
   return (
     <div
       className={cn(
-        'bg-[var(--color-surface)] rounded-[var(--radius-lg)] border p-5',
-        'border-[var(--color-border)] shadow-[var(--shadow-tile)]',
+        'bg-[var(--color-surface)] rounded-[var(--radius-lg)] border p-[var(--density-card-padding)]',
+        'border-[var(--color-border)]',
+        elevation === 'nested' ? 'shadow-[var(--shadow-tile-nested)]' : 'shadow-[var(--shadow-tile)]',
         className,
       )}
       {...props}
@@ -19,15 +24,15 @@ export function Card({ className, children, ...props }: CardProps) {
   )
 }
 
-export function CardHeader({ className, children, ...props }: CardProps) {
+export function CardHeader({ className, children, ...props }: CardSectionProps) {
   return (
-    <div className={cn('mb-4', className)} {...props}>
+    <div className={cn('mb-[var(--density-card-header-mb)]', className)} {...props}>
       {children}
     </div>
   )
 }
 
-export function CardTitle({ className, children, ...props }: CardProps) {
+export function CardTitle({ className, children, ...props }: CardSectionProps) {
   return (
     <h3
       className={cn('text-base font-semibold', className)}
@@ -39,7 +44,7 @@ export function CardTitle({ className, children, ...props }: CardProps) {
   )
 }
 
-export function CardContent({ className, children, ...props }: CardProps) {
+export function CardContent({ className, children, ...props }: CardSectionProps) {
   return (
     <div className={cn('', className)} {...props}>
       {children}

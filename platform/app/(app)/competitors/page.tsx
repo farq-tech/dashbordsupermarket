@@ -78,10 +78,10 @@ export default function CompetitorsPage() {
   return (
     <div className="animate-fade-in">
       <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} />
-      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div className="page-shell">
 
         {/* Competitor Cards */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
           {competitors.map(comp => {
             const myScore = myKpis?.performance_score ?? 0
             const compScore = comp.performance_score
@@ -136,7 +136,7 @@ export default function CompetitorsPage() {
         </Card>
 
         {/* Price positioning + Category dominance */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'تموضع الأسعار في السوق' : 'Market Price Positioning'}</CardTitle>

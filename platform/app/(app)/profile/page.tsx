@@ -97,7 +97,7 @@ export default function ProfilePage() {
   return (
     <div className="animate-fade-in">
       <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} />
-      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div className="page-shell">
 
         {/* Profile Header */}
         <Card>
@@ -187,7 +187,7 @@ export default function ProfilePage() {
 
         {/* You vs Market & Top Competitor */}
         {topCompetitor && (
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>

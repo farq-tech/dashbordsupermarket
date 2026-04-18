@@ -24,6 +24,20 @@
   --color-trend-down: #ff3e13;
   --color-grid: #e4e5e7;
   --color-axis-tick: #838383;
+  /* Scatter / multi-series accents (read by lib/chartTheme.ts) */
+  --color-chart-tag-opportunity: #ca8a04;
+  --color-chart-tag-risk: #ea580c;
+  --color-chart-tag-muted: #9ca3af;
+
+  /* Critical vs attention (use critical only for severity === high) */
+  --color-alert-critical-bg: #fef2f2;
+  --color-alert-critical-border: #fecaca;
+  --color-alert-critical-text: #7f1d1d;
+  --color-alert-critical-muted: #991b1b;
+  --color-alert-attention-bg: #fffbeb;
+  --color-alert-attention-border: #fde68a;
+  --color-alert-attention-text: #78350f;
+  --color-alert-attention-muted: #92400e;
 
   /* Layout */
   --color-sidebar-bg: var(--color-surface);
@@ -41,7 +55,31 @@
 
   /* Elevation */
   --shadow-tile: 0 5px 20px rgba(0, 0, 0, 0.05);
+  --shadow-tile-nested: 0 2px 10px rgba(0, 0, 0, 0.04);
   --shadow-shell: 0 0 50px rgba(0, 0, 0, 0.1);
+}
+
+/* Density: toggled via html[data-density="compact"] from app store */
+html {
+  --density-card-padding: 1.25rem;
+  --density-card-header-mb: 1rem;
+  --density-page-x: 1.5rem;
+  --density-page-y: 1.5rem;
+  --density-stack: 1.5rem;
+  --density-grid-gap: 1.5rem;
+  --density-table-cell-y: 0.75rem;
+  --density-kpi-title-mb: 0.25rem;
+}
+
+html[data-density="compact"] {
+  --density-card-padding: 0.875rem;
+  --density-card-header-mb: 0.75rem;
+  --density-page-x: 1rem;
+  --density-page-y: 1rem;
+  --density-stack: 1rem;
+  --density-grid-gap: 1rem;
+  --density-table-cell-y: 0.5rem;
+  --density-kpi-title-mb: 0.125rem;
 }
 
 * {
@@ -95,6 +133,58 @@ body {
   animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes chartReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-reveal {
+  animation: chartReveal 0.45s ease-out both;
+}
+
+/** Main content area: respects density (compact / comfortable) */
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--density-stack);
+  padding: var(--density-page-y) var(--density-page-x);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .chart-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .card-hover {
+    transition: none !important;
+  }
+  .card-hover:hover {
+    transform: none !important;
+  }
+  .animate-pulse {
+    animation: none !important;
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #d1d5db;
+    --color-text-muted: rgba(0, 0, 0, 0.68);
+    --color-text-subtle: #4b5563;
+    --shadow-tile: 0 4px 14px rgba(0, 0, 0, 0.12);
+    --shadow-tile-nested: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -126,10 +216,34 @@ body {
 
 /* Decision Center / reports: hide chrome when printing */
 @media print {
-  .no-print {
+  @page {
+    margin: 12mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .no-print,
+  .print-hide {
     display: none !important;
   }
+
   .print-break-before {
     break-before: page;
+  }
+
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  main {
+    max-width: none !important;
+  }
+
+  .card-hover:hover {
+    transform: none !important;
   }
 }

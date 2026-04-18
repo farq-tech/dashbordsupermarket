@@ -62,10 +62,10 @@ export default function CategoriesPage() {
   return (
     <div className="animate-fade-in">
       <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} />
-      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div className="page-shell">
 
         {/* Highlight chips */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-3">
           <div className="rounded-xl border border-[color:color-mix(in_srgb,var(--color-trend-up)_32%,#ffffff)] bg-[color:color-mix(in_srgb,var(--color-trend-up)_10%,#ffffff)] p-4">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-semibold text-[color:#0a8f5a]">{isAr ? 'فرص عالية' : 'High Opportunities'}</p>
@@ -90,7 +90,7 @@ export default function CategoriesPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'أعلى الأصناف بعدد المنتجات' : 'Top Categories by Products'}</CardTitle>
@@ -153,13 +153,13 @@ export default function CategoriesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-neutral-50 border-b border-neutral-100">
-                    <th className="text-start px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'الصنف' : 'Category'}</th>
-                    <th className="text-end px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'منتجات' : 'Products'}</th>
-                    <th className="text-end px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'متوسط سعرك' : 'Avg Price'}</th>
-                    <th className="text-end px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
-                    <th className="text-end px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'مؤشر السعر' : 'Price Idx'}</th>
-                    <th className="text-end px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'تنافسي' : 'Competitive'}</th>
-                    <th className="text-center px-4 py-3 text-xs font-semibold text-neutral-600">{isAr ? 'الحالة' : 'Status'}</th>
+                    <th className="text-start px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'الصنف' : 'Category'}</th>
+                    <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'منتجات' : 'Products'}</th>
+                    <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'متوسط سعرك' : 'Avg Price'}</th>
+                    <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
+                    <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'مؤشر السعر' : 'Price Idx'}</th>
+                    <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'تنافسي' : 'Competitive'}</th>
+                    <th className="text-center px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'الحالة' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -169,13 +169,13 @@ export default function CategoriesPage() {
                       className={`border-b border-neutral-50 cursor-pointer transition-colors ${selected?.name_en === cat.name_en ? 'bg-[var(--color-surface-hover)]' : 'hover:bg-neutral-50'}`}
                       onClick={() => setSelected(selected?.name_en === cat.name_en ? null : cat)}
                     >
-                      <td className="px-4 py-3 font-medium text-neutral-800">
+                      <td className="px-4 py-[var(--density-table-cell-y)] font-medium text-neutral-800">
                         {isAr ? cat.name_ar : cat.name_en}
                       </td>
-                      <td className="px-4 py-3 text-end tabular-nums text-neutral-600">{cat.product_count}</td>
-                      <td className="px-4 py-3 text-end tabular-nums text-neutral-600">{cat.avg_price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-end tabular-nums text-neutral-500">{cat.market_avg_price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-end">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end tabular-nums text-neutral-600">{cat.product_count}</td>
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end tabular-nums text-neutral-600">{cat.avg_price.toFixed(2)}</td>
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end tabular-nums text-neutral-500">{cat.market_avg_price.toFixed(2)}</td>
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end">
                         <span className={`font-semibold tabular-nums ${
                           cat.pricing_index > 108 ? 'text-red-600' :
                           cat.pricing_index < 95 ? 'text-[color:var(--color-trend-up)]' : 'text-[color:var(--color-interactive)]'
@@ -183,10 +183,10 @@ export default function CategoriesPage() {
                           {cat.pricing_index.toFixed(0)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-end tabular-nums text-neutral-600">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end tabular-nums text-neutral-600">
                         {cat.competitive_count + cat.cheapest_count}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-center">
                         <CategoryStatus kpi={cat} isAr={isAr} />
                       </td>
                     </tr>

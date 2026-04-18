@@ -1,5 +1,8 @@
+'use client'
+
 import { cn } from './cn'
 import { Card } from './card'
+import { CountUp } from './count-up'
 
 interface KpiCardProps {
   title_ar: string
@@ -11,6 +14,12 @@ interface KpiCardProps {
   color?: string
   icon?: React.ReactNode
   lang?: 'ar' | 'en'
+  /** Deep-link target: `/dashboard?kpi=performance` */
+  kpiId?: string
+  focused?: boolean
+  /** Animate main value from 0 (large KPIs only) */
+  countUp?: boolean
+  countDecimals?: number
 }
 
 export function KpiCard({
@@ -23,29 +32,62 @@ export function KpiCard({
   color = '#000000',
   icon,
   lang = 'ar',
+  kpiId,
+  focused,
+  countUp,
+  countDecimals = 0,
 }: KpiCardProps) {
   const title = lang === 'ar' ? title_ar : title_en
   const trendPositive = trend !== undefined && trend > 0
   const trendNegative = trend !== undefined && trend < 0
 
+  const numericEnd =
+    typeof value === 'number' ? value : Number.parseFloat(String(value).replace(/[^\d.-]/g, ''))
+  const canCountUp = Boolean(countUp && Number.isFinite(numericEnd))
+
   return (
-    <Card className="card-hover">
+    <Card
+      id={kpiId ? `kpi-${kpiId}` : undefined}
+      className={cn(
+        'card-hover scroll-mt-28',
+        focused &&
+          'ring-2 ring-[color:var(--color-interactive)] ring-offset-2 ring-offset-[var(--color-surface)]',
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p
-            className="text-xs font-medium mb-1"
+            className="text-xs font-medium mb-[var(--density-kpi-title-mb)]"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {title}
           </p>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold tabular-nums tracking-tight" style={{ color }}>
-              {value}
-            </span>
-            {unit && (
-              <span className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-                {unit}
-              </span>
+            {canCountUp ? (
+              <>
+                <CountUp
+                  end={numericEnd}
+                  decimals={countDecimals}
+                  className="text-2xl font-bold tabular-nums tracking-tight"
+                  style={{ color }}
+                />
+                {unit && (
+                  <span className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
+                    {unit}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className="text-2xl font-bold tabular-nums tracking-tight" style={{ color }}>
+                  {value}
+                </span>
+                {unit && (
+                  <span className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
+                    {unit}
+                  </span>
+                )}
+              </>
             )}
           </div>
           {subtitle && (
@@ -64,7 +106,7 @@ export function KpiCard({
                     : 'var(--color-text-subtle)',
               }}
             >
-              {trendPositive ? '▲' : trendNegative ? '▼' : '→'} {Math.abs(trend).toFixed(1)}%
+              {trendPositive ? '\u25b2' : trendNegative ? '\u25bc' : '\u2192'} {Math.abs(trend).toFixed(1)}%
             </p>
           )}
         </div>

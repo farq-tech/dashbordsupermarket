@@ -149,7 +149,7 @@ export default function DecisionsPage() {
     return (
       <div className="animate-fade-in">
         <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
-        <div className="max-w-lg mx-auto space-y-4 p-4 sm:p-6">
+        <div className="max-w-lg mx-auto page-shell">
           <Card>
             <CardContent className="pt-6 text-center text-sm text-neutral-600">
               {isAr
@@ -173,7 +173,7 @@ export default function DecisionsPage() {
         />
       </div>
 
-      <div id="decision-print-root" className="mx-auto max-w-6xl space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div id="decision-print-root" className="mx-auto max-w-6xl page-shell">
         {/* Toolbar */}
         <div className="no-print flex flex-wrap gap-2 justify-end">
           <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -205,7 +205,7 @@ export default function DecisionsPage() {
         </div>
 
         {/* Executive snapshot */}
-        <Card className="border-[rgba(27,89,248,0.2)] bg-gradient-to-br from-[var(--color-surface-muted)] to-white">
+        <Card className="print-avoid-break border-[rgba(27,89,248,0.2)] bg-gradient-to-br from-[var(--color-surface-muted)] to-white">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row md:items-start gap-4">
               <div
@@ -339,9 +339,9 @@ export default function DecisionsPage() {
         </Card>
 
         {/* Three pillars */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-3">
           {brief.pillars.map(p => (
-            <Card key={p.key}>
+            <Card key={p.key} className="print-avoid-break">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between gap-2">
                   <span>{isAr ? p.label_ar : p.label_en}</span>
@@ -366,7 +366,7 @@ export default function DecisionsPage() {
         </div>
 
         {/* Ranked queue + workflow */}
-        <Card>
+        <Card className="print-avoid-break">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="flex items-center gap-2">

@@ -164,10 +164,10 @@ export default function RecommendationsPage() {
   return (
     <div className="animate-fade-in">
       <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} />
-      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+      <div className="page-shell">
 
         {/* Summary */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">
           <div className="bg-gradient-to-br from-[#0f2552] to-[#1b59f8] rounded-xl p-4 text-white shadow-[var(--shadow-tile)]">
             <p className="text-white/70 text-xs">{isAr ? 'إجمالي التوصيات' : 'Total Recommendations'}</p>
             <p className="text-3xl font-bold mt-1">{filtered.length}</p>

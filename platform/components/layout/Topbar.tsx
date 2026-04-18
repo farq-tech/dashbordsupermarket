@@ -1,7 +1,7 @@
 'use client'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
-import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu } from 'lucide-react'
+import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu, LayoutDashboard, Rows3 } from 'lucide-react'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 interface TopbarProps {
@@ -22,7 +22,7 @@ export function Topbar({
   description_ar,
   description_en,
 }: TopbarProps) {
-  const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden } = useAppStore()
+  const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden, uiDensity, setUiDensity } = useAppStore()
 
   const formatDate = (iso: string | null) => {
     if (!iso) return lang === 'ar' ? 'لم يتم التحميل بعد' : 'Not loaded yet'
@@ -153,6 +153,37 @@ export function Topbar({
           <RefreshCw className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{lang === 'ar' ? 'تحديث البيانات' : 'Refresh'}</span>
         </Button>
+
+        <button
+          type="button"
+          onClick={() => setUiDensity(uiDensity === 'compact' ? 'comfortable' : 'compact')}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border shrink-0"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'var(--color-surface)',
+            color: 'var(--color-text-primary)',
+          }}
+          title={
+            lang === 'ar'
+              ? uiDensity === 'compact'
+                ? 'عرض مريح (مسافات أوسع)'
+                : 'عرض مضغوط'
+              : uiDensity === 'compact'
+                ? 'Comfortable density'
+                : 'Compact density'
+          }
+          aria-label={
+            lang === 'ar'
+              ? uiDensity === 'compact'
+                ? 'التبديل إلى العرض المريح'
+                : 'التبديل إلى العرض المضغوط'
+              : uiDensity === 'compact'
+                ? 'Switch to comfortable layout'
+                : 'Switch to compact layout'
+          }
+        >
+          {uiDensity === 'compact' ? <LayoutDashboard className="h-4 w-4" /> : <Rows3 className="h-4 w-4" />}
+        </button>
 
         <button
           type="button"
