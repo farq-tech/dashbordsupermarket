@@ -1,0 +1,5 @@
+{
+  "name": "dashbordsupermarket",
+  "private": true,
+  "description": "Monorepo root. Next.js app lives in /platform — Vercel uses vercel.json to install & build there."
+}
