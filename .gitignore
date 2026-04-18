@@ -33,6 +33,10 @@ data/
 
 # Cursor
 .cursor/
+
+# Large design exports (Figma community PNGs, etc.) — keep .zip locally
+platform/docs/design-reference/
+
 # Environment variables
 .env
 .env.local
