@@ -17,9 +17,9 @@ const IMPACT_MAP = {
 }
 
 const TYPE_MAP = {
-  pricing: { ar: 'تسعير', en: 'Pricing', icon: <TrendingUp className="h-4 w-4" />, color: '#2563eb' },
+  pricing: { ar: 'تسعير', en: 'Pricing', icon: <TrendingUp className="h-4 w-4" />, color: '#1b59f8' },
   coverage: { ar: 'تغطية', en: 'Coverage', icon: <Map className="h-4 w-4" />, color: '#ca8a04' },
-  expansion: { ar: 'توسع', en: 'Expansion', icon: <Zap className="h-4 w-4" />, color: '#16a34a' },
+  expansion: { ar: 'توسع', en: 'Expansion', icon: <Zap className="h-4 w-4" />, color: '#0f2552' },
   competitive: { ar: 'تنافسية', en: 'Competitive', icon: <Lightbulb className="h-4 w-4" />, color: '#7c3aed' },
 }
 
@@ -66,7 +66,7 @@ function RecCard({ rec, lang, onDone }: { rec: Recommendation; lang: string; onD
             </span>
             <Badge variant="neutral">{isAr ? rec.category_ar : rec.category_en}</Badge>
             {rec.value_estimate != null && rec.value_estimate > 0 && (
-              <span className="text-xs text-green-600 font-semibold">
+              <span className="text-xs font-semibold" style={{ color: 'var(--color-interactive)' }}>
                 {rec.value_estimate.toLocaleString()} {isAr ? 'ريال (من البيانات)' : 'SAR (from data)'}
               </span>
             )}
@@ -74,7 +74,7 @@ function RecCard({ rec, lang, onDone }: { rec: Recommendation; lang: string; onD
         </div>
         <button
           onClick={() => onDone(rec.id)}
-          className="shrink-0 text-neutral-300 hover:text-green-500 transition-colors mt-0.5"
+          className="shrink-0 text-neutral-300 transition-colors mt-0.5 hover:[color:var(--color-interactive)]"
           title={isAr ? 'تم' : 'Mark done'}
         >
           <CheckCircle className="h-5 w-5" />
@@ -89,7 +89,7 @@ function AlertCard({ alert, lang }: { alert: Alert; lang: string }) {
   const severityColors = {
     high: { bg: '#fee2e2', border: '#fca5a5', text: '#dc2626' },
     medium: { bg: '#fff7ed', border: '#fdba74', text: '#ea580c' },
-    low: { bg: '#f0fdf4', border: '#86efac', text: '#16a34a' },
+    low: { bg: '#f2f7ff', border: '#93c5fd', text: '#1b59f8' },
   }
   const colors = severityColors[alert.severity]
   const typeIcons = { price_change: '💰', competitor_move: '⚔️', opportunity: '✨', risk: '⚠️' }
@@ -168,7 +168,7 @@ export default function RecommendationsPage() {
 
         {/* Summary */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
-          <div className="bg-gradient-to-br from-[#1a5c3a] to-[#22794d] rounded-xl p-4 text-white">
+          <div className="bg-gradient-to-br from-[#0f2552] to-[#1b59f8] rounded-xl p-4 text-white shadow-[var(--shadow-tile)]">
             <p className="text-white/70 text-xs">{isAr ? 'إجمالي التوصيات' : 'Total Recommendations'}</p>
             <p className="text-3xl font-bold mt-1">{filtered.length}</p>
           </div>
@@ -187,10 +187,19 @@ export default function RecommendationsPage() {
         </div>
 
         {totalValue > 0 && (
-          <div className="flex flex-col gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <p className="text-sm font-semibold text-green-800">
+          <div
+            className="flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+            style={{
+              borderColor: 'var(--color-border)',
+              background: 'var(--color-surface-muted)',
+            }}
+          >
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {isAr ? 'مجموع القيم الرقمية (فجوات سعر من البيانات):' : 'Sum of quantified price gaps (from data):'}
-              {' '}<span className="text-green-700">{totalValue.toLocaleString()} {isAr ? 'ريال' : 'SAR'}</span>
+              {' '}
+              <span style={{ color: 'var(--color-interactive)' }}>
+                {totalValue.toLocaleString()} {isAr ? 'ريال' : 'SAR'}
+              </span>
             </p>
             <Button variant="ghost" size="sm" onClick={() => exportRecs(filtered, lang)}>
               <Download className="h-3.5 w-3.5" />
@@ -210,12 +219,15 @@ export default function RecommendationsPage() {
               onClick={() => setTab(t.key as 'recs' | 'alerts')}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                 tab === t.key
-                  ? 'border-[#1a5c3a] text-[#1a5c3a]'
+                  ? 'border-[color:var(--color-interactive)] text-[color:var(--color-interactive)]'
                   : 'border-transparent text-neutral-500 hover:text-neutral-700'
               }`}
             >
               {isAr ? t.ar : t.en}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-[#1a5c3a]/10 text-[#1a5c3a]' : 'bg-neutral-100 text-neutral-500'}`}>
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-[var(--color-surface-hover)]' : 'bg-neutral-100 text-neutral-500'}`}
+                style={tab === t.key ? { color: 'var(--color-interactive)' } : undefined}
+              >
                 {t.count}
               </span>
             </button>
@@ -229,7 +241,9 @@ export default function RecommendationsPage() {
               <button
                 onClick={() => { setFilterType(''); setFilterImpact('') }}
                 className={`px-3 py-1.5 text-xs rounded-full border font-medium transition-colors ${
-                  !filterType && !filterImpact ? 'bg-[#1a5c3a] text-white border-[#1a5c3a]' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                  !filterType && !filterImpact
+                    ? 'bg-[var(--color-interactive)] text-white border-[var(--color-interactive)]'
+                    : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                 }`}
               >
                 {isAr ? 'الكل' : 'All'} ({allRecs.filter(r => !done.has(r.id)).length})

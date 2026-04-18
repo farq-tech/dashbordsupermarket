@@ -2,7 +2,12 @@ import { cn } from './cn'
 
 export function Spinner({ className }: { className?: string }) {
   return (
-    <div className={cn('h-8 w-8 border-3 border-neutral-200 border-t-[#1a5c3a] rounded-full animate-spin', className)} />
+    <div
+      className={cn(
+        'h-8 w-8 border-2 border-neutral-200 rounded-full animate-spin border-t-[color:var(--color-interactive)]',
+        className,
+      )}
+    />
   )
 }
 

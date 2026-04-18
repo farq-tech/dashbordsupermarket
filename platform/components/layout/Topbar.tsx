@@ -60,11 +60,14 @@ export function Topbar({
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex-1 min-w-0 basis-[min(100%,12rem)] sm:basis-auto">
-          <h1 className="text-base font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-lg sm:text-2xl font-bold tracking-tight truncate leading-tight"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
             {lang === 'ar' ? title_ar : (title_en ?? title_ar)}
           </h1>
           {(subtitle_ar || subtitle_en) && (
-            <p className="text-xs truncate mt-0.5" style={{ color: '#889DB4' }}>
+            <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-subtle)' }}>
               {lang === 'ar' ? subtitle_ar : subtitle_en}
             </p>
           )}
@@ -99,7 +102,9 @@ export function Topbar({
             className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors whitespace-nowrap"
             style={{
               background: dataSource === 'supermarket' ? 'var(--color-surface-muted)' : 'transparent',
-              color: 'var(--color-text-primary)',
+              color:
+                dataSource === 'supermarket' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              fontWeight: dataSource === 'supermarket' ? 600 : 500,
             }}
           >
             {lang === 'ar' ? 'متاجر التجزئة' : 'Retail Market'}
@@ -110,7 +115,9 @@ export function Topbar({
             className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors whitespace-nowrap"
             style={{
               background: dataSource === 'restaurants' ? 'var(--color-surface-muted)' : 'transparent',
-              color: 'var(--color-text-primary)',
+              color:
+                dataSource === 'restaurants' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              fontWeight: dataSource === 'restaurants' ? 600 : 500,
             }}
           >
             {lang === 'ar' ? 'تطبيقات التوصيل' : 'Delivery Apps'}
@@ -132,7 +139,7 @@ export function Topbar({
           {desktopSidebarHidden ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
         </button>
 
-        <span className="text-xs hidden lg:block shrink-0" style={{ color: '#889DB4' }}>
+        <span className="text-xs hidden lg:block shrink-0 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
           {lang === 'ar' ? 'آخر تحديث:' : 'Last updated:'} {formatDate(lastUpdated)}
         </span>
 

@@ -8,7 +8,7 @@ const toneStyles: Record<InsightTone, { border: string; bg: string; icon: typeof
     border: 'var(--color-border)',
     bg: 'var(--color-surface-muted)',
     icon: Lightbulb,
-    iconColor: '#2563eb',
+    iconColor: 'var(--color-interactive)',
   },
   attention: {
     border: '#FCD34D',
@@ -17,10 +17,10 @@ const toneStyles: Record<InsightTone, { border: string; bg: string; icon: typeof
     iconColor: '#B45309',
   },
   positive: {
-    border: '#86EFAC',
-    bg: '#F0FDF4',
+    border: 'rgba(27, 89, 248, 0.22)',
+    bg: 'var(--color-surface-muted)',
     icon: Sparkles,
-    iconColor: '#15803D',
+    iconColor: 'var(--color-interactive)',
   },
 }
 

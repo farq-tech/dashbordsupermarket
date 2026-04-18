@@ -50,9 +50,9 @@ const WF_STATUS: { value: DecisionWorkflowStatus; ar: string; en: string }[] = [
 ]
 
 function pillarColor(score: number) {
-  if (score >= 70) return '#16a34a'
+  if (score >= 70) return '#1fe08f'
   if (score >= 45) return '#ca8a04'
-  return '#dc2626'
+  return '#ff3e13'
 }
 
 export default function DecisionsPage() {
@@ -205,10 +205,13 @@ export default function DecisionsPage() {
         </div>
 
         {/* Executive snapshot */}
-        <Card className="border-[#1a5c3a]/20 bg-gradient-to-br from-[#f0fdf4] to-white">
+        <Card className="border-[rgba(27,89,248,0.2)] bg-gradient-to-br from-[var(--color-surface-muted)] to-white">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row md:items-start gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-[#1a5c3a] flex items-center justify-center shrink-0">
+              <div
+                className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ background: 'var(--color-interactive)' }}
+              >
                 <Scale className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -256,7 +259,9 @@ export default function DecisionsPage() {
                       <div key={key} className="p-2 rounded-lg bg-neutral-50 border border-neutral-100">
                         <p className="text-neutral-500">{label}</p>
                         <p className="font-bold tabular-nums text-neutral-900">{cur.toFixed(1)}</p>
-                        <p className={d >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        <p
+                          className={d >= 0 ? 'text-[color:var(--color-trend-up)]' : 'text-[color:var(--color-trend-down)]'}
+                        >
                           Δ {d >= 0 ? '+' : ''}{d.toFixed(2)}
                         </p>
                       </div>
@@ -365,7 +370,7 @@ export default function DecisionsPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-[#1a5c3a]" />
+                <Target className="h-5 w-5" style={{ color: 'var(--color-interactive)' }} />
                 {isAr ? 'قائمة القرارات + سير العمل' : 'Decision queue + workflow'}
               </CardTitle>
               <div className="flex flex-wrap gap-1.5 no-print">
@@ -374,7 +379,9 @@ export default function DecisionsPage() {
                   onClick={() => setKindFilter('')}
                   className={cn(
                     'px-2.5 py-1 text-xs rounded-full border transition-colors',
-                    !kindFilter ? 'bg-[#1a5c3a] text-white border-[#1a5c3a]' : 'border-neutral-200 text-neutral-600',
+                    !kindFilter
+                      ? 'bg-[var(--color-interactive)] text-white border-[var(--color-interactive)]'
+                      : 'border-neutral-200 text-neutral-600',
                   )}
                 >
                   {isAr ? 'الكل' : 'All'}
@@ -442,7 +449,10 @@ export default function DecisionsPage() {
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs font-medium text-[#1a5c3a] pt-1 border-t border-neutral-100">
+                        <p
+                          className="text-xs font-medium pt-1 border-t border-neutral-100"
+                          style={{ color: 'var(--color-interactive)' }}
+                        >
                           {isAr ? 'مقترح:' : 'Suggested:'}{' '}
                           {isAr ? item.suggested_action_ar : item.suggested_action_en}
                         </p>
@@ -476,7 +486,7 @@ export default function DecisionsPage() {
                         {item.fid !== undefined && (
                           <Link
                             href={`/products?fid=${item.fid}`}
-                            className="no-print inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                            className="no-print inline-flex items-center gap-1 text-xs text-[color:var(--color-interactive)] hover:text-[color:var(--color-interactive-hover)] hover:underline"
                           >
                             <Package className="h-3.5 w-3.5" />
                             {isAr ? 'فتح في المنتجات' : 'Open in Products'}
@@ -502,7 +512,7 @@ export default function DecisionsPage() {
 
         <div className="no-print flex justify-end">
           <Link href="/recommendations">
-            <Button size="sm" className="bg-[#1a5c3a] hover:bg-[#134030]">
+            <Button size="sm">
               {isAr ? 'التوصيات التفصيلية' : 'Full recommendations'}
               <ChevronRight className="h-4 w-4 ms-1" />
             </Button>

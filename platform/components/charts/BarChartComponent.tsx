@@ -15,30 +15,35 @@ interface BarChartProps {
 }
 
 export function SimpleBarChart({
-  data, dataKey, nameKey = 'name', color = '#1a5c3a',
+  data, dataKey, nameKey = 'name', color = '#1b59f8',
   height = 240, showGrid = true, unit = '', colors,
 }: BarChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-        {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f1" />}
+        {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e4e5e7" vertical={false} />}
         <XAxis
           dataKey={nameKey}
-          tick={{ fontSize: 11, fill: '#6b9175' }}
+          tick={{ fontSize: 11, fill: '#838383' }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: '#6b9175' }}
+          tick={{ fontSize: 11, fill: '#838383' }}
           axisLine={false}
           tickLine={false}
           tickFormatter={v => `${v}${unit}`}
         />
         <Tooltip
-          contentStyle={{ borderRadius: 8, border: '1px solid #e4ebe6', fontSize: 12 }}
+          contentStyle={{
+            borderRadius: 12,
+            border: '1px solid #eff0f6',
+            fontSize: 12,
+            boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
+          }}
           formatter={(v: unknown) => [`${v}${unit}`, '']}
         />
-        <Bar dataKey={dataKey} radius={[4, 4, 0, 0]} maxBarSize={48}>
+        <Bar dataKey={dataKey} radius={[6, 6, 0, 0]} maxBarSize={48}>
           {colors
             ? data.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)
             : <Cell fill={color} />
@@ -60,13 +65,20 @@ export function MultiBarChart({ data, keys, nameKey = 'name', height = 280 }: Mu
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f1" />
-        <XAxis dataKey={nameKey} tick={{ fontSize: 11, fill: '#6b9175' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 11, fill: '#6b9175' }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e4ebe6', fontSize: 12 }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e4e5e7" vertical={false} />
+        <XAxis dataKey={nameKey} tick={{ fontSize: 11, fill: '#838383' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 11, fill: '#838383' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          contentStyle={{
+            borderRadius: 12,
+            border: '1px solid #eff0f6',
+            fontSize: 12,
+            boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
+          }}
+        />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         {keys.map(k => (
-          <Bar key={k.dataKey} dataKey={k.dataKey} name={k.name} fill={k.color} radius={[4, 4, 0, 0]} maxBarSize={40} />
+          <Bar key={k.dataKey} dataKey={k.dataKey} name={k.name} fill={k.color} radius={[6, 6, 0, 0]} maxBarSize={40} />
         ))}
       </BarChart>
     </ResponsiveContainer>

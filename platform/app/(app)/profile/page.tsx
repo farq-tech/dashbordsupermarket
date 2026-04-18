@@ -132,7 +132,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex flex-col items-center">
-              <ScoreGauge value={kpis.performance_score} color={selectedRetailer?.color ?? '#1a5c3a'} />
+              <ScoreGauge value={kpis.performance_score} color={selectedRetailer?.color ?? '#1b59f8'} />
               <p className="text-xs text-neutral-400 -mt-2">{isAr ? 'نقاط الأداء' : 'Performance Score'}</p>
             </div>
           </div>
@@ -143,15 +143,15 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingUp className="h-4 w-4 text-[color:var(--color-trend-up)]" />
                 <CardTitle>{isAr ? 'نقاط القوة' : 'Strengths'}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 {strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-green-700">
-                    <span className="text-green-500 mt-0.5">✓</span>
+                  <li key={i} className="flex items-start gap-2 text-sm text-[color:#0a8f5a]">
+                    <span className="mt-0.5 text-[color:var(--color-trend-up)]">✓</span>
                     {s}
                   </li>
                 ))}
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                   label={isAr ? 'نقاط الأداء' : 'Performance Score'}
                   myVal={kpis.performance_score}
                   competitorVal={topCompetitor.performance_score}
-                  myColor={selectedRetailer?.color ?? '#1a5c3a'}
+                  myColor={selectedRetailer?.color ?? '#1b59f8'}
                   compColor={topCompetitor.retailer.color}
                   unit=""
                 />
@@ -209,7 +209,7 @@ export default function ProfilePage() {
                   label={isAr ? 'مؤشر التنافسية %' : 'Competitive Index %'}
                   myVal={kpis.competitive_index}
                   competitorVal={topCompetitor.competitive_index}
-                  myColor={selectedRetailer?.color ?? '#1a5c3a'}
+                  myColor={selectedRetailer?.color ?? '#1b59f8'}
                   compColor={topCompetitor.retailer.color}
                   unit="%"
                 />
@@ -217,7 +217,7 @@ export default function ProfilePage() {
                   label={isAr ? 'تغطية المنتجات %' : 'Coverage %'}
                   myVal={kpis.coverage_index}
                   competitorVal={topCompetitor.coverage_index}
-                  myColor={selectedRetailer?.color ?? '#1a5c3a'}
+                  myColor={selectedRetailer?.color ?? '#1b59f8'}
                   compColor={topCompetitor.retailer.color}
                   unit="%"
                 />
@@ -225,7 +225,7 @@ export default function ProfilePage() {
                   label={isAr ? 'متوسط السعر' : 'Avg Price'}
                   myVal={kpis.avg_price}
                   competitorVal={topCompetitor.avg_price}
-                  myColor={selectedRetailer?.color ?? '#1a5c3a'}
+                  myColor={selectedRetailer?.color ?? '#1b59f8'}
                   compColor={topCompetitor.retailer.color}
                   unit=" SAR"
                 />
@@ -252,7 +252,7 @@ export default function ProfilePage() {
                   dataKey={isAr ? 'مؤشر السعر' : 'Price Index'}
                   colors={topCatData.map(d => {
                     const v = d[isAr ? 'مؤشر السعر' : 'Price Index'] as number
-                    return v > 105 ? '#dc2626' : v < 95 ? '#16a34a' : '#2563eb'
+                    return v > 105 ? '#ff3e13' : v < 95 ? '#1fe08f' : '#1b59f8'
                   })}
                   height={240}
                 />
@@ -262,7 +262,7 @@ export default function ProfilePage() {
         )}
 
         {/* CTA */}
-        <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0f3d27] to-[#1a5c3a] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0f2552] to-[#1b59f8] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <p className="text-white font-bold text-lg">
               {isAr ? 'ماذا يجب أن تفعل الآن؟' : 'What should you do next?'}
@@ -273,7 +273,8 @@ export default function ProfilePage() {
           </div>
           <Link
             href="/recommendations"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#1a5c3a] transition-colors hover:bg-neutral-50 sm:w-auto sm:justify-start"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-neutral-50 sm:w-auto sm:justify-start"
+            style={{ color: 'var(--color-interactive)' }}
           >
             <Target className="h-4 w-4" />
             {isAr ? 'عرض التوصيات' : 'View Actions'}

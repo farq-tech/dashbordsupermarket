@@ -44,13 +44,13 @@ export default function PricingPage() {
   const gapBuckets = useMemo(() => {
     const stocked = comparisons.filter(c => c.your_price !== null)
     const buckets = [
-      { name: isAr ? '< -10%' : '< -10%', count: 0, color: '#16a34a' },
-      { name: isAr ? '-10% إلى -5%' : '-10% to -5%', count: 0, color: '#4ade80' },
-      { name: isAr ? '-5% إلى 0%' : '-5% to 0%', count: 0, color: '#86efac' },
-      { name: isAr ? '0% إلى 5%' : '0% to 5%', count: 0, color: '#2563eb' },
+      { name: isAr ? '< -10%' : '< -10%', count: 0, color: '#1fe08f' },
+      { name: isAr ? '-10% إلى -5%' : '-10% to -5%', count: 0, color: '#5eead4' },
+      { name: isAr ? '-5% إلى 0%' : '-5% to 0%', count: 0, color: '#93c5fd' },
+      { name: isAr ? '0% إلى 5%' : '0% to 5%', count: 0, color: '#1b59f8' },
       { name: isAr ? '5% إلى 10%' : '5% to 10%', count: 0, color: '#f59e0b' },
       { name: isAr ? '10% إلى 20%' : '10% to 20%', count: 0, color: '#f97316' },
-      { name: isAr ? '> 20%' : '> 20%', count: 0, color: '#dc2626' },
+      { name: isAr ? '> 20%' : '> 20%', count: 0, color: '#ff3e13' },
     ]
     stocked.forEach(c => {
       const g = c.price_gap_pct
@@ -94,11 +94,11 @@ export default function PricingPage() {
         {/* Summary KPI row */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: '#dc2626' },
+            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: '#ff3e13' },
             { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: '#f97316' },
-            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: '#2563eb' },
-            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: '#16a34a' },
-            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: '#1a5c3a' },
+            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: '#1b59f8' },
+            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: '#1fe08f' },
+            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: '#0f2552' },
           ].map(item => (
             <div key={item.label} className="bg-white rounded-xl border border-neutral-100 p-4 text-center">
               <p className="text-2xl font-bold tabular-nums" style={{ color: item.color }}>{item.value}</p>
@@ -156,7 +156,7 @@ export default function PricingPage() {
               dataKey={isAr ? 'مؤشر التسعير' : 'Pricing Index'}
               colors={catPricingData.map(d => {
                 const v = d[isAr ? 'مؤشر التسعير' : 'Pricing Index'] as number
-                return v > 108 ? '#dc2626' : v > 103 ? '#f97316' : v < 95 ? '#16a34a' : '#2563eb'
+                return v > 108 ? '#ff3e13' : v > 103 ? '#f97316' : v < 95 ? '#1fe08f' : '#1b59f8'
               })}
               height={260}
             />
@@ -199,7 +199,7 @@ export default function PricingPage() {
                           </span>
                         </span>
                         {rec.value_estimate != null && rec.value_estimate > 0 && (
-                          <span className="text-xs text-green-600 font-medium">
+                          <span className="text-xs font-medium text-[color:var(--color-trend-up)]">
                             {rec.value_estimate.toLocaleString()} {isAr ? 'ريال (من البيانات)' : 'SAR (from data)'}
                           </span>
                         )}

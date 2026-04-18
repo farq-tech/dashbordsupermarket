@@ -64,8 +64,10 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
             }}
             className={cn('flex-1 px-2 text-[11px] md:text-[11px] leading-tight rounded-md transition-colors text-center touch-manipulation', btnPad)}
             style={{
-              background: dataSource === 'supermarket' ? 'var(--color-surface-hover)' : 'transparent',
-              color: 'var(--color-text-primary)',
+              background: dataSource === 'supermarket' ? 'var(--color-surface-muted)' : 'transparent',
+              color:
+                dataSource === 'supermarket' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              fontWeight: dataSource === 'supermarket' ? 600 : 500,
             }}
           >
             {lang === 'ar' ? 'متاجر التجزئة' : 'Retail Market'}
@@ -78,8 +80,10 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
             }}
             className={cn('flex-1 px-2 text-[11px] leading-tight rounded-md transition-colors text-center touch-manipulation', btnPad)}
             style={{
-              background: dataSource === 'restaurants' ? 'var(--color-surface-hover)' : 'transparent',
-              color: 'var(--color-text-primary)',
+              background: dataSource === 'restaurants' ? 'var(--color-surface-muted)' : 'transparent',
+              color:
+                dataSource === 'restaurants' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              fontWeight: dataSource === 'restaurants' ? 600 : 500,
             }}
           >
             {lang === 'ar' ? 'تطبيقات التوصيل' : 'Delivery Apps'}
@@ -108,10 +112,14 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                   : 'opacity-80 hover:opacity-100',
               )}
               style={{
-                color: 'var(--color-text-primary)',
-                background: selectedRetailer?.store_key === r.store_key
-                  ? 'var(--color-surface-hover)'
-                  : 'transparent',
+                color:
+                  selectedRetailer?.store_key === r.store_key
+                    ? 'var(--color-interactive)'
+                    : 'var(--color-text-primary)',
+                background:
+                  selectedRetailer?.store_key === r.store_key
+                    ? 'var(--color-surface-hover)'
+                    : 'transparent',
               }}
             >
               <RetailerLogo
@@ -130,7 +138,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
           <div key={section.id}>
             <p
               className="text-[10px] font-semibold uppercase tracking-wider px-3 mb-1.5"
-              style={{ color: '#889DB4' }}
+              style={{ color: 'var(--color-text-muted)' }}
             >
               {lang === 'ar' ? section.title_ar : section.title_en}
             </p>
@@ -150,7 +158,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                       active ? 'font-semibold' : 'opacity-85 hover:opacity-100',
                     )}
                     style={{
-                      color: 'var(--color-text-primary)',
+                      color: active ? 'var(--color-interactive)' : 'var(--color-text-primary)',
                       background: active ? 'var(--color-surface-hover)' : 'transparent',
                     }}
                   >
@@ -179,7 +187,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
         className="px-4 pb-3 pt-1 border-t mt-auto"
         style={{ borderColor: 'var(--color-border)', paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
       >
-        <p className="text-[11px]" style={{ color: '#889DB4' }}>v3.0</p>
+        <p className="text-[11px]" style={{ color: 'var(--color-text-subtle)' }}>v3.0</p>
       </div>
     </div>
   )

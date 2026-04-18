@@ -14,8 +14,8 @@ import { cn } from '@/components/ui/cn'
 
 const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
   decrease: { ar: 'خفض السعر', en: 'Decrease Price', color: '#dc2626' },
-  increase: { ar: 'رفع السعر', en: 'Increase Price', color: '#16a34a' },
-  keep: { ar: 'إبقاء', en: 'Keep', color: '#2563eb' },
+  increase: { ar: 'رفع السعر', en: 'Increase Price', color: '#1fe08f' },
+  keep: { ar: 'إبقاء', en: 'Keep', color: '#1b59f8' },
   expand: { ar: 'توسيع التوزيع', en: 'Expand Distribution', color: '#ca8a04' },
   stock: { ar: 'إضافة للمخزون', en: 'Add to Stock', color: '#6b7280' },
 }
@@ -113,7 +113,14 @@ function ProductsPageContent() {
       <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {deepLinkOnly && (
-          <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+          <p
+            className="text-xs rounded-lg border px-3 py-2"
+            style={{
+              color: 'var(--color-interactive)',
+              background: 'var(--color-surface-muted)',
+              borderColor: 'var(--color-border)',
+            }}
+          >
             {isAr
               ? 'عرض منتج مرتبط بالرابط. امسح البحث أو أضف فلاتر لعرض القائمة الكاملة.'
               : 'Showing linked product. Use search or filters to see the full list again.'}
@@ -127,7 +134,7 @@ function ProductsPageContent() {
               key={tag}
               onClick={() => { setFilterTag(filterTag === tag ? '' : tag); setPage(1) }}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
-                filterTag === tag ? 'ring-2 ring-offset-1 ring-[#1a5c3a]' : ''
+                filterTag === tag ? 'ring-2 ring-offset-1 ring-[color:var(--color-interactive)]' : ''
               } tag-${tag}`}
             >
               {count.toLocaleString()}
@@ -147,13 +154,13 @@ function ProductsPageContent() {
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
                 placeholder={isAr ? 'ابحث عن منتج أو ماركة...' : 'Search product or brand...'}
-                className="w-full ps-9 pe-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a5c3a]/30"
+                className="w-full ps-9 pe-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[color:rgba(27,89,248,0.35)]"
               />
             </div>
             <select
               value={filterCat}
               onChange={e => { setFilterCat(e.target.value); setPage(1) }}
-              className="px-3 py-2 border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c3a]/30"
+              className="px-3 py-2 border border-neutral-200 rounded-lg text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-[color:rgba(27,89,248,0.35)]"
             >
               <option value="">{isAr ? 'كل الأصناف' : 'All Categories'}</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -221,14 +228,14 @@ function ProductsPageContent() {
                       <td className="px-4 py-3 text-end text-neutral-500 tabular-nums">
                         {row.market_avg.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-end text-green-600 font-medium tabular-nums">
+                      <td className="px-4 py-3 text-end font-medium tabular-nums text-[color:var(--color-trend-up)]">
                         {row.min_price.toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-end">
                         {row.your_price !== null ? (
                           <span className={`font-semibold tabular-nums text-sm ${
                             row.price_gap_pct > 10 ? 'text-red-600' :
-                            row.price_gap_pct < -3 ? 'text-green-600' : 'text-neutral-600'
+                            row.price_gap_pct < -3 ? 'text-[color:var(--color-trend-up)]' : 'text-neutral-600'
                           }`}>
                             {row.price_gap_pct > 0 ? '+' : ''}{row.price_gap_pct.toFixed(1)}%
                           </span>

@@ -55,10 +55,10 @@ export default function DashboardPage() {
 
   // Pricing distribution pie
   const pieData = [
-    { name: isAr ? 'تنافسي' : 'Competitive', value: kpis.competitive_count, color: '#2563eb' },
-    { name: isAr ? 'مرتفع السعر' : 'Overpriced', value: kpis.overpriced_count, color: '#dc2626' },
-    { name: isAr ? 'منخفض' : 'Underpriced', value: kpis.underpriced_count, color: '#16a34a' },
-    { name: isAr ? 'الأرخص' : 'Cheapest', value: kpis.cheapest_count, color: '#1a5c3a' },
+    { name: isAr ? 'تنافسي' : 'Competitive', value: kpis.competitive_count, color: '#1b59f8' },
+    { name: isAr ? 'مرتفع السعر' : 'Overpriced', value: kpis.overpriced_count, color: '#ff3e13' },
+    { name: isAr ? 'منخفض' : 'Underpriced', value: kpis.underpriced_count, color: '#1fe08f' },
+    { name: isAr ? 'الأرخص' : 'Cheapest', value: kpis.cheapest_count, color: '#0f2552' },
   ].filter(d => d.value > 0)
 
   // Coverage comparison
@@ -69,9 +69,9 @@ export default function DashboardPage() {
   }))
 
   const getPricingIndexLabel = (idx: number) => {
-    if (idx < 95) return { label: isAr ? 'أقل من السوق' : 'Below Market', color: '#16a34a' }
-    if (idx <= 105) return { label: isAr ? 'متوسط السوق' : 'At Market', color: '#2563eb' }
-    return { label: isAr ? 'أعلى من السوق' : 'Above Market', color: '#dc2626' }
+    if (idx < 95) return { label: isAr ? 'أقل من السوق' : 'Below Market', color: '#1fe08f' }
+    if (idx <= 105) return { label: isAr ? 'متوسط السوق' : 'At Market', color: '#1b59f8' }
+    return { label: isAr ? 'أعلى من السوق' : 'Above Market', color: '#ff3e13' }
   }
   const piLabel = getPricingIndexLabel(kpis.pricing_index)
 
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             value={myKpis.performance_score.toFixed(0)}
             unit="/100"
             subtitle={isAr ? `ترتيبك: #${marketRank} بين السلاسل` : `Rank: #${marketRank} among chains`}
-            color="#043434"
+            color="var(--color-interactive-pressed)"
             icon={<Target className="h-5 w-5" />}
             lang={lang}
           />
@@ -166,7 +166,7 @@ export default function DashboardPage() {
             value={myKpis.competitive_index.toFixed(0)}
             unit="%"
             subtitle={isAr ? 'نسبة المنتجات ضمن نطاق السعر التنافسي' : '% products priced competitively'}
-            color="#2563eb"
+            color="var(--color-interactive)"
             icon={<TrendingUp className="h-5 w-5" />}
             lang={lang}
           />
@@ -194,25 +194,43 @@ export default function DashboardPage() {
 
         {/* Secondary KPI Cards */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
-          <div className="bg-white rounded-[var(--radius-lg)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
+          <div
+            className="bg-white rounded-[var(--radius-lg)] border p-4 shadow-[var(--shadow-tile)]"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'متوسط سعرك' : 'Your Avg Price'}</p>
             <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
-              {myKpis.avg_price.toFixed(2)} <span className="text-sm" style={{ color: '#889DB4' }}>{isAr ? 'ريال' : 'SAR'}</span>
+              {myKpis.avg_price.toFixed(2)}{' '}
+              <span className="text-sm font-medium" style={{ color: 'var(--color-text-subtle)' }}>
+                {isAr ? 'ريال' : 'SAR'}
+              </span>
             </p>
           </div>
-          <div className="bg-white rounded-[var(--radius-lg)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
+          <div
+            className="bg-white rounded-[var(--radius-lg)] border p-4 shadow-[var(--shadow-tile)]"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'متوسط السوق' : 'Market Avg Price'}</p>
             <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
-              {myKpis.market_avg_price.toFixed(2)} <span className="text-sm" style={{ color: '#889DB4' }}>{isAr ? 'ريال' : 'SAR'}</span>
+              {myKpis.market_avg_price.toFixed(2)}{' '}
+              <span className="text-sm font-medium" style={{ color: 'var(--color-text-subtle)' }}>
+                {isAr ? 'ريال' : 'SAR'}
+              </span>
             </p>
           </div>
-          <div className="bg-white rounded-[var(--radius-lg)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
+          <div
+            className="bg-white rounded-[var(--radius-lg)] border p-4 shadow-[var(--shadow-tile)]"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'منتجات أعلى من المنافسين' : 'Higher Than Competitors'}</p>
-            <p className="text-xl font-bold text-red-600 mt-1 tabular-nums">{myKpis.overpriced_count}</p>
+            <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-trend-down)' }}>{myKpis.overpriced_count}</p>
           </div>
-          <div className="bg-white rounded-[var(--radius-lg)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
+          <div
+            className="bg-white rounded-[var(--radius-lg)] border p-4 shadow-[var(--shadow-tile)]"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'منتجات ضمن الأرخص' : 'Among the Cheapest'}</p>
-            <p className="text-xl font-bold text-green-600 mt-1 tabular-nums">{myKpis.cheapest_count}</p>
+            <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-trend-up)' }}>{myKpis.cheapest_count}</p>
           </div>
         </div>
 
@@ -254,8 +272,8 @@ export default function DashboardPage() {
                 <MultiBarChart
                   data={catChartData}
                   keys={[
-                    { dataKey: isAr ? 'عدد المنتجات' : 'Products', name: isAr ? 'المنتجات' : 'Products', color: '#1a5c3a' },
-                    { dataKey: isAr ? 'مؤشر السعر' : 'Price Index', name: isAr ? 'مؤشر السعر' : 'Price Index', color: '#2ecc71' },
+                    { dataKey: isAr ? 'عدد المنتجات' : 'Products', name: isAr ? 'المنتجات' : 'Products', color: '#1b59f8' },
+                    { dataKey: isAr ? 'مؤشر السعر' : 'Price Index', name: isAr ? 'مؤشر السعر' : 'Price Index', color: '#1fe08f' },
                   ]}
                   height={240}
                 />
@@ -296,7 +314,11 @@ export default function DashboardPage() {
                 <Lightbulb className="h-4 w-4 text-amber-500" />
                 <CardTitle>{isAr ? 'توصيات مبنية على البيانات — أهم الإجراءات' : 'Data-driven recommendations — top actions'}</CardTitle>
               </div>
-              <Link href="/recommendations" className="text-xs text-[#1a5c3a] hover:underline font-medium">
+              <Link
+                href="/recommendations"
+                className="text-xs font-semibold hover:underline"
+                style={{ color: 'var(--color-interactive)' }}
+              >
                 {isAr ? 'عرض الكل ←' : '→ View All'}
               </Link>
             </div>

@@ -8,8 +8,8 @@ export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-sm border p-5',
-        'border-[var(--color-border)]',
+        'bg-[var(--color-surface)] rounded-[var(--radius-lg)] border p-5',
+        'border-[var(--color-border)] shadow-[var(--shadow-tile)]',
         className,
       )}
       {...props}
@@ -29,7 +29,11 @@ export function CardHeader({ className, children, ...props }: CardProps) {
 
 export function CardTitle({ className, children, ...props }: CardProps) {
   return (
-    <h3 className={cn('text-base font-semibold text-neutral-800', className)} {...props}>
+    <h3
+      className={cn('text-base font-semibold', className)}
+      style={{ color: 'var(--color-text-primary)' }}
+      {...props}
+    >
       {children}
     </h3>
   )

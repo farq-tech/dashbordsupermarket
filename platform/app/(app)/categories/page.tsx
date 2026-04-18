@@ -66,12 +66,12 @@ export default function CategoriesPage() {
 
         {/* Highlight chips */}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="rounded-xl border border-[color:color-mix(in_srgb,var(--color-trend-up)_32%,#ffffff)] bg-[color:color-mix(in_srgb,var(--color-trend-up)_10%,#ffffff)] p-4">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-green-800">{isAr ? 'فرص عالية' : 'High Opportunities'}</p>
+              <p className="text-sm font-semibold text-[color:#0a8f5a]">{isAr ? 'فرص عالية' : 'High Opportunities'}</p>
               <Badge variant="success">{highOpportunity.length}</Badge>
             </div>
-            <p className="text-xs text-green-600">{isAr ? 'أصناف بسعر أقل من السوق — رفع للهامش' : 'Categories priced below market — margin uplift'}</p>
+            <p className="text-xs text-[color:var(--color-trend-up)]">{isAr ? 'أصناف بسعر أقل من السوق — رفع للهامش' : 'Categories priced below market — margin uplift'}</p>
           </div>
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-1">
@@ -100,7 +100,7 @@ export default function CategoriesPage() {
                 data={chartData}
                 dataKey={isAr ? 'المنتجات' : 'Products'}
                 height={240}
-                color="#1a5c3a"
+                color="#1b59f8"
               />
             </CardContent>
           </Card>
@@ -114,7 +114,7 @@ export default function CategoriesPage() {
                 dataKey={isAr ? 'مؤشر التسعير' : 'Pricing Index'}
                 colors={pricingIndexData.map(d => {
                   const v = d[isAr ? 'مؤشر التسعير' : 'Pricing Index'] as number
-                  return v > 108 ? '#dc2626' : v > 103 ? '#f97316' : v < 95 ? '#16a34a' : '#2563eb'
+                  return v > 108 ? '#ff3e13' : v > 103 ? '#f97316' : v < 95 ? '#1fe08f' : '#1b59f8'
                 })}
                 height={240}
               />
@@ -138,7 +138,7 @@ export default function CategoriesPage() {
                     onClick={() => setSortBy(s.key as typeof sortBy)}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                       sortBy === s.key
-                        ? 'bg-[#1a5c3a] text-white border-[#1a5c3a]'
+                        ? 'bg-[var(--color-interactive)] text-white border-[var(--color-interactive)]'
                         : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                     }`}
                   >
@@ -166,7 +166,7 @@ export default function CategoriesPage() {
                   {sorted.map((cat, i) => (
                     <tr
                       key={i}
-                      className={`border-b border-neutral-50 cursor-pointer transition-colors ${selected?.name_en === cat.name_en ? 'bg-[#1a5c3a]/5' : 'hover:bg-neutral-50'}`}
+                      className={`border-b border-neutral-50 cursor-pointer transition-colors ${selected?.name_en === cat.name_en ? 'bg-[var(--color-surface-hover)]' : 'hover:bg-neutral-50'}`}
                       onClick={() => setSelected(selected?.name_en === cat.name_en ? null : cat)}
                     >
                       <td className="px-4 py-3 font-medium text-neutral-800">
@@ -178,7 +178,7 @@ export default function CategoriesPage() {
                       <td className="px-4 py-3 text-end">
                         <span className={`font-semibold tabular-nums ${
                           cat.pricing_index > 108 ? 'text-red-600' :
-                          cat.pricing_index < 95 ? 'text-green-600' : 'text-blue-600'
+                          cat.pricing_index < 95 ? 'text-[color:var(--color-trend-up)]' : 'text-[color:var(--color-interactive)]'
                         }`}>
                           {cat.pricing_index.toFixed(0)}
                         </span>

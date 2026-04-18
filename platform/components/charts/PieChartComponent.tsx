@@ -29,7 +29,12 @@ export function SimplePieChart({
           ))}
         </Pie>
         <Tooltip
-          contentStyle={{ borderRadius: 8, border: '1px solid #e4ebe6', fontSize: 12 }}
+          contentStyle={{
+            borderRadius: 12,
+            border: '1px solid #eff0f6',
+            fontSize: 12,
+            boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
+          }}
           formatter={(v: unknown) => [`${v}`, '']}
         />
         {showLegend && (

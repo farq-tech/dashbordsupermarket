@@ -1,19 +1,29 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Brand */
+  /* Brand (Farq identity — logo / wordmark) */
   --color-brand: #043434;
   --color-brand-hover: #065151;
   --color-accent: #75F0A8;
 
-  /* Neutrals */
-  --color-text-primary: #2D2E2E;
-  --color-text-secondary: #355273;
-  --color-border: #EAEDF1;
-  --color-bg: #FCFCFC;
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #F4F8FB;
-  --color-surface-hover: #EFF8F2;
+  /* Analytics UI (Figma “Analytics Dashboard” community — surfaces, type, chrome) */
+  --color-text-primary: #000000;
+  --color-text-secondary: #4d4d4d;
+  --color-text-muted: rgba(0, 0, 0, 0.5);
+  --color-text-subtle: #9098a3;
+  --color-border: #eff0f6;
+  --color-bg: #f9f9f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2f7ff;
+  --color-surface-hover: rgba(27, 89, 248, 0.1);
+  --color-interactive: #1b59f8;
+  --color-interactive-hover: #1554d6;
+  --color-interactive-pressed: #0f2552;
+  --color-chart-line: #1b59f8;
+  --color-trend-up: #1fe08f;
+  --color-trend-down: #ff3e13;
+  --color-grid: #e4e5e7;
+  --color-axis-tick: #838383;
 
   /* Layout */
   --color-sidebar-bg: var(--color-surface);
@@ -24,9 +34,14 @@
   --font-brand: 'Futura', var(--font-poppins), var(--font-inter), system-ui, sans-serif;
 
   /* Radius */
-  --radius-sm: 0.5rem;   /* 8px */
-  --radius-md: 0.75rem;  /* 12px */
-  --radius-lg: 1.25rem;  /* 20px */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.625rem; /* 10px — Figma sidebar pill */
+  --radius-lg: 1.25rem; /* 20px — cards / side nav */
+  --radius-shell: 1.875rem; /* 30px — main frame */
+
+  /* Elevation */
+  --shadow-tile: 0 5px 20px rgba(0, 0, 0, 0.05);
+  --shadow-shell: 0 0 50px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -60,14 +75,14 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f2;
+  background: #f0f0f0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c8d6cc;
+  background: #d1d5db;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ab5a0;
+  background: #9ca3af;
 }
 
 /* Animations */
@@ -92,7 +107,7 @@ body {
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .card-hover:hover {
-  box-shadow: 0 8px 30px rgba(15, 61, 39, 0.12);
+  box-shadow: var(--shadow-tile), 0 12px 40px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
@@ -103,8 +118,8 @@ body {
 
 /* Tag colors */
 .tag-overpriced { background: #fee2e2; color: #dc2626; }
-.tag-underpriced { background: #dcfce7; color: #16a34a; }
-.tag-competitive { background: #dbeafe; color: #2563eb; }
+.tag-underpriced { background: rgba(31, 224, 143, 0.12); color: #0a8f5a; }
+.tag-competitive { background: rgba(27, 89, 248, 0.1); color: #1b59f8; }
 .tag-opportunity { background: #fef9c3; color: #ca8a04; }
 .tag-risk { background: #ffedd5; color: #ea580c; }
 .tag-not_stocked { background: #f3f4f6; color: #6b7280; }
