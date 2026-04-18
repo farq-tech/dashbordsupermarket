@@ -1,12 +1,14 @@
 'use client'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
+import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
-import { TrendingUp, TrendingDown, Minus, Award, Target, ArrowLeft } from 'lucide-react'
+import { TrendingUp, TrendingDown, Award, Target, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 function ScoreGauge({ value, color }: { value: number; color: string }) {
   const angle = (value / 100) * 180
@@ -65,7 +67,7 @@ export default function ProfilePage() {
   const isAr = lang === 'ar'
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="ملف المتجر" title_en="Store Profile" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><LoadingOverlay /></div>
   }
 
   const { kpis, all_kpis } = dashboardData
@@ -94,18 +96,21 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="ملف المتجر" title_en="Store Profile" />
-      <div className="p-6 space-y-6">
+      <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {/* Profile Header */}
         <Card>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div
-              className="h-16 w-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg shrink-0"
-              style={{ backgroundColor: selectedRetailer?.color }}
-            >
-              {selectedRetailer?.logo_letter}
-            </div>
+            {selectedRetailer && (
+              <RetailerLogo
+                retailer={selectedRetailer}
+                label={isAr ? selectedRetailer.brand_ar : selectedRetailer.brand_en}
+                size={64}
+                rounded="2xl"
+                className="shadow-lg"
+              />
+            )}
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-neutral-900">
                 {isAr ? selectedRetailer?.brand_ar : selectedRetailer?.brand_en}
@@ -134,7 +139,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Strengths & Weaknesses */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -182,7 +187,7 @@ export default function ProfilePage() {
 
         {/* You vs Market & Top Competitor */}
         {topCompetitor && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -257,7 +262,7 @@ export default function ProfilePage() {
         )}
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-[#0f3d27] to-[#1a5c3a] rounded-2xl p-6 flex items-center justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0f3d27] to-[#1a5c3a] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <p className="text-white font-bold text-lg">
               {isAr ? 'ماذا يجب أن تفعل الآن؟' : 'What should you do next?'}
@@ -268,7 +273,7 @@ export default function ProfilePage() {
           </div>
           <Link
             href="/recommendations"
-            className="bg-white text-[#1a5c3a] font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-neutral-50 transition-colors text-sm"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#1a5c3a] transition-colors hover:bg-neutral-50 sm:w-auto sm:justify-start"
           >
             <Target className="h-4 w-4" />
             {isAr ? 'عرض التوصيات' : 'View Actions'}

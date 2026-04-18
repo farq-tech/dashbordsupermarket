@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { invalidateCache, getDataBundle, getCacheInfo, type DataSource } from '@/lib/dataCache'
+import { invalidateCache, getDataBundle, getCacheInfo } from '@/lib/dataCache'
 
 export const dynamic = 'force-dynamic'
 

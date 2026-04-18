@@ -1,12 +1,13 @@
 'use client'
-import { useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
+import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { MultiBarChart } from '@/components/charts/BarChartComponent'
 import { SimplePieChart } from '@/components/charts/PieChartComponent'
+import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 export default function CompetitorsPage() {
   const { lang, dashboardData, loading, selectedRetailer } = useAppStore()
@@ -32,7 +33,7 @@ export default function CompetitorsPage() {
 
   // Category dominance: who is cheapest most often per category
   const comparisons = dashboardData?.comparisons ?? []
-  const catDominance = useMemo(() => {
+  const catDominance = (() => {
     const catMap = new Map<string, { name_ar: string; name_en: string; cheapestBy: Record<number, number> }>()
     comparisons.forEach(c => {
       if (!catMap.has(c.category_en)) {
@@ -61,7 +62,7 @@ export default function CompetitorsPage() {
       })
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
-  }, [comparisons, allKpis, isAr])
+  })()
 
   // Price positioning pie per competitor
   const pricePie = allKpis.map(k => ({
@@ -71,16 +72,16 @@ export default function CompetitorsPage() {
   }))
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="المنافسون" title_en="Competitor Intelligence" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><LoadingOverlay /></div>
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="المنافسون" title_en="Competitor Intelligence" />
-      <div className="p-6 space-y-6">
+      <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {/* Competitor Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           {competitors.map(comp => {
             const myScore = myKpis?.performance_score ?? 0
             const compScore = comp.performance_score
@@ -88,12 +89,12 @@ export default function CompetitorsPage() {
             return (
               <Card key={comp.retailer.store_key} className="card-hover">
                 <div className="flex items-start gap-4">
-                  <span
-                    className="h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold text-white shrink-0"
-                    style={{ backgroundColor: comp.retailer.color }}
-                  >
-                    {comp.retailer.logo_letter}
-                  </span>
+                  <RetailerLogo
+                    retailer={comp.retailer}
+                    label={isAr ? comp.retailer.brand_ar : comp.retailer.brand_en}
+                    size={48}
+                    rounded="xl"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h3 className="font-bold text-neutral-900">
@@ -103,7 +104,7 @@ export default function CompetitorsPage() {
                         {iAhead ? (isAr ? 'أنت متقدم' : 'You Lead') : (isAr ? 'متأخر' : 'Behind')}
                       </Badge>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 mt-3">
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
                       {[
                         { label: isAr ? 'الأداء' : 'Performance', val: comp.performance_score.toFixed(0), unit: '' },
                         { label: isAr ? 'متوسط سعر' : 'Avg Price', val: comp.avg_price.toFixed(1), unit: ' SAR' },
@@ -135,7 +136,7 @@ export default function CompetitorsPage() {
         </Card>
 
         {/* Price positioning + Category dominance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'تموضع الأسعار في السوق' : 'Market Price Positioning'}</CardTitle>

@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getDataBundle, getCacheInfo, type DataSource } from '@/lib/dataCache'
-import { computeRetailerKPIs, buildProductComparisons, getMarketSummary, RETAILERS, retailersFromStores } from '@/lib/kpis'
+import { computeRetailerKPIs, buildProductComparisons, getMarketSummary, retailersFromStores } from '@/lib/kpis'
 import { generateRecommendations, generateAlerts } from '@/lib/recommendations'
+import { buildDecisionBrief } from '@/lib/decisionLayer'
+import { buildMatchCheapestScenario, buildLiftToMarketAvgScenario } from '@/lib/scenarios'
+import { DECISION_POLICY } from '@/config/decisionPolicy'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,15 +21,34 @@ export async function GET(request: Request) {
     const source = parseSource(searchParams.get('source'))
 
     const bundle = await getDataBundle(source)
-    const { last_updated: _cache_last_updated, ...cacheInfo } = getCacheInfo(source)
+    const cacheInfoRaw = getCacheInfo(source)
+    const { last_updated, ...cacheInfo } = cacheInfoRaw
+    void last_updated
     const retailers = retailersFromStores(bundle.stores, { source })
+    const marketStoreCount = Math.max(
+      1,
+      bundle.stores.length,
+      new Set(bundle.prices.map(p => p.StoreKey)).size,
+    )
+
+    if (retailers.length === 0 && section !== 'stores') {
+      return NextResponse.json(
+        {
+          error: 'No store data loaded. Add fustog_stores_lookup_*.csv under the data folder for this source.',
+          retailers: [],
+          last_updated: bundle.last_updated,
+          ...cacheInfo,
+        },
+        { status: 503 },
+      )
+    }
 
     if (section === 'stores') {
       return NextResponse.json({ stores: bundle.stores, ...cacheInfo })
     }
 
     if (section === 'comparisons') {
-      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching)
+      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching, marketStoreCount)
       const cat = searchParams.get('category')
       const brand = searchParams.get('brand')
       const tag = searchParams.get('tag')
@@ -49,20 +71,62 @@ export async function GET(request: Request) {
 
     if (section === 'recommendations') {
       const kpis = computeRetailerKPIs(storeKey, bundle.prices, bundle.matching, retailers)
-      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching)
+      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching, marketStoreCount)
       const recs = generateRecommendations(kpis, comparisons)
       const alerts = generateAlerts(kpis, comparisons)
       return NextResponse.json({ recommendations: recs, alerts, ...cacheInfo })
     }
 
+    if (section === 'scenario') {
+      const strategy = searchParams.get('strategy') === 'lift_to_market_avg' ? 'lift_to_market_avg' : 'match_cheapest'
+      const topN = Math.min(
+        DECISION_POLICY.scenarios.maxScenarioLineItems,
+        Math.max(1, parseInt(searchParams.get('top_n') || String(DECISION_POLICY.scenarios.matchCheapestDefaultTopN), 10)),
+      )
+      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching, marketStoreCount)
+      const scenario =
+        strategy === 'lift_to_market_avg'
+          ? buildLiftToMarketAvgScenario(comparisons, topN)
+          : buildMatchCheapestScenario(comparisons, topN, DECISION_POLICY.minSkuGapSar)
+      return NextResponse.json({ scenario, ...cacheInfo })
+    }
+
+    if (section === 'decisions') {
+      const kpis = computeRetailerKPIs(storeKey, bundle.prices, bundle.matching, retailers)
+      const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching, marketStoreCount)
+      const recs = generateRecommendations(kpis, comparisons)
+      const alerts = generateAlerts(kpis, comparisons)
+      const allRetailersKpis = retailers.map(r =>
+        computeRetailerKPIs(r.store_key, bundle.prices, bundle.matching, retailers),
+      )
+      const decision_brief = buildDecisionBrief(
+        kpis,
+        comparisons,
+        recs,
+        alerts,
+        allRetailersKpis,
+        bundle.last_updated,
+      )
+      return NextResponse.json({ decision_brief, ...cacheInfo })
+    }
+
     // Full dashboard data
     const kpis = computeRetailerKPIs(storeKey, bundle.prices, bundle.matching, retailers)
-    const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching)
+    const comparisons = buildProductComparisons(storeKey, bundle.prices, bundle.matching, marketStoreCount)
     const recs = generateRecommendations(kpis, comparisons)
     const alerts = generateAlerts(kpis, comparisons)
     const marketSummary = getMarketSummary(bundle.prices, bundle.matching, retailers)
     const allRetailersKpis = retailers.map(r =>
       computeRetailerKPIs(r.store_key, bundle.prices, bundle.matching, retailers)
+    )
+
+    const decision_brief = buildDecisionBrief(
+      kpis,
+      comparisons,
+      recs,
+      alerts,
+      allRetailersKpis,
+      bundle.last_updated,
     )
 
     return NextResponse.json({
@@ -74,6 +138,7 @@ export async function GET(request: Request) {
       all_kpis: allRetailersKpis,
       retailers,
       last_updated: bundle.last_updated,
+      decision_brief,
       ...cacheInfo,
     })
   } catch (error) {

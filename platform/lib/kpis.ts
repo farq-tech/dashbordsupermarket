@@ -8,6 +8,7 @@ import type {
   ProductComparison,
 } from './types'
 import { getSupermarketChainDisplay } from './supermarketChainLabels'
+import { getRetailerLogoUrl } from './providerLogos'
 
 export const RETAILERS: Retailer[] = [
   {
@@ -19,6 +20,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'Panda',
     color: '#E53E3E',
     logo_letter: 'P',
+    logo_url: '/logos/panda.svg',
   },
   {
     store_key: 5,
@@ -29,6 +31,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'Othaim',
     color: '#2B6CB0',
     logo_letter: 'E',
+    logo_url: '/logos/othaim.svg',
   },
   {
     store_key: 6,
@@ -39,6 +42,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'LuLu',
     color: '#276749',
     logo_letter: 'L',
+    logo_url: '/logos/lulu.svg',
   },
 ]
 
@@ -73,6 +77,7 @@ export function retailersFromStores(
       const nameAr = branchAr || brandAr
       const letter = chain?.logo_letter ?? (brandEn[0] || 'S').toUpperCase()
       const color = chain?.color ?? '#1a5c3a'
+      const logo_url = getRetailerLogoUrl(s.store_key, source)
 
       return {
         store_key: s.store_key,
@@ -83,13 +88,15 @@ export function retailersFromStores(
         brand_en: brandEn,
         color,
         logo_letter: letter,
+        ...(logo_url ? { logo_url } : {}),
       } satisfies Retailer
     })
 
   // Deduplicate by store_key while preserving order
   const seen = new Set<number>()
   const uniq = derived.filter(r => (seen.has(r.store_key) ? false : (seen.add(r.store_key), true)))
-  return uniq.length > 0 ? uniq : RETAILERS
+  // No fallback sample retailers — empty stores CSV yields empty list (no mock chains).
+  return uniq
 }
 
 export function computeRetailerKPIs(
@@ -208,8 +215,14 @@ export function buildProductComparisons(
   storeKey: number,
   prices: PriceRow[],
   matching: MatchingRow[],
-  totalStores: number = 6,
+  /** Stores in the market (from stores CSV). Used for availability % and expand heuristic. */
+  marketStoreCount?: number,
 ): ProductComparison[] {
+  const distinctFromPrices = new Set(prices.map(p => p.StoreKey)).size
+  const totalStores = Math.max(
+    1,
+    marketStoreCount ?? distinctFromPrices,
+  )
   const myPriceMap = new Map<number, number>()
   prices.filter(p => p.StoreKey === storeKey).forEach(p => myPriceMap.set(p.FID, p.Price))
 

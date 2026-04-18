@@ -1,9 +1,5 @@
 import type { Recommendation, Alert, RetailerKPIs, ProductComparison } from './types'
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
-}
-
 function median(values: number[]) {
   if (values.length === 0) return 0
   const sorted = [...values].sort((a, b) => a - b)
@@ -50,7 +46,7 @@ export function generateRecommendations(
     })
     const topCheapest = Array.from(cheapestNameCounts.values()).sort((a, b) => b.count - a.count)[0]
     if (topCheapest) {
-      const est = clamp(topCheapest.gapSar * 15, 500, 250000)
+      const totalGapSar = Math.round(topCheapest.gapSar)
       recs.push({
         id: id(),
         title_ar: `${topCheapest.en} الأرخص في ${topCheapest.count} منتج لديك`,
@@ -60,11 +56,11 @@ export function generateRecommendations(
         category_en: 'Pricing',
         action_ar: 'مواءمة مع الأرخص',
         action_en: 'Match the cheapest competitor',
-        reason_ar: `تقدير فجوة السعر الإجمالية ≈ ${formatSar(topCheapest.gapSar)} ريال. ابدأ بالمنتجات الأعلى فجوة.`,
-        reason_en: `Estimated total price gap ≈ ${formatSar(topCheapest.gapSar)} SAR. Start with the biggest gaps.`,
+        reason_ar: `إجمالي فجوة السعر لهذه المنتجات = ${formatSar(topCheapest.gapSar)} ريال (مجموع الفروق من البيانات).`,
+        reason_en: `Total price gap on those items = ${formatSar(topCheapest.gapSar)} SAR (sum of per-product gaps from data).`,
         priority: 1,
         type: 'pricing',
-        value_estimate: Math.round(est),
+        value_estimate: totalGapSar,
       })
     }
   }
@@ -75,7 +71,7 @@ export function generateRecommendations(
     .slice()
     .sort((a, b) => (b.price_gap_sar - a.price_gap_sar) || (b.price_gap_pct - a.price_gap_pct))[0]
   if (worst) {
-    const est = clamp(Math.max(0, worst.price_gap_sar) * 40, 200, 100000)
+    const gapSar = Math.round(Math.max(0, worst.price_gap_sar))
     recs.push({
       id: id(),
       title_ar: `أسوأ فجوة سعر: ${worst.title_ar}`,
@@ -89,7 +85,7 @@ export function generateRecommendations(
       reason_en: `${formatSar(worst.price_gap_sar)} SAR above cheapest (${worst.cheapest_store_name_en}) (${worst.price_gap_pct.toFixed(1)}%).`,
       priority: 1,
       type: 'pricing',
-      value_estimate: Math.round(est),
+      value_estimate: gapSar,
     })
   }
 
@@ -111,7 +107,7 @@ export function generateRecommendations(
     .sort((a, b) => (b.avgGap - a.avgGap) || (b.items.length - a.items.length))
     .slice(0, 2)
     .forEach(b => {
-      const est = clamp(b.gapSar * 10, 300, 150000)
+      const totalGapSar = Math.round(b.gapSar)
       recs.push({
         id: id(),
         title_ar: `براند مرتفع السعر بشكل ممنهج: ${b.ar}`,
@@ -121,11 +117,11 @@ export function generateRecommendations(
         category_en: 'Pricing',
         action_ar: 'مراجعة تسعير البراند',
         action_en: 'Review brand pricing',
-        reason_ar: `${b.items.length} منتجات من هذا البراند أعلى من الأرخص بمتوسط ${b.avgGap.toFixed(1)}% (فجوة ≈ ${formatSar(b.gapSar)} ريال).`,
-        reason_en: `${b.items.length} items above cheapest by ${b.avgGap.toFixed(1)}% on average (gap ≈ ${formatSar(b.gapSar)} SAR).`,
+        reason_ar: `${b.items.length} منتجات من هذا البراند أعلى من الأرخص بمتوسط ${b.avgGap.toFixed(1)}% (مجموع الفجوة ${formatSar(b.gapSar)} ريال).`,
+        reason_en: `${b.items.length} items above cheapest by ${b.avgGap.toFixed(1)}% on average (total gap ${formatSar(b.gapSar)} SAR).`,
         priority: 2,
         type: 'pricing',
-        value_estimate: Math.round(est),
+        value_estimate: totalGapSar,
       })
     })
 
@@ -141,6 +137,7 @@ export function generateRecommendations(
     const catAr = products[0].category_ar
     if (products.length >= 3) {
       const avgGap = products.reduce((s, p) => s + p.price_gap_pct, 0) / products.length
+      const catGapSar = Math.round(products.reduce((s, p) => s + Math.max(0, p.price_gap_sar), 0))
       recs.push({
         id: id(),
         title_ar: `خفض أسعار ${products.length} منتج في ${catAr}`,
@@ -150,11 +147,11 @@ export function generateRecommendations(
         category_en: catEn,
         action_ar: 'خفض السعر',
         action_en: 'Decrease Price',
-        reason_ar: `أسعارك أعلى من السوق بـ ${avgGap.toFixed(1)}% في المتوسط`,
-        reason_en: `Your prices are ${avgGap.toFixed(1)}% above market average`,
+        reason_ar: `أسعارك أعلى من السوق بـ ${avgGap.toFixed(1)}% في المتوسط؛ مجموع فجوة السعر ≈ ${formatSar(catGapSar)} ريال.`,
+        reason_en: `Your prices are ${avgGap.toFixed(1)}% above market average; total gap ≈ ${formatSar(catGapSar)} SAR.`,
         priority: avgGap > 15 ? 1 : 2,
         type: 'pricing',
-        value_estimate: products.length * 500,
+        value_estimate: catGapSar,
       })
     }
   })
@@ -170,6 +167,12 @@ export function generateRecommendations(
   underpricedByCat.forEach((products, catEn) => {
     const catAr = products[0].category_ar
     if (products.length >= 2) {
+      const headroomSar = Math.round(
+        products.reduce((s, p) => {
+          if (p.your_price === null) return s
+          return s + Math.max(0, p.market_avg - p.your_price)
+        }, 0),
+      )
       recs.push({
         id: id(),
         title_ar: `رفع أسعار ${products.length} منتج في ${catAr} (تحت السعر)`,
@@ -179,11 +182,11 @@ export function generateRecommendations(
         category_en: catEn,
         action_ar: 'رفع السعر',
         action_en: 'Increase Price',
-        reason_ar: `أسعارك أقل من السوق، فرصة لتحسين الهامش`,
-        reason_en: 'Prices below market — margin improvement opportunity',
+        reason_ar: `أسعارك أقل من متوسط السوق في هذا التصنيف؛ فرق متوسط السوق عن سعرك ≈ ${formatSar(headroomSar)} ريال إجمالاً.`,
+        reason_en: `Below market average in this category; aggregate gap vs market avg ≈ ${formatSar(headroomSar)} SAR.`,
         priority: 3,
         type: 'pricing',
-        value_estimate: products.length * 300,
+        value_estimate: headroomSar,
       })
     }
   })
@@ -240,7 +243,6 @@ export function generateRecommendations(
     .slice(0, 2)
     .forEach(ins => {
       if (ins.missingPct < 35 || ins.missing < 8) return
-      const est = clamp(ins.missing * 250, 500, 150000)
       recs.push({
         id: id(),
         title_ar: `${ins.catAr}: ${ins.missingPct.toFixed(0)}% ناقص مقارنة بـ ${ins.bestNameAr}`,
@@ -250,11 +252,10 @@ export function generateRecommendations(
         category_en: ins.catEn,
         action_ar: 'سد فجوة التغطية',
         action_en: 'Close coverage gap',
-        reason_ar: `لديك ${ins.myCount} منتج مقابل ${ins.bestCount} لدى ${ins.bestNameAr}. ابدأ بأكثر المنتجات طلباً في هذا التصنيف.`,
-        reason_en: `You carry ${ins.myCount} vs ${ins.bestCount} at ${ins.bestNameEn}. Start with the highest-impact SKUs in this category.`,
+        reason_ar: `لديك ${ins.myCount} منتج مقابل ${ins.bestCount} لدى ${ins.bestNameAr} (${ins.missing} منتج فرق عدد).`,
+        reason_en: `You carry ${ins.myCount} SKUs vs ${ins.bestCount} at ${ins.bestNameEn} (${ins.missing} SKU gap).`,
         priority: 2,
         type: 'coverage',
-        value_estimate: Math.round(est),
       })
     })
 
@@ -271,11 +272,10 @@ export function generateRecommendations(
         category_en: catEn,
         action_ar: 'إضافة للمخزون',
         action_en: 'Add to Inventory',
-        reason_ar: `المنافسون يعرضون هذه المنتجات ولديك غياب في هذا التصنيف`,
-        reason_en: 'Competitors carry these products — you have coverage gap',
+        reason_ar: `المنافسون يعرضون هذه المنتجات ولديك غياب في هذا التصنيف (العدد من مطابقة السوق).`,
+        reason_en: 'Competitors list these matched products — you do not (count from market matching data).',
         priority: products.length > 20 ? 3 : 5,
         type: 'coverage',
-        value_estimate: products.length * 200,
       })
     }
   })
@@ -373,8 +373,8 @@ export function generateRecommendations(
       category_en: 'Coverage',
       action_ar: 'توسيع المحفظة',
       action_en: 'Expand Portfolio',
-      reason_ar: `التغطية الحالية ${kpis.coverage_index.toFixed(0)}% — رفعها إلى 55–65% عادةً يعطي أثر سريع على المبيعات والولاء.`,
-      reason_en: `Current coverage is ${kpis.coverage_index.toFixed(0)}% — lifting it to ~55–65% typically drives fast gains.`,
+      reason_ar: `التغطية الحالية ${kpis.coverage_index.toFixed(0)}% (من بيانات المطابقة والأسعار).`,
+      reason_en: `Current coverage is ${kpis.coverage_index.toFixed(0)}% (from matching and price data).`,
       priority: 1,
       type: 'expansion',
     })
@@ -479,8 +479,8 @@ export function generateAlerts(
       type: 'opportunity',
       title_ar: `تغطية منخفضة جداً (${kpis.coverage_index.toFixed(0)}%)`,
       title_en: `Very low coverage (${kpis.coverage_index.toFixed(0)}%)`,
-      description_ar: 'ابدأ خطة توسع سريعة: 50 SKU/أسبوع في أعلى 3 تصنيفات نقصاً.',
-      description_en: 'Start a fast expansion plan: 50 SKUs/week in the top 3 missing categories.',
+      description_ar: 'ركّز على التصنيفات ذات أعلى فجوة تغطية مقارنة بالمنافسين (حسب بيانات المطابقة).',
+      description_en: 'Prioritize categories with the largest coverage gap vs competitors (from matching data).',
       severity: 'high',
       created_at: now,
     })

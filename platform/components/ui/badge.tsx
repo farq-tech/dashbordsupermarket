@@ -32,19 +32,20 @@ export function Badge({ variant = 'default', size = 'sm', className, children, .
   )
 }
 
-export function TagBadge({ tag }: { tag: string }) {
+export function TagBadge({ tag, lang = 'ar' }: { tag: string; lang?: 'ar' | 'en' }) {
   const map: Record<string, { label_ar: string; label_en: string; cls: string }> = {
-    overpriced: { label_ar: 'مرتفع السعر', label_en: 'Overpriced', cls: 'tag-overpriced' },
-    underpriced: { label_ar: 'منخفض السعر', label_en: 'Underpriced', cls: 'tag-underpriced' },
-    competitive: { label_ar: 'تنافسي', label_en: 'Competitive', cls: 'tag-competitive' },
-    opportunity: { label_ar: 'فرصة', label_en: 'Opportunity', cls: 'tag-opportunity' },
-    risk: { label_ar: 'خطر', label_en: 'Risk', cls: 'tag-risk' },
-    not_stocked: { label_ar: 'غير متوفر', label_en: 'Not Stocked', cls: 'tag-not_stocked' },
+    overpriced: { label_ar: 'سعر أعلى من السوق', label_en: 'Overpriced', cls: 'tag-overpriced' },
+    underpriced: { label_ar: 'سعر أقل من السوق', label_en: 'Underpriced', cls: 'tag-underpriced' },
+    competitive: { label_ar: 'سعر تنافسي', label_en: 'Competitive', cls: 'tag-competitive' },
+    opportunity: { label_ar: 'فرصة تحسين', label_en: 'Opportunity', cls: 'tag-opportunity' },
+    risk: { label_ar: 'مخاطر محتملة', label_en: 'Risk', cls: 'tag-risk' },
+    not_stocked: { label_ar: 'غير متوفر', label_en: 'Not Available', cls: 'tag-not_stocked' },
   }
   const info = map[tag] ?? map.not_stocked
+  const label = lang === 'ar' ? info.label_ar : info.label_en
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${info.cls}`}>
-      {info.label_ar}
+      {label}
     </span>
   )
 }

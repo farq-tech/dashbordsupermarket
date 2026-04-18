@@ -19,9 +19,9 @@
   --color-sidebar-bg: var(--color-surface);
   --color-topbar-bg: var(--color-surface);
 
-  /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --font-brand: 'Futura', 'Inter', system-ui, sans-serif;
+  /* Typography (Inter/Poppins loaded via next/font in app/layout.tsx) */
+  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-brand: 'Futura', var(--font-poppins), var(--font-inter), system-ui, sans-serif;
 
   /* Radius */
   --radius-sm: 0.5rem;   /* 8px */
@@ -107,3 +107,13 @@ body {
 .tag-opportunity { background: #fef9c3; color: #ca8a04; }
 .tag-risk { background: #ffedd5; color: #ea580c; }
 .tag-not_stocked { background: #f3f4f6; color: #6b7280; }
+
+/* Decision Center / reports: hide chrome when printing */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-break-before {
+    break-before: page;
+  }
+}

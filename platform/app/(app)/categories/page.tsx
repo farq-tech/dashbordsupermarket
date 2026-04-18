@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
+import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -22,7 +23,10 @@ export default function CategoriesPage() {
   const [sortBy, setSortBy] = useState<'product_count' | 'pricing_index' | 'competitive_count'>('product_count')
   const [selected, setSelected] = useState<CategoryKPI | null>(null)
 
-  const categories = dashboardData?.kpis.categories ?? []
+  const categories = useMemo(
+    () => dashboardData?.kpis.categories ?? [],
+    [dashboardData?.kpis.categories],
+  )
 
   const sorted = useMemo(() =>
     [...categories].sort((a, b) => {
@@ -52,16 +56,16 @@ export default function CategoriesPage() {
   })
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="أداء الأصناف" title_en="Category Performance" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><LoadingOverlay /></div>
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="أداء الأصناف" title_en="Category Performance" />
-      <div className="p-6 space-y-6">
+      <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {/* Highlight chips */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
           <div className="bg-green-50 border border-green-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-semibold text-green-800">{isAr ? 'فرص عالية' : 'High Opportunities'}</p>
@@ -86,7 +90,7 @@ export default function CategoriesPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'أعلى الأصناف بعدد المنتجات' : 'Top Categories by Products'}</CardTitle>

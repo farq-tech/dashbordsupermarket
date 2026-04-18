@@ -56,6 +56,8 @@ export interface Retailer {
   brand_en: string
   color: string
   logo_letter: string
+  /** Path under /public, e.g. /logos/jahez.svg — shown when set */
+  logo_url?: string
 }
 
 export interface RetailerKPIs {
@@ -138,6 +140,50 @@ export interface Alert {
   description_en: string
   severity: 'high' | 'medium' | 'low'
   created_at: string
+}
+
+export interface DecisionEvidence {
+  label_ar: string
+  label_en: string
+  value: string
+}
+
+export interface DecisionItem {
+  id: string
+  score: number
+  kind: 'sku_price' | 'portfolio_pricing' | 'portfolio_coverage' | 'competitive' | 'alert'
+  title_ar: string
+  title_en: string
+  context_ar: string
+  context_en: string
+  impact: 'high' | 'medium' | 'low'
+  suggested_action_ar: string
+  suggested_action_en: string
+  evidence: DecisionEvidence[]
+  fid?: number
+  recommendation_id?: string
+  alert_id?: string
+}
+
+export interface DecisionPillarScore {
+  key: 'price_competitiveness' | 'assortment_coverage' | 'market_position'
+  label_ar: string
+  label_en: string
+  score: number
+  hint_ar: string
+  hint_en: string
+}
+
+export interface DecisionBrief {
+  headline_ar: string
+  headline_en: string
+  subline_ar: string
+  subline_en: string
+  pillars: DecisionPillarScore[]
+  queue: DecisionItem[]
+  data_as_of: string
+  market_rank: number
+  market_participants: number
 }
 
 export interface DataBundle {

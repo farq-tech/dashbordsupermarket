@@ -2,11 +2,12 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { PAGE_TITLES } from '@/lib/navConfig'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
-import { Lightbulb, TrendingUp, Map, Zap, Bell, Download, CheckCircle } from 'lucide-react'
+import { Lightbulb, TrendingUp, Map, Zap, Download, CheckCircle } from 'lucide-react'
 import type { Recommendation, Alert } from '@/lib/types'
 
 const IMPACT_MAP = {
@@ -64,9 +65,9 @@ function RecCard({ rec, lang, onDone }: { rec: Recommendation; lang: string; onD
               <span className="font-medium text-neutral-700">{isAr ? rec.action_ar : rec.action_en}</span>
             </span>
             <Badge variant="neutral">{isAr ? rec.category_ar : rec.category_en}</Badge>
-            {rec.value_estimate && (
+            {rec.value_estimate != null && rec.value_estimate > 0 && (
               <span className="text-xs text-green-600 font-semibold">
-                +{rec.value_estimate.toLocaleString()} {isAr ? 'ريال (تقديري)' : 'SAR (est.)'}
+                {rec.value_estimate.toLocaleString()} {isAr ? 'ريال (من البيانات)' : 'SAR (from data)'}
               </span>
             )}
           </div>
@@ -116,8 +117,8 @@ function AlertCard({ alert, lang }: { alert: Alert; lang: string }) {
 function exportRecs(recs: Recommendation[], lang: string) {
   const isAr = lang === 'ar'
   const headers = isAr
-    ? ['العنوان', 'النوع', 'الأثر', 'الصنف', 'الإجراء', 'السبب', 'القيمة المقدرة']
-    : ['Title', 'Type', 'Impact', 'Category', 'Action', 'Reason', 'Est. Value']
+            ? ['العنوان', 'النوع', 'الأثر', 'الصنف', 'الإجراء', 'السبب', 'القيمة (ريال من البيانات)']
+    : ['Title', 'Type', 'Impact', 'Category', 'Action', 'Reason', 'Value (SAR from data)']
   const rows = recs.map(r => [
     isAr ? r.title_ar : r.title_en,
     r.type,
@@ -157,16 +158,16 @@ export default function RecommendationsPage() {
   const totalValue = filtered.reduce((s, r) => s + (r.value_estimate ?? 0), 0)
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="مركز التوصيات" title_en="Recommendations Center" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><LoadingOverlay /></div>
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="مركز التوصيات" title_en="Recommendations Center" />
-      <div className="p-6 space-y-5">
+      <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {/* Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
           <div className="bg-gradient-to-br from-[#1a5c3a] to-[#22794d] rounded-xl p-4 text-white">
             <p className="text-white/70 text-xs">{isAr ? 'إجمالي التوصيات' : 'Total Recommendations'}</p>
             <p className="text-3xl font-bold mt-1">{filtered.length}</p>
@@ -186,9 +187,9 @@ export default function RecommendationsPage() {
         </div>
 
         {totalValue > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-xl px-5 py-3 flex items-center justify-between">
+          <div className="flex flex-col gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="text-sm font-semibold text-green-800">
-              {isAr ? 'إجمالي الفرصة المقدرة:' : 'Total Estimated Opportunity:'}
+              {isAr ? 'مجموع القيم الرقمية (فجوات سعر من البيانات):' : 'Sum of quantified price gaps (from data):'}
               {' '}<span className="text-green-700">{totalValue.toLocaleString()} {isAr ? 'ريال' : 'SAR'}</span>
             </p>
             <Button variant="ghost" size="sm" onClick={() => exportRecs(filtered, lang)}>

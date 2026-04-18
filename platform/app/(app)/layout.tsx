@@ -6,7 +6,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <DataProvider>
       <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
         <Sidebar />
-        <main className="mr-60 min-h-screen">
+        <main className="min-h-screen w-full min-w-0 md:mr-64 pb-[env(safe-area-inset-bottom,0px)]">
           {children}
         </main>
       </div>

@@ -4,12 +4,14 @@ import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { KpiCard } from '@/components/ui/kpi-card'
+import { InsightCard } from '@/components/ui/insight-card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { SimpleBarChart, MultiBarChart } from '@/components/charts/BarChartComponent'
 import { SimplePieChart } from '@/components/charts/PieChartComponent'
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Lightbulb, Target } from 'lucide-react'
 import Link from 'next/link'
+import { PAGE_TITLES } from '@/lib/navConfig'
 
 export default function DashboardPage() {
   const { lang, dashboardData, loading, selectedRetailer, fetchData } = useAppStore()
@@ -19,9 +21,15 @@ export default function DashboardPage() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading || !dashboardData) {
+    const t = PAGE_TITLES['/dashboard']
     return (
       <div>
-        <Topbar title_ar="لوحة الأداء" title_en="Performance Dashboard" />
+        <Topbar
+          title_ar={t.ar}
+          title_en={t.en}
+          description_ar="ملخص تنفيذي لأداء السلسلة مقارنة بالسوق."
+          description_en="Executive view of your chain’s performance vs the market."
+        />
         <LoadingOverlay />
       </div>
     )
@@ -71,24 +79,69 @@ export default function DashboardPage() {
   const marketRank = [...all_kpis].sort((a, b) => b.performance_score - a.performance_score)
     .findIndex(k => k.retailer.store_key === selectedRetailer?.store_key) + 1
 
+  const pageTitle = PAGE_TITLES['/dashboard']
+  let insightBlock: {
+    tone: 'attention' | 'positive'
+    title_ar: string
+    title_en: string
+    body_ar: string
+    body_en: string
+  }
+  if (alerts.length > 0) {
+    insightBlock = {
+      tone: 'attention',
+      title_ar: 'مخاطر وتنبيهات تحتاج متابعة',
+      title_en: 'Risks and alerts to address',
+      body_ar: `يوجد ${alerts.length} تنبيه نشط. راجع التفاصيل في التوصيات التشغيلية أو أضف البنود إلى مركز اتخاذ القرار.`,
+      body_en: `You have ${alerts.length} active alert(s). Review Action Recommendations or add items to the Decision Hub.`,
+    }
+  } else if (myKpis.overpriced_count > 80) {
+    insightBlock = {
+      tone: 'attention',
+      title_ar: 'ضغط تسعير مقابل السوق',
+      title_en: 'Pricing pressure vs market',
+      body_ar: `عدد كبير من المنتجات بأسعار أعلى من السوق (${myKpis.overpriced_count}). يُنصح بمراجعة استراتيجية التسعير والتوصيات.`,
+      body_en: `Many SKUs are priced above market (${myKpis.overpriced_count}). Consider reviewing Pricing Strategy and recommendations.`,
+    }
+  } else {
+    insightBlock = {
+      tone: 'positive',
+      title_ar: 'قراءة سريعة للوضع التنافسي',
+      title_en: 'Competitive snapshot',
+      body_ar: `أداء السلسلة ضمن نطاق يمكن التنبؤ به. تغطية السوق ${myKpis.coverage_index.toFixed(0)}٪ ومؤشر السعر ${myKpis.pricing_index.toFixed(0)}٪ مقارنة بالمتوسط.`,
+      body_en: `Your chain shows a stable position: ${myKpis.coverage_index.toFixed(0)}% coverage and ${myKpis.pricing_index.toFixed(0)}% pricing index vs market average.`,
+    }
+  }
+
   return (
     <div className="animate-fade-in">
       <Topbar
-        title_ar="لوحة الأداء"
-        title_en="Performance Dashboard"
-        subtitle_ar={`${isAr ? 'السلسلة:' : 'Chain:'} ${isAr ? selectedRetailer?.brand_ar : selectedRetailer?.brand_en}`}
+        title_ar={pageTitle.ar}
+        title_en={pageTitle.en}
+        subtitle_ar={selectedRetailer ? `الشركة: ${selectedRetailer.brand_ar}` : undefined}
+        subtitle_en={selectedRetailer ? `Business: ${selectedRetailer.brand_en}` : undefined}
+        description_ar="ماذا يحدث، لماذا يهم، وما الخطوة التالية — في نظرة واحدة."
+        description_en="What is happening, why it matters, and what to do next — in one view."
       />
 
-      <div className="p-6 space-y-6">
-        {/* Alerts banner */}
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+        <InsightCard
+          lang={lang}
+          tone={insightBlock.tone}
+          title_ar={insightBlock.title_ar}
+          title_en={insightBlock.title_en}
+          body_ar={insightBlock.body_ar}
+          body_en={insightBlock.body_en}
+        />
+
         {alerts.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="rounded-[var(--radius-lg)] border border-amber-200 bg-amber-50/90 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-800 text-sm">
+              <p className="font-semibold text-amber-900 text-sm">
                 {alerts.length} {isAr ? 'تنبيه يتطلب انتباهك' : 'alerts require attention'}
               </p>
-              <p className="text-amber-600 text-xs mt-0.5">
+              <p className="text-amber-800 text-xs mt-0.5">
                 {alerts[0]?.[isAr ? 'title_ar' : 'title_en']}
               </p>
             </div>
@@ -96,7 +149,7 @@ export default function DashboardPage() {
         )}
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
           <KpiCard
             title_ar="درجة الأداء"
             title_en="Performance Score"
@@ -140,7 +193,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Secondary KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
           <div className="bg-white rounded-[var(--radius-lg)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'متوسط سعرك' : 'Your Avg Price'}</p>
             <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
@@ -241,7 +294,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-amber-500" />
-                <CardTitle>{isAr ? 'توصيات الذكاء الاصطناعي — أهم الإجراءات هذا الأسبوع' : 'AI Recommendations — Top Actions This Week'}</CardTitle>
+                <CardTitle>{isAr ? 'توصيات مبنية على البيانات — أهم الإجراءات' : 'Data-driven recommendations — top actions'}</CardTitle>
               </div>
               <Link href="/recommendations" className="text-xs text-[#1a5c3a] hover:underline font-medium">
                 {isAr ? 'عرض الكل ←' : '→ View All'}

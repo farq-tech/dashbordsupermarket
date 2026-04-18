@@ -38,6 +38,21 @@ function findLatestFile(dataDir: string, pattern: RegExp): string | null {
   }
 }
 
+/** Latest modification time among loaded CSV files (reflects real export freshness). */
+function latestMtimeOfFiles(files: (string | null)[]): string {
+  let maxMs = 0
+  for (const f of files) {
+    if (!f) continue
+    try {
+      const t = fs.statSync(f).mtimeMs
+      if (t > maxMs) maxMs = t
+    } catch {
+      /* ignore */
+    }
+  }
+  return maxMs > 0 ? new Date(maxMs).toISOString() : new Date().toISOString()
+}
+
 function loadStores(dataDir: string): StoreRow[] {
   const file = findLatestFile(dataDir, /^fustog_stores_lookup_.*\.csv$/)
   if (!file) return []
@@ -110,15 +125,20 @@ function loadMatching(dataDir: string): MatchingRow[] {
 async function loadData(source: DataSource): Promise<DataBundle> {
   const dataDir = dataDirForSource(source)
   console.log('[DataCache] Loading data from CSV files...')
+  const storeFile = findLatestFile(dataDir, /^fustog_stores_lookup_.*\.csv$/)
+  const priceFile = findLatestFile(dataDir, /^fustog_prices_enriched_long_.*\.csv$/)
+  const matchFile = findLatestFile(dataDir, /^fustog_matching_summary_.*\.csv$/)
+
   const stores = loadStores(dataDir)
   const prices = loadPrices(dataDir)
   const matching = loadMatching(dataDir)
+  const last_updated = latestMtimeOfFiles([storeFile, priceFile, matchFile])
   console.log(`[DataCache] Loaded(${source}): ${stores.length} stores, ${prices.length} prices, ${matching.length} products`)
   return {
     stores,
     prices,
     matching,
-    last_updated: new Date().toISOString(),
+    last_updated,
   }
 }
 

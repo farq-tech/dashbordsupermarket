@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
-import type { RetailerKPIs, ProductComparison, Recommendation, Alert, Retailer } from '@/lib/types'
+import type { RetailerKPIs, ProductComparison, Recommendation, Alert, Retailer, DecisionBrief } from '@/lib/types'
+import { pushKpiSnapshot } from '@/lib/kpiSnapshotHistory'
 
 const DATA_SOURCE_STORAGE_KEY = 'dash_data_source'
 
@@ -32,6 +33,8 @@ export interface DashboardData {
   all_kpis: RetailerKPIs[]
   retailers: Retailer[]
   last_updated: string
+  /** Ranked decision queue + pillar snapshot (derived from same bundle). */
+  decision_brief?: DecisionBrief
 }
 
 interface AppState {
@@ -46,6 +49,9 @@ interface AppState {
   error: string | null
   lastUpdated: string | null
   filters: { category: string; brand: string; tag: string }
+  /** Mobile slide-out navigation (md+ uses fixed sidebar) */
+  mobileNavOpen: boolean
+  setMobileNavOpen: (open: boolean) => void
 
   setLang: (lang: 'ar' | 'en') => void
   setDataSource: (source: 'restaurants' | 'supermarket') => void
@@ -70,6 +76,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   error: null,
   lastUpdated: null,
   filters: { category: '', brand: '', tag: '' },
+  mobileNavOpen: false,
+  setMobileNavOpen: open => set({ mobileNavOpen: open }),
 
   setLang: (lang) => {
     set({ lang, dir: lang === 'ar' ? 'rtl' : 'ltr' })
@@ -121,6 +129,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       const data: DashboardData = await res.json()
       const retailers = data.retailers || []
       const selected = retailers.find(r => r.store_key === key) || retailers[0] || null
+      if (data.kpis) {
+        pushKpiSnapshot({
+          store_key: key,
+          source,
+          performance_score: data.kpis.performance_score,
+          competitive_index: data.kpis.competitive_index,
+          coverage_index: data.kpis.coverage_index,
+          pricing_index: data.kpis.pricing_index,
+        })
+      }
       set({
         dashboardData: data,
         retailers,

@@ -1,13 +1,16 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
+import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card } from '@/components/ui/card'
-import { Badge, TagBadge } from '@/components/ui/badge'
+import { TagBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
-import { Search, Filter, Download } from 'lucide-react'
+import { Search, Download } from 'lucide-react'
 import type { ProductComparison } from '@/lib/types'
+import { cn } from '@/components/ui/cn'
 
 const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
   decrease: { ar: 'خفض السعر', en: 'Decrease Price', color: '#dc2626' },
@@ -43,8 +46,9 @@ function exportCsv(data: ProductComparison[], lang: string) {
   a.click()
 }
 
-export default function ProductsPage() {
-  const { lang, dashboardData, loading, selectedRetailer } = useAppStore()
+function ProductsPageContent() {
+  const searchParams = useSearchParams()
+  const { lang, dashboardData, loading } = useAppStore()
   const isAr = lang === 'ar'
   const [search, setSearch] = useState('')
   const [filterTag, setFilterTag] = useState('')
@@ -52,7 +56,12 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 50
 
-  const comparisons = dashboardData?.comparisons ?? []
+  const comparisons = useMemo(
+    () => dashboardData?.comparisons ?? [],
+    [dashboardData?.comparisons],
+  )
+  const fidParam = searchParams.get('fid')
+  const highlightFid = fidParam ? parseInt(fidParam, 10) : NaN
 
   const categories = useMemo(
     () => [...new Set(comparisons.map(c => isAr ? c.category_ar : c.category_en))].sort(),
@@ -60,6 +69,10 @@ export default function ProductsPage() {
   )
 
   const filtered = useMemo(() => {
+    if (Number.isFinite(highlightFid) && !search && !filterTag && !filterCat) {
+      const hit = comparisons.find(c => c.FID === highlightFid)
+      if (hit) return [hit]
+    }
     let res = comparisons
     if (search) {
       const q = search.toLowerCase()
@@ -73,13 +86,16 @@ export default function ProductsPage() {
     if (filterTag) res = res.filter(c => c.tag === filterTag)
     if (filterCat) res = res.filter(c => (isAr ? c.category_ar : c.category_en) === filterCat)
     return res
-  }, [comparisons, search, filterTag, filterCat, isAr])
+  }, [comparisons, highlightFid, search, filterTag, filterCat, isAr])
 
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const deepLinkOnly = Number.isFinite(highlightFid) && !search && !filterTag && !filterCat
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const effectivePage = deepLinkOnly && filtered.length <= PAGE_SIZE ? 1 : Math.min(page, totalPages)
+  const paged = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE)
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="مقارنة المنتجات" title_en="Product Comparison" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><LoadingOverlay /></div>
   }
 
   const tagCounts = {
@@ -93,8 +109,16 @@ export default function ProductsPage() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="مقارنة المنتجات" title_en="Product Comparison" />
-      <div className="p-6 space-y-4">
+      <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+
+        {deepLinkOnly && (
+          <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+            {isAr
+              ? 'عرض منتج مرتبط بالرابط. امسح البحث أو أضف فلاتر لعرض القائمة الكاملة.'
+              : 'Showing linked product. Use search or filters to see the full list again.'}
+          </p>
+        )}
 
         {/* Summary chips */}
         <div className="flex flex-wrap gap-2">
@@ -170,8 +194,16 @@ export default function ProductsPage() {
               <tbody>
                 {paged.map(row => {
                   const action = ACTION_MAP[row.recommended_action]
+                  const isHi = Number.isFinite(highlightFid) && row.FID === highlightFid
                   return (
-                    <tr key={row.FID} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
+                    <tr
+                      id={`product-row-${row.FID}`}
+                      key={row.FID}
+                      className={cn(
+                        'border-b border-neutral-50 hover:bg-neutral-50 transition-colors',
+                        isHi && 'bg-blue-50 ring-2 ring-inset ring-blue-400',
+                      )}
+                    >
                       <td className="px-4 py-3">
                         <p className="font-medium text-neutral-800 leading-tight">
                           {isAr ? row.title_ar : row.title_en}
@@ -203,7 +235,7 @@ export default function ProductsPage() {
                         ) : '—'}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <TagBadge tag={row.tag} />
+                        <TagBadge tag={row.tag} lang={lang} />
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
@@ -223,13 +255,13 @@ export default function ProductsPage() {
           {/* Pagination */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-100">
             <p className="text-xs text-neutral-400">
-              {isAr ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+              {isAr ? `الصفحة ${effectivePage} من ${totalPages}` : `Page ${effectivePage} of ${totalPages}`}
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+              <Button variant="outline" size="sm" disabled={effectivePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
                 {isAr ? 'السابق' : 'Prev'}
               </Button>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+              <Button variant="outline" size="sm" disabled={effectivePage >= totalPages} onClick={() => setPage(p => p + 1)}>
                 {isAr ? 'التالي' : 'Next'}
               </Button>
             </div>
@@ -237,5 +269,19 @@ export default function ProductsPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={(
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} />
+        <LoadingOverlay />
+      </div>
+    )}
+    >
+      <ProductsPageContent />
+    </Suspense>
   )
 }

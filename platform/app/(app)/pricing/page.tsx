@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
+import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -12,7 +13,10 @@ export default function PricingPage() {
   const { lang, dashboardData, loading } = useAppStore()
   const isAr = lang === 'ar'
 
-  const comparisons = dashboardData?.comparisons ?? []
+  const comparisons = useMemo(
+    () => dashboardData?.comparisons ?? [],
+    [dashboardData?.comparisons],
+  )
   const kpis = dashboardData?.kpis
 
   const scatterData = useMemo(() =>
@@ -74,7 +78,7 @@ export default function PricingPage() {
   const pricingRecs = dashboardData?.recommendations.filter(r => r.type === 'pricing') ?? []
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar="ذكاء التسعير" title_en="Pricing Intelligence" /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><LoadingOverlay /></div>
   }
 
   const stocked = comparisons.filter(c => c.your_price !== null)
@@ -84,11 +88,11 @@ export default function PricingPage() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar="ذكاء التسعير" title_en="Pricing Intelligence" />
-      <div className="p-6 space-y-6">
+      <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} />
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
 
         {/* Summary KPI row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
             { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: '#dc2626' },
             { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: '#f97316' },
@@ -104,7 +108,7 @@ export default function PricingPage() {
         </div>
 
         {/* Scatter + Distribution */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'سعرك مقابل متوسط السوق' : 'Your Price vs Market Avg'}</CardTitle>
@@ -194,9 +198,9 @@ export default function PricingPage() {
                             {isAr ? rec.action_ar : rec.action_en}
                           </span>
                         </span>
-                        {rec.value_estimate && (
+                        {rec.value_estimate != null && rec.value_estimate > 0 && (
                           <span className="text-xs text-green-600 font-medium">
-                            +{rec.value_estimate.toLocaleString()} {isAr ? 'ريال (تقديري)' : 'SAR (est.)'}
+                            {rec.value_estimate.toLocaleString()} {isAr ? 'ريال (من البيانات)' : 'SAR (from data)'}
                           </span>
                         )}
                       </div>
