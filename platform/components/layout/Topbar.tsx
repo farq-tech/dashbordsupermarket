@@ -1,7 +1,7 @@
 'use client'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, Globe, Menu } from 'lucide-react'
+import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu } from 'lucide-react'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 interface TopbarProps {
@@ -22,7 +22,7 @@ export function Topbar({
   description_ar,
   description_en,
 }: TopbarProps) {
-  const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen } = useAppStore()
+  const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden } = useAppStore()
 
   const formatDate = (iso: string | null) => {
     if (!iso) return lang === 'ar' ? 'لم يتم التحميل بعد' : 'Not loaded yet'
@@ -116,6 +116,21 @@ export function Topbar({
             {lang === 'ar' ? 'تطبيقات التوصيل' : 'Delivery Apps'}
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setDesktopSidebarHidden(!desktopSidebarHidden)}
+          className="hidden md:flex h-9 w-9 items-center justify-center rounded-lg border shrink-0"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'var(--color-surface)',
+            color: 'var(--color-text-primary)',
+          }}
+          aria-label={lang === 'ar' ? 'إظهار/إخفاء الشريط الجانبي' : 'Toggle sidebar'}
+          title={lang === 'ar' ? 'إظهار/إخفاء الشريط الجانبي' : 'Toggle sidebar'}
+        >
+          {desktopSidebarHidden ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
+        </button>
 
         <span className="text-xs hidden lg:block shrink-0" style={{ color: '#889DB4' }}>
           {lang === 'ar' ? 'آخر تحديث:' : 'Last updated:'} {formatDate(lastUpdated)}

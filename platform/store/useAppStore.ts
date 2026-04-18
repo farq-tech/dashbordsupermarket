@@ -53,6 +53,10 @@ interface AppState {
   mobileNavOpen: boolean
   setMobileNavOpen: (open: boolean) => void
 
+  /** Desktop sidebar visibility toggle */
+  desktopSidebarHidden: boolean
+  setDesktopSidebarHidden: (hidden: boolean) => void
+
   setLang: (lang: 'ar' | 'en') => void
   setDataSource: (source: 'restaurants' | 'supermarket') => void
   setRetailer: (retailer: Retailer) => void
@@ -78,6 +82,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   filters: { category: '', brand: '', tag: '' },
   mobileNavOpen: false,
   setMobileNavOpen: open => set({ mobileNavOpen: open }),
+  desktopSidebarHidden: false,
+  setDesktopSidebarHidden: hidden => set({ desktopSidebarHidden: hidden }),
 
   setLang: (lang) => {
     set({ lang, dir: lang === 'ar' ? 'rtl' : 'ltr' })
