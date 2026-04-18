@@ -7,10 +7,10 @@ export function Sidebar() {
   return (
     <>
       <aside
-        className="hidden md:flex fixed top-0 right-0 z-40 h-screen w-64 flex-col"
+        className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col md:flex"
         style={{
           background: 'var(--color-sidebar-bg)',
-          borderLeft: '1px solid var(--color-border)',
+          borderInlineStart: '1px solid var(--color-border)',
         }}
       >
         <SidebarPanel variant="desktop" />
