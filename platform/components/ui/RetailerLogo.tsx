@@ -20,14 +20,14 @@ const roundedClass = {
   '2xl': 'rounded-2xl',
 } as const
 
-export function RetailerLogo({ retailer, label, size = 24, className, rounded = 'md' }: Props) {
+export function RetailerLogo({ retailer, label, size = 32, className, rounded = 'md' }: Props) {
   const url = retailer.logo_url
   const alt = label ? `${label} logo` : ''
   if (url) {
     return (
       <span
         className={cn(
-          'relative inline-flex shrink-0 overflow-hidden bg-white ring-1 ring-black/[0.06]',
+          'relative inline-flex shrink-0 overflow-hidden bg-white ring-1 ring-black/[0.08]',
           roundedClass[rounded],
           className,
         )}
@@ -39,8 +39,8 @@ export function RetailerLogo({ retailer, label, size = 24, className, rounded = 
           title={label}
           width={size}
           height={size}
-          className="object-contain p-[2px]"
-          sizes={`${size}px`}
+          className="box-border object-contain object-center p-0"
+          sizes={`${Math.min(size * 2, 128)}px`}
         />
       </span>
     )
@@ -56,7 +56,7 @@ export function RetailerLogo({ retailer, label, size = 24, className, rounded = 
         width: size,
         height: size,
         backgroundColor: retailer.color,
-        fontSize: Math.max(10, Math.round(size * 0.38)),
+        fontSize: Math.max(11, Math.round(size * 0.42)),
       }}
     >
       {retailer.logo_letter}

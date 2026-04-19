@@ -132,7 +132,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                   onInteract?.()
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2.5 rounded-lg px-3 text-start transition-colors text-sm touch-manipulation',
+                  'flex w-full items-center gap-3 rounded-lg px-3 text-start transition-colors text-sm touch-manipulation',
                   linkPad,
                   selectedRetailer?.store_key === r.store_key
                     ? 'font-semibold'
@@ -152,7 +152,8 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                 <RetailerLogo
                   retailer={r}
                   label={lang === 'ar' ? r.brand_ar : r.brand_en}
-                  size={24}
+                  size={44}
+                  rounded="lg"
                 />
                 <span className="truncate">{lang === 'ar' ? r.brand_ar : r.brand_en}</span>
               </button>

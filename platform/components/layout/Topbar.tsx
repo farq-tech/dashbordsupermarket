@@ -83,8 +83,8 @@ export function Topbar({
             <RetailerLogo
               retailer={selectedRetailer}
               label={lang === 'ar' ? selectedRetailer.brand_ar : selectedRetailer.brand_en}
-              size={20}
-              rounded="md"
+              size={32}
+              rounded="lg"
             />
             <span className="text-sm font-medium truncate max-w-[140px]" style={{ color: 'var(--color-text-primary)' }}>
               {lang === 'ar' ? selectedRetailer.brand_ar : selectedRetailer.brand_en}
