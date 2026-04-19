@@ -30,23 +30,26 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="px-4 py-4 md:py-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center gap-2.5">
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[var(--radius-md)] bg-white ring-1 ring-black/[0.08] md:h-9 md:w-9">
+      <div className="border-b px-3 py-5 sm:px-4 md:py-6" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-3.5">
+          <span className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-[var(--radius-lg)] bg-white shadow-[var(--shadow-tile-nested)] ring-1 ring-black/[0.07] sm:h-[5rem] sm:w-[5rem]">
             <Image
               src="/brand/farq.png"
               alt={lang === 'ar' ? 'فرق' : 'Farq'}
               fill
-              className="object-contain p-1"
-              sizes="(max-width: 768px) 40px, 36px"
+              className="object-contain p-2.5 sm:p-3"
+              sizes="96px"
               priority
             />
           </span>
-          <div className="min-w-0">
-            <p className="font-bold text-sm leading-tight" style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}>
+          <div className="min-w-0 w-full text-center sm:flex-1 sm:text-start">
+            <p
+              className="text-base font-bold leading-snug sm:text-[1.05rem]"
+              style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}
+            >
               {lang === 'ar' ? 'ذكاء التجزئة' : 'Retail Intelligence'}
             </p>
-            <p className="text-[11px] mt-0.5 font-medium truncate" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="mt-1 text-xs font-medium leading-snug sm:text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               {lang === 'ar' ? 'منصة القرار' : 'Decision platform'}
             </p>
           </div>
