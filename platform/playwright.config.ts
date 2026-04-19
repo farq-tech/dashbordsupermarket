@@ -18,9 +18,10 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run dev',
+    // `next dev` can resolve PostCSS/tailwind from the monorepo parent; production `start` matches launch.
+    command: 'npm run start',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    timeout: 120_000,
   },
 })

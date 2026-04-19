@@ -1,16 +1,16 @@
 'use client'
 
-import { useLayoutEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { chartThemeFallback, getChartTheme, type ChartTheme } from '@/lib/chartTheme'
 
 /**
- * Theme for Recharts: starts with CSS fallbacks for SSR-safe markup, then syncs from
- * `document.documentElement` once (via cached `getChartTheme()`).
+ * Theme for Recharts: SSR uses CSS fallbacks; client reads cached `getChartTheme()` from
+ * `document.documentElement`.
  */
 export function useChartTheme(): ChartTheme {
-  const [theme, setTheme] = useState<ChartTheme>(chartThemeFallback)
-  useLayoutEffect(() => {
-    setTheme(getChartTheme())
-  }, [])
-  return theme
+  return useSyncExternalStore(
+    () => () => {},
+    getChartTheme,
+    (): ChartTheme => chartThemeFallback,
+  )
 }

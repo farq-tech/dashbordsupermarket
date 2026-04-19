@@ -66,11 +66,12 @@ test.describe.serial('Platform UI/UX', () => {
       await expect(dashNav).toContainText(/نظرة عامة على الأداء|Business Overview/)
 
       const topbar = page.getByTestId('app-topbar')
-      await topbar.getByRole('button', { name: /^EN$/ }).click()
+      // Visible text is EN/عر but aria-label is the accessible name (see Topbar).
+      await topbar.getByRole('button', { name: /Switch to English/ }).click()
       await expect(page.locator('html')).toHaveAttribute('lang', 'en', { timeout: 30_000 })
       await expect(dashNav).toContainText('Business Overview')
 
-      await topbar.getByRole('button', { name: /^عر$/ }).click()
+      await topbar.getByRole('button', { name: /التبديل إلى العربية/ }).click()
       await expect(page.locator('html')).toHaveAttribute('lang', 'ar', { timeout: 30_000 })
       await expect(dashNav).toContainText('نظرة عامة على الأداء')
     })

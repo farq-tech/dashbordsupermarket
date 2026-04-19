@@ -13,15 +13,13 @@ interface CountUpProps {
 
 export function CountUp({ end, durationMs = 900, decimals = 0, className, style }: CountUpProps) {
   const reduceMotion = usePrefersReducedMotion()
-  const [val, setVal] = useState(reduceMotion ? end : 0)
+  const [val, setVal] = useState(0)
   const startRef = useRef<number | null>(null)
   const frameRef = useRef<number>(0)
+  const shown = reduceMotion ? end : val
 
   useEffect(() => {
-    if (reduceMotion) {
-      setVal(end)
-      return
-    }
+    if (reduceMotion) return
     startRef.current = null
     const tick = (now: number) => {
       if (startRef.current === null) startRef.current = now
@@ -34,7 +32,7 @@ export function CountUp({ end, durationMs = 900, decimals = 0, className, style 
     return () => cancelAnimationFrame(frameRef.current)
   }, [end, durationMs, reduceMotion])
 
-  const formatted = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString()
+  const formatted = decimals > 0 ? shown.toFixed(decimals) : Math.round(shown).toString()
 
   return (
     <span className={className} style={style}>

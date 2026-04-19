@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:consistency": "cross-env NODE_ENV=test npx tsx scripts/consistency-test.ts",
-    "test:ui": "playwright test",
-    "test:ui:headed": "playwright test --headed"
+    "test:ui": "npm run build && playwright test",
+    "test:ui:headed": "npm run build && playwright test --headed"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.7",
