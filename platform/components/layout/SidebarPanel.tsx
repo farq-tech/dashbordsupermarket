@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/components/ui/cn'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
-import { Bell } from 'lucide-react'
+import { Bell, ChevronDown } from 'lucide-react'
 import { NAV_SECTIONS } from '@/lib/navConfig'
 
 type Variant = 'desktop' | 'drawer'
@@ -20,6 +22,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
   const pathname = usePathname()
   const { lang, retailers, selectedRetailer, setRetailer, dashboardData, dataSource, setDataSource } = useAppStore()
   const alertsCount = dashboardData?.alerts?.length ?? 0
+  const [businessOpen, setBusinessOpen] = useState(true)
 
   const touchNav = variant === 'drawer'
   const linkPad = touchNav ? 'py-3 min-h-[48px]' : 'py-2'
@@ -29,14 +32,16 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
     <div className="flex h-full min-h-0 flex-col">
       <div className="px-4 py-4 md:py-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex items-center gap-2.5">
-          <div
-            className="h-10 w-10 md:h-9 md:w-9 rounded-[var(--radius-md)] flex items-center justify-center shrink-0"
-            style={{ background: 'var(--color-brand)' }}
-          >
-            <span className="font-bold text-sm" style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-brand)' }}>
-              R
-            </span>
-          </div>
+          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[var(--radius-md)] bg-white ring-1 ring-black/[0.08] md:h-9 md:w-9">
+            <Image
+              src="/brand/farq.png"
+              alt={lang === 'ar' ? 'فرق' : 'Farq'}
+              fill
+              className="object-contain p-1"
+              sizes="(max-width: 768px) 40px, 36px"
+              priority
+            />
+          </span>
           <div className="min-w-0">
             <p className="font-bold text-sm leading-tight" style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}>
               {lang === 'ar' ? 'ذكاء التجزئة' : 'Retail Intelligence'}
@@ -91,46 +96,66 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
         </div>
       </div>
 
-      <div className="px-3 py-3 border-b max-h-[32vh] md:max-h-[38vh] overflow-y-auto" style={{ borderColor: 'var(--color-border)' }}>
-        <p className="text-xs mb-2 px-1 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-          {lang === 'ar' ? 'الشركة' : 'Business'}
-        </p>
-        <div className="space-y-1">
-          {retailers.map(r => (
-            <button
-              key={r.store_key}
-              type="button"
-              onClick={() => {
-                setRetailer(r)
-                onInteract?.()
-              }}
-              className={cn(
-                'w-full flex items-center gap-2.5 px-3 rounded-lg text-right transition-colors text-sm touch-manipulation',
-                linkPad,
-                selectedRetailer?.store_key === r.store_key
-                  ? 'font-semibold'
-                  : 'opacity-80 hover:opacity-100',
-              )}
-              style={{
-                color:
+      <div className="border-b px-3 py-3" style={{ borderColor: 'var(--color-border)' }}>
+        <button
+          type="button"
+          className="mb-2 flex w-full items-center justify-between gap-2 rounded-lg px-1 py-0.5 text-start hover:bg-[var(--color-surface-muted)]/80"
+          onClick={() => setBusinessOpen(o => !o)}
+          aria-expanded={businessOpen}
+          aria-controls="sidebar-business-list"
+          id="sidebar-business-heading"
+        >
+          <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            {lang === 'ar' ? 'الشركة' : 'Business'}
+          </span>
+          <ChevronDown
+            className={cn('h-4 w-4 shrink-0 opacity-70 transition-transform duration-200', !businessOpen && '-rotate-90')}
+            aria-hidden
+          />
+        </button>
+        {businessOpen && (
+          <div
+            id="sidebar-business-list"
+            role="region"
+            aria-labelledby="sidebar-business-heading"
+            className="max-h-[32vh] space-y-1 overflow-y-auto md:max-h-[38vh]"
+          >
+            {retailers.map(r => (
+              <button
+                key={r.store_key}
+                type="button"
+                onClick={() => {
+                  setRetailer(r)
+                  onInteract?.()
+                }}
+                className={cn(
+                  'flex w-full items-center gap-2.5 rounded-lg px-3 text-start transition-colors text-sm touch-manipulation',
+                  linkPad,
                   selectedRetailer?.store_key === r.store_key
-                    ? 'var(--color-interactive)'
-                    : 'var(--color-text-primary)',
-                background:
-                  selectedRetailer?.store_key === r.store_key
-                    ? 'var(--color-surface-hover)'
-                    : 'transparent',
-              }}
-            >
-              <RetailerLogo
-                retailer={r}
-                label={lang === 'ar' ? r.brand_ar : r.brand_en}
-                size={24}
-              />
-              <span className="truncate">{lang === 'ar' ? r.brand_ar : r.brand_en}</span>
-            </button>
-          ))}
-        </div>
+                    ? 'font-semibold'
+                    : 'opacity-80 hover:opacity-100',
+                )}
+                style={{
+                  color:
+                    selectedRetailer?.store_key === r.store_key
+                      ? 'var(--color-interactive)'
+                      : 'var(--color-text-primary)',
+                  background:
+                    selectedRetailer?.store_key === r.store_key
+                      ? 'var(--color-surface-hover)'
+                      : 'transparent',
+                }}
+              >
+                <RetailerLogo
+                  retailer={r}
+                  label={lang === 'ar' ? r.brand_ar : r.brand_en}
+                  size={24}
+                />
+                <span className="truncate">{lang === 'ar' ? r.brand_ar : r.brand_en}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-5 overscroll-contain">

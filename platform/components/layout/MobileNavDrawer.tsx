@@ -20,9 +20,17 @@ export function MobileNavDrawer() {
         <Dialog.Content
           className="print:hidden fixed inset-y-0 z-[61] flex w-[min(20rem,100vw)] max-w-full flex-col bg-[var(--color-sidebar-bg)] shadow-xl outline-none transition-transform duration-200 md:hidden"
           style={{
-            right: 0,
-            left: 'auto',
-            borderLeft: '1px solid var(--color-border)',
+            ...(lang === 'ar'
+              ? {
+                  right: 0,
+                  left: 'auto',
+                  borderLeft: '1px solid var(--color-border)',
+                }
+              : {
+                  left: 0,
+                  right: 'auto',
+                  borderRight: '1px solid var(--color-border)',
+                }),
             paddingTop: 'env(safe-area-inset-top, 0px)',
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}

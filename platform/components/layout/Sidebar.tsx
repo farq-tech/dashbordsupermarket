@@ -4,7 +4,7 @@ import { SidebarPanel } from './SidebarPanel'
 import { MobileNavDrawer } from './MobileNavDrawer'
 import { cn } from '@/components/ui/cn'
 
-export function Sidebar({ hidden, side: _side }: { hidden?: boolean; side: 'right' | 'left' }) {
+export function Sidebar({ hidden }: { hidden?: boolean }) {
   return (
     <>
       <aside
