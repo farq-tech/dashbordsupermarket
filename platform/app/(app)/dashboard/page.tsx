@@ -17,6 +17,7 @@ import { ChartReveal } from '@/components/ui/chart-reveal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ChartCardSkeleton, KpiCardSkeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
 function DashboardPageInner() {
   const searchParams = useSearchParams()
@@ -103,10 +104,10 @@ function DashboardPageInner() {
 
   // Pricing distribution pie
   const pieData = [
-    { name: isAr ? 'تنافسي' : 'Competitive', value: kpis.competitive_count, color: '#1b59f8' },
-    { name: isAr ? 'مرتفع السعر' : 'Overpriced', value: kpis.overpriced_count, color: '#ff3e13' },
-    { name: isAr ? 'منخفض' : 'Underpriced', value: kpis.underpriced_count, color: '#1fe08f' },
-    { name: isAr ? 'الأرخص' : 'Cheapest', value: kpis.cheapest_count, color: '#0f2552' },
+    { name: isAr ? 'تنافسي' : 'Competitive', value: kpis.competitive_count, color: fareeqChart.blue },
+    { name: isAr ? 'مرتفع السعر' : 'Overpriced', value: kpis.overpriced_count, color: fareeqChart.coral },
+    { name: isAr ? 'منخفض' : 'Underpriced', value: kpis.underpriced_count, color: fareeqChart.green },
+    { name: isAr ? 'الأرخص' : 'Cheapest', value: kpis.cheapest_count, color: fareeqChart.deepBlue },
   ].filter(d => d.value > 0)
 
   // Coverage comparison
@@ -117,9 +118,9 @@ function DashboardPageInner() {
   }))
 
   const getPricingIndexLabel = (idx: number) => {
-    if (idx < 95) return { label: isAr ? 'أقل من السوق' : 'Below Market', color: '#1fe08f' }
-    if (idx <= 105) return { label: isAr ? 'متوسط السوق' : 'At Market', color: '#1b59f8' }
-    return { label: isAr ? 'أعلى من السوق' : 'Above Market', color: '#ff3e13' }
+    if (idx < 95) return { label: isAr ? 'أقل من السوق' : 'Below Market', color: fareeqChart.green }
+    if (idx <= 105) return { label: isAr ? 'متوسط السوق' : 'At Market', color: fareeqChart.blue }
+    return { label: isAr ? 'أعلى من السوق' : 'Above Market', color: fareeqChart.coral }
   }
   const piLabel = getPricingIndexLabel(kpis.pricing_index)
 
@@ -279,7 +280,7 @@ function DashboardPageInner() {
             value={myKpis.coverage_index}
             unit="%"
             subtitle={`${myKpis.covered_products} / ${myKpis.total_products} ${isAr ? 'منتج' : 'products'}`}
-            color="#ca8a04"
+            color={fareeqHex.amber}
             icon={<CheckCircle className="h-5 w-5" />}
             lang={lang}
           />

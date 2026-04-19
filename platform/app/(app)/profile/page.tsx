@@ -9,6 +9,7 @@ import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import { TrendingUp, TrendingDown, Award, Target, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
+import { fareeqChart } from '@/lib/design-system'
 
 function ScoreGauge({ value, color }: { value: number; color: string }) {
   const angle = (value / 100) * 180
@@ -132,7 +133,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex flex-col items-center">
-              <ScoreGauge value={kpis.performance_score} color={selectedRetailer?.color ?? '#1b59f8'} />
+              <ScoreGauge value={kpis.performance_score} color={selectedRetailer?.color ?? fareeqChart.blue} />
               <p className="text-xs text-neutral-400 -mt-2">{isAr ? 'نقاط الأداء' : 'Performance Score'}</p>
             </div>
           </div>
@@ -201,7 +202,7 @@ export default function ProfilePage() {
                   label={isAr ? 'نقاط الأداء' : 'Performance Score'}
                   myVal={kpis.performance_score}
                   competitorVal={topCompetitor.performance_score}
-                  myColor={selectedRetailer?.color ?? '#1b59f8'}
+                  myColor={selectedRetailer?.color ?? fareeqChart.blue}
                   compColor={topCompetitor.retailer.color}
                   unit=""
                 />
@@ -209,7 +210,7 @@ export default function ProfilePage() {
                   label={isAr ? 'مؤشر التنافسية %' : 'Competitive Index %'}
                   myVal={kpis.competitive_index}
                   competitorVal={topCompetitor.competitive_index}
-                  myColor={selectedRetailer?.color ?? '#1b59f8'}
+                  myColor={selectedRetailer?.color ?? fareeqChart.blue}
                   compColor={topCompetitor.retailer.color}
                   unit="%"
                 />
@@ -217,7 +218,7 @@ export default function ProfilePage() {
                   label={isAr ? 'تغطية المنتجات %' : 'Coverage %'}
                   myVal={kpis.coverage_index}
                   competitorVal={topCompetitor.coverage_index}
-                  myColor={selectedRetailer?.color ?? '#1b59f8'}
+                  myColor={selectedRetailer?.color ?? fareeqChart.blue}
                   compColor={topCompetitor.retailer.color}
                   unit="%"
                 />
@@ -225,7 +226,7 @@ export default function ProfilePage() {
                   label={isAr ? 'متوسط السعر' : 'Avg Price'}
                   myVal={kpis.avg_price}
                   competitorVal={topCompetitor.avg_price}
-                  myColor={selectedRetailer?.color ?? '#1b59f8'}
+                  myColor={selectedRetailer?.color ?? fareeqChart.blue}
                   compColor={topCompetitor.retailer.color}
                   unit=" SAR"
                 />
@@ -252,7 +253,7 @@ export default function ProfilePage() {
                   dataKey={isAr ? 'مؤشر السعر' : 'Price Index'}
                   colors={topCatData.map(d => {
                     const v = d[isAr ? 'مؤشر السعر' : 'Price Index'] as number
-                    return v > 105 ? '#ff3e13' : v < 95 ? '#1fe08f' : '#1b59f8'
+                    return v > 105 ? fareeqChart.coral : v < 95 ? fareeqChart.green : fareeqChart.blue
                   })}
                   height={240}
                 />
@@ -262,7 +263,12 @@ export default function ProfilePage() {
         )}
 
         {/* CTA */}
-        <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0f2552] to-[#1b59f8] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div
+          className="flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+          style={{
+            background: `linear-gradient(to right, ${fareeqChart.deepBlue}, ${fareeqChart.blue})`,
+          }}
+        >
           <div>
             <p className="text-white font-bold text-lg">
               {isAr ? 'ماذا يجب أن تفعل الآن؟' : 'What should you do next?'}

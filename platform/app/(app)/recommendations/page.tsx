@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { Lightbulb, TrendingUp, Map, Zap, Download, CheckCircle } from 'lucide-react'
 import type { Recommendation, Alert } from '@/lib/types'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
 const IMPACT_MAP = {
   high: { ar: 'عالي', en: 'High', color: '#dc2626', bg: '#fee2e2' },
@@ -17,10 +18,10 @@ const IMPACT_MAP = {
 }
 
 const TYPE_MAP = {
-  pricing: { ar: 'تسعير', en: 'Pricing', icon: <TrendingUp className="h-4 w-4" />, color: '#1b59f8' },
-  coverage: { ar: 'تغطية', en: 'Coverage', icon: <Map className="h-4 w-4" />, color: '#ca8a04' },
-  expansion: { ar: 'توسع', en: 'Expansion', icon: <Zap className="h-4 w-4" />, color: '#0f2552' },
-  competitive: { ar: 'تنافسية', en: 'Competitive', icon: <Lightbulb className="h-4 w-4" />, color: '#7c3aed' },
+  pricing: { ar: 'تسعير', en: 'Pricing', icon: <TrendingUp className="h-4 w-4" />, color: fareeqChart.blue },
+  coverage: { ar: 'تغطية', en: 'Coverage', icon: <Map className="h-4 w-4" />, color: fareeqHex.amber },
+  expansion: { ar: 'توسع', en: 'Expansion', icon: <Zap className="h-4 w-4" />, color: fareeqChart.deepBlue },
+  competitive: { ar: 'تنافسية', en: 'Competitive', icon: <Lightbulb className="h-4 w-4" />, color: fareeqHex.purple },
 }
 
 function RecCard({ rec, lang, onDone }: { rec: Recommendation; lang: string; onDone: (id: string) => void }) {
@@ -89,7 +90,7 @@ function AlertCard({ alert, lang }: { alert: Alert; lang: string }) {
   const severityColors = {
     high: { bg: '#fee2e2', border: '#fca5a5', text: '#dc2626' },
     medium: { bg: '#fff7ed', border: '#fdba74', text: '#ea580c' },
-    low: { bg: '#f2f7ff', border: '#93c5fd', text: '#1b59f8' },
+    low: { bg: fareeqChart.iceTintBg, border: fareeqChart.iceTintBorder, text: fareeqChart.blue },
   }
   const colors = severityColors[alert.severity]
   const typeIcons = { price_change: '💰', competitor_move: '⚔️', opportunity: '✨', risk: '⚠️' }
@@ -168,7 +169,12 @@ export default function RecommendationsPage() {
 
         {/* Summary */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">
-          <div className="bg-gradient-to-br from-[#0f2552] to-[#1b59f8] rounded-xl p-4 text-white shadow-[var(--shadow-tile)]">
+          <div
+            className="rounded-xl p-4 text-white shadow-[var(--shadow-tile)]"
+            style={{
+              background: `linear-gradient(to bottom right, ${fareeqChart.deepBlue}, ${fareeqChart.blue})`,
+            }}
+          >
             <p className="text-white/70 text-xs">{isAr ? 'إجمالي التوصيات' : 'Total Recommendations'}</p>
             <p className="text-3xl font-bold mt-1">{filtered.length}</p>
           </div>

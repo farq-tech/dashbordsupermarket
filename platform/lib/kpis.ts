@@ -76,7 +76,7 @@ export function retailersFromStores(
       const nameEn = branchEn || brandEn
       const nameAr = branchAr || brandAr
       const letter = chain?.logo_letter ?? (brandEn[0] || 'S').toUpperCase()
-      const color = chain?.color ?? '#1b59f8'
+      const color = chain?.color ?? '#22577a'
       const logo_url = getRetailerLogoUrl(s.store_key, source)
 
       return {

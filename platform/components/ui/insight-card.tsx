@@ -17,7 +17,7 @@ const toneStyles: Record<InsightTone, { border: string; bg: string; icon: typeof
     iconColor: '#B45309',
   },
   positive: {
-    border: 'rgba(27, 89, 248, 0.22)',
+    border: 'rgba(34, 87, 122, 0.22)',
     bg: 'var(--color-surface-muted)',
     icon: Sparkles,
     iconColor: 'var(--color-interactive)',

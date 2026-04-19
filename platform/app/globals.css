@@ -1,33 +1,47 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Brand (Farq identity — logo / wordmark) */
-  --color-brand: #043434;
-  --color-brand-hover: #065151;
-  --color-accent: #75F0A8;
+  /*
+   * Fareeq design system — lib/design-system/tokens.ts (fareeqHex / fareeqRgb).
+   * Semantic aliases below keep charts + UI aligned with the SVG kit palette.
+   */
+  --fareeq-primary: #043434;
+  --fareeq-mint: #83f1b1;
+  --fareeq-ink: #063b37;
+  --fareeq-ice: #d3e7ef;
+  --fareeq-purple: #22162b;
+  --fareeq-black: #040403;
+  --fareeq-blue: #22577a;
+  --fareeq-coral: #ef8354;
+  --fareeq-amber: #ffca3a;
+  --fareeq-glass: #283939;
+  --fareeq-icon: #0f172a;
 
-  /* Analytics UI (Figma “Analytics Dashboard” community — surfaces, type, chrome) */
-  --color-text-primary: #000000;
-  --color-text-secondary: #4d4d4d;
-  --color-text-muted: rgba(0, 0, 0, 0.5);
-  --color-text-subtle: #9098a3;
-  --color-border: #eff0f6;
-  --color-bg: #f9f9f9;
+  --color-brand: var(--fareeq-primary);
+  --color-brand-hover: #0a4a47;
+  --color-accent: var(--fareeq-mint);
+
+  --color-text-primary: var(--fareeq-black);
+  --color-text-secondary: #2d4542;
+  --color-text-muted: rgba(6, 59, 55, 0.55);
+  --color-text-subtle: rgba(6, 59, 55, 0.42);
+  --color-border: #dbe8ee;
+  --color-bg: #f4f8fa;
   --color-surface: #ffffff;
-  --color-surface-muted: #f2f7ff;
-  --color-surface-hover: rgba(27, 89, 248, 0.1);
-  --color-interactive: #1b59f8;
-  --color-interactive-hover: #1554d6;
-  --color-interactive-pressed: #0f2552;
-  --color-chart-line: #1b59f8;
-  --color-trend-up: #1fe08f;
-  --color-trend-down: #ff3e13;
-  --color-grid: #e4e5e7;
-  --color-axis-tick: #838383;
+  --color-surface-muted: #e8f3f7;
+  --color-surface-hover: rgba(34, 87, 122, 0.1);
+  --color-interactive: var(--fareeq-blue);
+  --color-interactive-hover: #1a4a66;
+  --color-interactive-pressed: #143c54;
+  --color-chart-line: var(--fareeq-blue);
+  --color-trend-up: #16a34a;
+  --color-trend-down: var(--fareeq-coral);
+  --color-grid: #dde5e8;
+  --color-axis-tick: #6b7f82;
   /* Scatter / multi-series accents (read by lib/chartTheme.ts) */
   --color-chart-tag-opportunity: #ca8a04;
   --color-chart-tag-risk: #ea580c;
-  --color-chart-tag-muted: #9ca3af;
+  --color-chart-tag-muted: #94a3b8;
 
   /* Critical vs attention (use critical only for severity === high) */
   --color-alert-critical-bg: #fef2f2;
@@ -43,20 +57,26 @@
   --color-sidebar-bg: var(--color-surface);
   --color-topbar-bg: var(--color-surface);
 
-  /* Typography (Inter/Poppins loaded via next/font in app/layout.tsx) */
-  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --font-brand: 'Futura', var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+  /* Typography — ITF Huwiya Arabic (primary) + Inter/Poppins (fallbacks via layout.tsx) */
+  --font-sans: var(--font-huwiya-arabic), var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-brand: var(--font-huwiya-arabic), 'Futura', var(--font-poppins), var(--font-inter), system-ui, sans-serif;
 
-  /* Radius */
+  /* Radius — fareeqRadius.ctaRem for primary CTAs (~21.3px kit) */
   --radius-sm: 0.5rem; /* 8px */
-  --radius-md: 0.625rem; /* 10px — Figma sidebar pill */
+  --radius-md: 0.625rem; /* 10px — sidebar pill */
   --radius-lg: 1.25rem; /* 20px — cards / side nav */
+  --radius-cta: 1.33rem;
   --radius-shell: 1.875rem; /* 30px — main frame */
 
   /* Elevation */
-  --shadow-tile: 0 5px 20px rgba(0, 0, 0, 0.05);
-  --shadow-tile-nested: 0 2px 10px rgba(0, 0, 0, 0.04);
-  --shadow-shell: 0 0 50px rgba(0, 0, 0, 0.1);
+  --shadow-tile: 0 5px 20px rgba(4, 52, 52, 0.06);
+  --shadow-tile-nested: 0 2px 10px rgba(4, 52, 52, 0.04);
+  --shadow-shell: 0 0 50px rgba(4, 4, 3, 0.08);
+
+  /* fareeqGlass — glass surfaces / overlays */
+  --fareeq-glass-fill-opacity: 0.46;
+  --fareeq-glass-border-rgb: 255 255 255;
+  --fareeq-glass-border-opacity: 0.24;
 }
 
 /* Density: toggled via html[data-density="compact"] from app store */
@@ -206,13 +226,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Tag colors */
-.tag-overpriced { background: #fee2e2; color: #dc2626; }
-.tag-underpriced { background: rgba(31, 224, 143, 0.12); color: #0a8f5a; }
-.tag-competitive { background: rgba(27, 89, 248, 0.1); color: #1b59f8; }
-.tag-opportunity { background: #fef9c3; color: #ca8a04; }
-.tag-risk { background: #ffedd5; color: #ea580c; }
-.tag-not_stocked { background: #f3f4f6; color: #6b7280; }
+/* Tag colors — Fareeq coral / mint / blue / amber */
+.tag-overpriced { background: rgba(239, 131, 84, 0.14); color: #c2410c; }
+.tag-underpriced { background: rgba(131, 241, 177, 0.2); color: #15803d; }
+.tag-competitive { background: rgba(34, 87, 122, 0.12); color: #22577a; }
+.tag-opportunity { background: rgba(255, 202, 58, 0.22); color: #a16207; }
+.tag-risk { background: rgba(239, 131, 84, 0.12); color: #c2410c; }
+.tag-not_stocked { background: rgba(15, 23, 42, 0.06); color: #64748b; }
 
 /* Decision Center / reports: hide chrome when printing */
 @media print {

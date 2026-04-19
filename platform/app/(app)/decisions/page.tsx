@@ -33,6 +33,7 @@ import {
 } from '@/lib/decisionWorkflow'
 import { getKpiSnapshots, getPreviousSnapshot, type KpiSnapshot } from '@/lib/kpiSnapshotHistory'
 import { buildDecisionBriefHtml, downloadHtmlFile } from '@/lib/exportDecisionHtml'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
 const KIND_LABEL = {
   sku_price: { ar: 'منتج', en: 'SKU' },
@@ -50,9 +51,9 @@ const WF_STATUS: { value: DecisionWorkflowStatus; ar: string; en: string }[] = [
 ]
 
 function pillarColor(score: number) {
-  if (score >= 70) return '#1fe08f'
-  if (score >= 45) return '#ca8a04'
-  return '#ff3e13'
+  if (score >= 70) return fareeqChart.green
+  if (score >= 45) return fareeqHex.amber
+  return fareeqChart.coral
 }
 
 export default function DecisionsPage() {

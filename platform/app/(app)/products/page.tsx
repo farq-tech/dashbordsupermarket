@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
@@ -14,9 +15,9 @@ import { cn } from '@/components/ui/cn'
 
 const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
   decrease: { ar: 'خفض السعر', en: 'Decrease Price', color: '#dc2626' },
-  increase: { ar: 'رفع السعر', en: 'Increase Price', color: '#1fe08f' },
-  keep: { ar: 'إبقاء', en: 'Keep', color: '#1b59f8' },
-  expand: { ar: 'توسيع التوزيع', en: 'Expand Distribution', color: '#ca8a04' },
+  increase: { ar: 'رفع السعر', en: 'Increase Price', color: fareeqChart.green },
+  keep: { ar: 'إبقاء', en: 'Keep', color: fareeqChart.blue },
+  expand: { ar: 'توسيع التوزيع', en: 'Expand Distribution', color: fareeqHex.amber },
   stock: { ar: 'إضافة للمخزون', en: 'Add to Stock', color: '#6b7280' },
 }
 

@@ -16,24 +16,24 @@ export type ChartTheme = {
   >
 }
 
-/** Mirrors `app/globals.css` @theme — SSR / pre-paint fallback; DOM wins on client after `getChartTheme()`. */
+/** Mirrors `app/globals.css` @theme (Fareeq tokens) — SSR / pre-paint fallback. */
 export const chartThemeFallback: ChartTheme = {
-  interactive: '#1b59f8',
-  chartLine: '#1b59f8',
-  trendUp: '#1fe08f',
-  trendDown: '#ff3e13',
-  grid: '#e4e5e7',
-  axisTick: '#838383',
-  axisLabel: '#9098a3',
-  border: '#eff0f6',
-  shadow: '0 5px 20px rgba(0, 0, 0, 0.05)',
+  interactive: '#22577a',
+  chartLine: '#22577a',
+  trendUp: '#16a34a',
+  trendDown: '#ef8354',
+  grid: '#dde5e8',
+  axisTick: '#6b7f82',
+  axisLabel: 'rgba(6, 59, 55, 0.42)',
+  border: '#dbe8ee',
+  shadow: '0 5px 20px rgba(4, 52, 52, 0.06)',
   scatterTags: {
-    overpriced: '#ff3e13',
-    underpriced: '#1fe08f',
-    competitive: '#1b59f8',
+    overpriced: '#ef8354',
+    underpriced: '#16a34a',
+    competitive: '#22577a',
     opportunity: '#ca8a04',
     risk: '#ea580c',
-    not_stocked: '#9ca3af',
+    not_stocked: '#94a3b8',
   },
 }
 

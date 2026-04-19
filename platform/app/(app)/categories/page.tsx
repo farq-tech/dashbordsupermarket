@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import type { CategoryKPI } from '@/lib/types'
+import { fareeqChart } from '@/lib/design-system'
 
 function CategoryStatus({ kpi, isAr }: { kpi: CategoryKPI; isAr: boolean }) {
   if (kpi.pricing_index > 110) return <Badge variant="danger">{isAr ? 'مرتفع السعر' : 'Overpriced'}</Badge>
@@ -100,7 +101,7 @@ export default function CategoriesPage() {
                 data={chartData}
                 dataKey={isAr ? 'المنتجات' : 'Products'}
                 height={240}
-                color="#1b59f8"
+                color={fareeqChart.blue}
               />
             </CardContent>
           </Card>
@@ -114,7 +115,7 @@ export default function CategoriesPage() {
                 dataKey={isAr ? 'مؤشر التسعير' : 'Pricing Index'}
                 colors={pricingIndexData.map(d => {
                   const v = d[isAr ? 'مؤشر التسعير' : 'Pricing Index'] as number
-                  return v > 108 ? '#ff3e13' : v > 103 ? '#f97316' : v < 95 ? '#1fe08f' : '#1b59f8'
+                  return v > 108 ? fareeqChart.coral : v > 103 ? fareeqChart.orange : v < 95 ? fareeqChart.green : fareeqChart.blue
                 })}
                 height={240}
               />

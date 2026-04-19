@@ -1,4 +1,5 @@
 'use client'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
@@ -26,9 +27,9 @@ export default function CompetitorsPage() {
   }))
 
   const chartKeys = [
-    { dataKey: isAr ? 'نقاط الأداء' : 'Performance', name: isAr ? 'الأداء' : 'Performance', color: '#1b59f8' },
-    { dataKey: isAr ? 'مؤشر التنافسية' : 'Competitive Index', name: isAr ? 'التنافسية' : 'Competitive', color: '#1fe08f' },
-    { dataKey: isAr ? 'التغطية %' : 'Coverage %', name: isAr ? 'التغطية' : 'Coverage', color: '#f59e0b' },
+    { dataKey: isAr ? 'نقاط الأداء' : 'Performance', name: isAr ? 'الأداء' : 'Performance', color: fareeqChart.blue },
+    { dataKey: isAr ? 'مؤشر التنافسية' : 'Competitive Index', name: isAr ? 'التنافسية' : 'Competitive', color: fareeqChart.green },
+    { dataKey: isAr ? 'التغطية %' : 'Coverage %', name: isAr ? 'التغطية' : 'Coverage', color: fareeqHex.amber },
   ]
 
   // Category dominance: who is cheapest most often per category

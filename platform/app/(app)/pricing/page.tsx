@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import { PriceScatterChart } from '@/components/charts/ScatterChartComponent'
+import { fareeqChart } from '@/lib/design-system'
 
 export default function PricingPage() {
   const { lang, dashboardData, loading } = useAppStore()
@@ -44,13 +45,13 @@ export default function PricingPage() {
   const gapBuckets = useMemo(() => {
     const stocked = comparisons.filter(c => c.your_price !== null)
     const buckets = [
-      { name: isAr ? '< -10%' : '< -10%', count: 0, color: '#1fe08f' },
+      { name: isAr ? '< -10%' : '< -10%', count: 0, color: fareeqChart.green },
       { name: isAr ? '-10% إلى -5%' : '-10% to -5%', count: 0, color: '#5eead4' },
-      { name: isAr ? '-5% إلى 0%' : '-5% to 0%', count: 0, color: '#93c5fd' },
-      { name: isAr ? '0% إلى 5%' : '0% to 5%', count: 0, color: '#1b59f8' },
-      { name: isAr ? '5% إلى 10%' : '5% to 10%', count: 0, color: '#f59e0b' },
-      { name: isAr ? '10% إلى 20%' : '10% to 20%', count: 0, color: '#f97316' },
-      { name: isAr ? '> 20%' : '> 20%', count: 0, color: '#ff3e13' },
+      { name: isAr ? '-5% إلى 0%' : '-5% to 0%', count: 0, color: '#9ecae1' },
+      { name: isAr ? '0% إلى 5%' : '0% to 5%', count: 0, color: fareeqChart.blue },
+      { name: isAr ? '5% إلى 10%' : '5% to 10%', count: 0, color: '#eab308' },
+      { name: isAr ? '10% إلى 20%' : '10% to 20%', count: 0, color: fareeqChart.orange },
+      { name: isAr ? '> 20%' : '> 20%', count: 0, color: fareeqChart.coral },
     ]
     stocked.forEach(c => {
       const g = c.price_gap_pct
@@ -94,11 +95,11 @@ export default function PricingPage() {
         {/* Summary KPI row */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: '#ff3e13' },
-            { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: '#f97316' },
-            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: '#1b59f8' },
-            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: '#1fe08f' },
-            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: '#0f2552' },
+            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: fareeqChart.coral },
+            { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: fareeqChart.orange },
+            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: fareeqChart.blue },
+            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: fareeqChart.green },
+            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: fareeqChart.deepBlue },
           ].map(item => (
             <div key={item.label} className="bg-white rounded-xl border border-neutral-100 p-4 text-center">
               <p className="text-2xl font-bold tabular-nums" style={{ color: item.color }}>{item.value}</p>
@@ -156,7 +157,7 @@ export default function PricingPage() {
               dataKey={isAr ? 'مؤشر التسعير' : 'Pricing Index'}
               colors={catPricingData.map(d => {
                 const v = d[isAr ? 'مؤشر التسعير' : 'Pricing Index'] as number
-                return v > 108 ? '#ff3e13' : v > 103 ? '#f97316' : v < 95 ? '#1fe08f' : '#1b59f8'
+                return v > 108 ? fareeqChart.coral : v > 103 ? fareeqChart.orange : v < 95 ? fareeqChart.green : fareeqChart.blue
               })}
               height={260}
             />
