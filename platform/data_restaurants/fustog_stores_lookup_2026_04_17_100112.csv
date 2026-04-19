@@ -1,5 +1,5 @@
 store_key,sid,rid,store_name_ar,store_name_en,retailer_brand_ar,retailer_brand_en,is_integration_ready
-1,1,1,تطبيق مباشر,Direct app,تطبيق مباشر,Direct app,True
+1,1,1,المطعم الرئيسي,Main restaurant,المطعم الرئيسي,Main restaurant,True
 2,2,2,هنقرستيشن,HungerStation,هنقرستيشن,HungerStation,True
 3,3,3,جاهز,Jahez,جاهز,Jahez,True
 4,4,4,ذا شفز,Chefz,ذا شفز,Chefz,True
