@@ -20,7 +20,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'Panda',
     color: '#E53E3E',
     logo_letter: 'P',
-    logo_url: '/logos/panda.svg',
+    logo_url: '/logos/panda.jpg',
   },
   {
     store_key: 5,
@@ -31,7 +31,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'Othaim',
     color: '#2B6CB0',
     logo_letter: 'E',
-    logo_url: '/logos/othaim.svg',
+    logo_url: '/logos/othaim.jpg',
   },
   {
     store_key: 6,
@@ -42,7 +42,7 @@ export const RETAILERS: Retailer[] = [
     brand_en: 'LuLu',
     color: '#276749',
     logo_letter: 'L',
-    logo_url: '/logos/lulu.svg',
+    logo_url: '/logos/lulu.png',
   },
 ]
 
