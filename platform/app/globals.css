@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./fareeq-primitives.css";
 
 @theme inline {
   /*
@@ -77,6 +78,53 @@
   --fareeq-glass-fill-opacity: 0.46;
   --fareeq-glass-border-rgb: 255 255 255;
   --fareeq-glass-border-opacity: 0.24;
+
+  /* Farq /dev/design — swatches + shadcn bridge (see fareeq-primitives.css :root) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-ink: rgb(var(--ink) / 1);
+  --color-line: rgb(var(--line) / 1);
+  --color-surface: rgb(var(--surface) / 1);
+  --color-surface-2: rgb(var(--surface-2) / 1);
+  --color-surface-3: rgb(var(--surface-3) / 1);
+
+  --color-brand-900: rgb(4 52 52);
+  --color-brand-700: rgb(11 106 99);
+  --color-mint-500: rgb(131 241 177);
+  --color-mint-600: rgb(94 214 145);
+  --color-coral-500: rgb(239 131 84);
+  --color-amber-500: rgb(255 202 58);
+
+  --text-ds-xs: var(--text-xs);
+  --text-ds-sm: var(--text-sm);
+  --text-ds-md: var(--text-md);
+  --text-ds-lg: var(--text-lg);
+  --text-ds-xl: var(--text-xl);
+  --text-ds-2xl: var(--text-2xl);
+
+  --spacing-ds-xs: var(--space-xs);
+  --spacing-ds-sm: var(--space-sm);
+  --spacing-ds-md: var(--space-md);
+  --spacing-ds-lg: var(--space-lg);
+  --spacing-ds-xl: var(--space-xl);
+  --spacing-ds-2xl: var(--space-2xl);
+
+  --radius-ds-sm: var(--radius-sm);
+  --radius-ds-md: var(--radius-md);
+  --radius-ds-lg: var(--radius-lg);
+  --radius-ds-xl: var(--radius-xl);
+  --radius-ds-2xl: var(--radius-2xl);
+
+  --shadow-soft: 0 10px 24px rgba(40, 45, 51, 0.06);
+  --shadow-card: 0 14px 34px rgba(40, 45, 51, 0.07);
 }
 
 /* Density: toggled via html[data-density="compact"] from app store */
