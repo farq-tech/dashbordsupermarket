@@ -182,15 +182,30 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                     href={item.href}
                     onClick={() => onInteract?.()}
                     className={cn(
-                      'flex items-center gap-3 px-3 rounded-lg text-sm transition-colors touch-manipulation',
+                      'relative flex items-center gap-3 px-3 rounded-lg text-sm transition-colors touch-manipulation overflow-hidden',
                       linkPad,
-                      active ? 'font-semibold' : 'opacity-85 hover:opacity-100',
+                      active
+                        ? 'font-semibold'
+                        : 'opacity-85 hover:opacity-100',
                     )}
                     style={{
                       color: active ? 'var(--color-interactive)' : 'var(--color-text-primary)',
-                      background: active ? 'var(--color-surface-hover)' : 'transparent',
+                      background: active
+                        ? 'color-mix(in srgb, var(--color-interactive) 10%, transparent)'
+                        : 'transparent',
                     }}
                   >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'absolute inset-y-2 w-[3px] rounded-full transition-opacity',
+                        active ? 'opacity-100' : 'opacity-0',
+                      )}
+                      style={{
+                        background: 'var(--color-interactive)',
+                        right: '0.5rem',
+                      }}
+                    />
                     <Icon className="h-4 w-4 shrink-0 opacity-90" />
                     <span className="leading-snug">{label}</span>
                   </Link>

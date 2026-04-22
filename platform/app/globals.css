@@ -224,6 +224,38 @@ body {
   padding: var(--density-page-y) var(--density-page-x);
 }
 
+/* Section rhythm (visual polish only; keeps IA/layout intact) */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--density-stack) * 0.75);
+}
+
+.section + .section {
+  margin-top: var(--density-stack);
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: calc(var(--density-card-header-mb) * 0.75);
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.section-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
   .chart-reveal {

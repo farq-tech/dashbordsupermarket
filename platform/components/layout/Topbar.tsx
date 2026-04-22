@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
 import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu, LayoutDashboard, Rows3 } from 'lucide-react'
@@ -23,6 +24,14 @@ export function Topbar({
   description_en,
 }: TopbarProps) {
   const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden, uiDensity, setUiDensity } = useAppStore()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const formatDate = (iso: string | null) => {
     if (!iso) return lang === 'ar' ? 'لم يتم التحميل بعد' : 'Not loaded yet'
@@ -37,10 +46,20 @@ export function Topbar({
   return (
     <header
       data-testid="app-topbar"
-      className="min-h-20 flex flex-col justify-center gap-1 px-3 sm:px-6 py-3 sticky top-0 z-30"
+      className={[
+        'min-h-20 flex flex-col justify-center gap-1 px-3 sm:px-6 py-3 sticky top-0 z-30',
+        'transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300',
+      ].join(' ')}
       style={{
-        background: 'var(--color-topbar-bg)',
-        borderBottom: '1px solid var(--color-border)',
+        background: scrolled
+          ? 'color-mix(in srgb, var(--color-topbar-bg) 80%, transparent)'
+          : 'var(--color-topbar-bg)',
+        backdropFilter: scrolled ? 'blur(20px)' : undefined,
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : undefined,
+        borderBottom: scrolled
+          ? '1px solid color-mix(in srgb, var(--color-border) 70%, transparent)'
+          : '1px solid var(--color-border)',
+        boxShadow: scrolled ? '0 8px 24px rgba(4, 52, 52, 0.06)' : 'none',
         paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))',
       }}
     >
