@@ -16,13 +16,14 @@ import { getPreviousSnapshot, type KpiSnapshot } from '@/lib/kpiSnapshotHistory'
 import { ChartReveal } from '@/components/ui/chart-reveal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ChartCardSkeleton, KpiCardSkeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
 import { Button } from '@/components/ui/button'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
 function DashboardPageInner() {
   const searchParams = useSearchParams()
   const focusKpi = searchParams.get('kpi')
-  const { lang, dashboardData, loading, selectedRetailer, fetchData, dataSource, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, selectedRetailer, fetchData, dataSource, forceRefresh } = useAppStore()
 
   useEffect(() => {
     if (!dashboardData && !loading) fetchData()
@@ -35,6 +36,24 @@ function DashboardPageInner() {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     })
   }, [focusKpi, dashboardData])
+
+  const dashTopbar = (
+    <Topbar
+      title_ar={PAGE_TITLES['/dashboard'].ar}
+      title_en={PAGE_TITLES['/dashboard'].en}
+      description_ar="ملخص تنفيذي لأداء السلسلة مقارنة بالسوق."
+      description_en="Executive view of your chain's performance vs the market."
+    />
+  )
+
+  if (!loading && error && !dashboardData) {
+    return (
+      <div>
+        {dashTopbar}
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
+  }
 
   if (loading || !dashboardData) {
     const t = PAGE_TITLES['/dashboard']
@@ -241,6 +260,8 @@ function DashboardPageInner() {
             color="var(--color-interactive-pressed)"
             icon={<Target className="h-5 w-5" />}
             lang={lang}
+            tooltip_ar="مؤشر مركّب يجمع التنافسية والتسعير والتغطية، يُحتسب من متوسط مرجّح للمؤشرات الثلاثة. 100 = أفضل أداء ممكن."
+            tooltip_en="Composite index combining competitive pricing, pricing index, and coverage. Weighted average of three sub-scores. 100 = best possible."
           />
           <KpiCard
             kpiId="competitive"
@@ -255,6 +276,8 @@ function DashboardPageInner() {
             color="var(--color-interactive)"
             icon={<TrendingUp className="h-5 w-5" />}
             lang={lang}
+            tooltip_ar="نسبة المنتجات التي سعرها لا يتجاوز السعر الأدنى في السوق بأكثر من 5%. المصدر: بيانات مقارنة المنتجات الداخلية."
+            tooltip_en="% of your products priced within 5% of the market's lowest price. Source: internal product comparison data."
           />
           <KpiCard
             kpiId="pricing"
@@ -269,6 +292,8 @@ function DashboardPageInner() {
             color={piLabel.color}
             icon={<TrendingDown className="h-5 w-5" />}
             lang={lang}
+            tooltip_ar="متوسط سعرك مقارنةً بمتوسط السوق. 100% = مساوٍ للسوق. أقل من 100% = أرخص. أُحتسب من متوسط الفجوة السعرية لجميع المنتجات المتوفرة."
+            tooltip_en="Your average price relative to market average. 100% = at market. Below 100% = cheaper. Calculated from average price gap across all stocked products."
           />
           <KpiCard
             kpiId="coverage"
@@ -283,6 +308,8 @@ function DashboardPageInner() {
             color={fareeqHex.amber}
             icon={<CheckCircle className="h-5 w-5" />}
             lang={lang}
+            tooltip_ar="نسبة المنتجات الموجودة في السوق والمتوفرة في سلسلتك. المصدر: مقارنة كتالوج السوق بكتالوجك الخاص."
+            tooltip_en="% of market-listed products that are present in your chain's catalog. Source: comparison of market catalog vs your own product list."
           />
         </div>
 

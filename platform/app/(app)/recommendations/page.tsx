@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { Lightbulb, TrendingUp, Map, Zap, Download, CheckCircle } from 'lucide-react'
 import type { Recommendation, Alert } from '@/lib/types'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
@@ -139,12 +140,35 @@ function exportRecs(recs: Recommendation[], lang: string) {
 }
 
 export default function RecommendationsPage() {
-  const { lang, dashboardData, loading } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
   const [filterType, setFilterType] = useState<string>('')
   const [filterImpact, setFilterImpact] = useState<string>('')
-  const [done, setDone] = useState<Set<string>>(new Set())
+  const [done, setDone] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set()
+    try {
+      const raw = localStorage.getItem('recs_done')
+      return new Set(raw ? JSON.parse(raw) as string[] : [])
+    } catch { return new Set() }
+  })
+  const [lastUndone, setLastUndone] = useState<string | null>(null)
   const [tab, setTab] = useState<'recs' | 'alerts'>('recs')
+
+  useEffect(() => {
+    try { localStorage.setItem('recs_done', JSON.stringify([...done])) } catch { /* ignore */ }
+  }, [done])
+
+  const markDone = useCallback((id: string) => {
+    setDone(prev => new Set([...prev, id]))
+    setLastUndone(id)
+    const t = setTimeout(() => setLastUndone(null), 5000)
+    return () => clearTimeout(t)
+  }, [])
+
+  const undoDone = useCallback((id: string) => {
+    setDone(prev => { const n = new Set(prev); n.delete(id); return n })
+    setLastUndone(null)
+  }, [])
 
   const allRecs = dashboardData?.recommendations ?? []
   const alerts = dashboardData?.alerts ?? []
@@ -158,8 +182,12 @@ export default function RecommendationsPage() {
 
   const totalValue = filtered.reduce((s, r) => s + (r.value_estimate ?? 0), 0)
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   return (
@@ -243,7 +271,21 @@ export default function RecommendationsPage() {
         {tab === 'recs' && (
           <>
             {/* Filters */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+            {done.size > 0 && (
+              <span className="text-xs ml-auto" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr ? `${done.size} منجز` : `${done.size} done`}
+                {' — '}
+                <button
+                  type="button"
+                  className="underline"
+                  style={{ color: 'var(--color-interactive)' }}
+                  onClick={() => setDone(new Set())}
+                >
+                  {isAr ? 'إعادة الكل' : 'Restore all'}
+                </button>
+              </span>
+            )}
               <button
                 onClick={() => { setFilterType(''); setFilterImpact('') }}
                 className={`px-3 py-1.5 text-xs rounded-full border font-medium transition-colors ${
@@ -281,6 +323,26 @@ export default function RecommendationsPage() {
               ))}
             </div>
 
+            {/* Undo toast */}
+            {lastUndone && (
+              <div
+                className="flex items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-xs animate-fade-in"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+              >
+                <span style={{ color: 'var(--color-text-secondary)' }}>
+                  {isAr ? 'تم تحديد التوصية كمنجزة' : 'Recommendation marked as done'}
+                </span>
+                <button
+                  type="button"
+                  className="font-semibold"
+                  style={{ color: 'var(--color-interactive)' }}
+                  onClick={() => undoDone(lastUndone)}
+                >
+                  {isAr ? 'تراجع' : 'Undo'}
+                </button>
+              </div>
+            )}
+
             {/* Recommendations list */}
             {filtered.length === 0 ? (
               <Card className="py-12 text-center">
@@ -293,7 +355,7 @@ export default function RecommendationsPage() {
                     key={rec.id}
                     rec={rec}
                     lang={lang}
-                    onDone={id => setDone(prev => new Set([...prev, id]))}
+                    onDone={markDone}
                   />
                 ))}
               </div>

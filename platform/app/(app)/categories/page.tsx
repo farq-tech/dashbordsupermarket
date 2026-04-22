@@ -1,11 +1,12 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import type { CategoryKPI } from '@/lib/types'
 import { fareeqChart } from '@/lib/design-system'
@@ -19,24 +20,32 @@ function CategoryStatus({ kpi, isAr }: { kpi: CategoryKPI; isAr: boolean }) {
 }
 
 export default function CategoriesPage() {
-  const { lang, dashboardData, loading } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
   const [sortBy, setSortBy] = useState<'product_count' | 'pricing_index' | 'competitive_count'>('product_count')
   const [selected, setSelected] = useState<CategoryKPI | null>(null)
+  const [quickFilter, setQuickFilter] = useState<'opportunity' | 'risk' | 'sensitive' | null>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(
     () => dashboardData?.kpis.categories ?? [],
     [dashboardData?.kpis.categories],
   )
 
-  const sorted = useMemo(() =>
-    [...categories].sort((a, b) => {
+  const sorted = useMemo(() => {
+    let list = [...categories]
+    if (quickFilter === 'opportunity') list = list.filter(c => c.pricing_index < 95 && c.product_count > 10)
+    else if (quickFilter === 'risk') list = list.filter(c => c.pricing_index > 108 && c.product_count > 5)
+    else if (quickFilter === 'sensitive') list = list.filter(c => {
+      const spreadPct = c.market_avg_price > 0 ? ((c.avg_price - c.market_avg_price) / c.market_avg_price) * 100 : 0
+      return Math.abs(spreadPct) > 8
+    })
+    return list.sort((a, b) => {
       if (sortBy === 'product_count') return b.product_count - a.product_count
       if (sortBy === 'pricing_index') return a.pricing_index - b.pricing_index
       return b.competitive_count - a.competitive_count
-    }),
-    [categories, sortBy],
-  )
+    })
+  }, [categories, sortBy, quickFilter])
 
   const chartData = sorted.slice(0, 10).map(c => ({
     name: isAr ? c.name_ar.slice(0, 14) : c.name_en.slice(0, 14),
@@ -56,8 +65,12 @@ export default function CategoriesPage() {
     return Math.abs(spreadPct) > 8
   })
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   return (
@@ -65,30 +78,82 @@ export default function CategoriesPage() {
       <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} />
       <div className="page-shell">
 
-        {/* Highlight chips */}
+        {/* Highlight chips — click to filter table */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-3">
-          <div className="rounded-xl border border-[color:color-mix(in_srgb,var(--color-trend-up)_32%,#ffffff)] bg-[color:color-mix(in_srgb,var(--color-trend-up)_10%,#ffffff)] p-4">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-[color:#0a8f5a]">{isAr ? 'فرص عالية' : 'High Opportunities'}</p>
-              <Badge variant="success">{highOpportunity.length}</Badge>
-            </div>
-            <p className="text-xs text-[color:var(--color-trend-up)]">{isAr ? 'أصناف بسعر أقل من السوق — رفع للهامش' : 'Categories priced below market — margin uplift'}</p>
-          </div>
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-red-800">{isAr ? 'أصناف خطرة' : 'At-Risk Categories'}</p>
-              <Badge variant="danger">{highRisk.length}</Badge>
-            </div>
-            <p className="text-xs text-red-600">{isAr ? 'أسعار أعلى من السوق — خطر فقدان عملاء' : 'Prices above market — risk of losing customers'}</p>
-          </div>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-amber-800">{isAr ? 'حساسة للسعر' : 'Price Sensitive'}</p>
-              <Badge variant="warning">{priceSensitive.length}</Badge>
-            </div>
-            <p className="text-xs text-amber-600">{isAr ? 'أصناف بفجوات سعرية كبيرة' : 'Categories with large price gaps'}</p>
-          </div>
+          {[
+            {
+              key: 'opportunity' as const,
+              count: highOpportunity.length,
+              title_ar: 'فرص عالية', title_en: 'High Opportunities',
+              desc_ar: 'أصناف بسعر أقل من السوق — رفع للهامش',
+              desc_en: 'Categories priced below market — margin uplift',
+              cls: 'rounded-xl border p-4 cursor-pointer transition-all',
+              activeCls: 'ring-2 ring-green-500',
+              style: { borderColor: 'color-mix(in srgb, var(--color-trend-up) 32%, #ffffff)', background: 'color-mix(in srgb, var(--color-trend-up) 10%, #ffffff)' },
+              titleColor: '#0a8f5a', descColor: 'var(--color-trend-up)', badge: 'success' as const,
+            },
+            {
+              key: 'risk' as const,
+              count: highRisk.length,
+              title_ar: 'أصناف خطرة', title_en: 'At-Risk Categories',
+              desc_ar: 'أسعار أعلى من السوق — خطر فقدان عملاء',
+              desc_en: 'Prices above market — risk of losing customers',
+              cls: 'rounded-xl border border-red-200 bg-red-50 p-4 cursor-pointer transition-all',
+              activeCls: 'ring-2 ring-red-500',
+              style: {},
+              titleColor: '#991b1b', descColor: '#dc2626', badge: 'danger' as const,
+            },
+            {
+              key: 'sensitive' as const,
+              count: priceSensitive.length,
+              title_ar: 'حساسة للسعر', title_en: 'Price Sensitive',
+              desc_ar: 'أصناف بفجوات سعرية كبيرة',
+              desc_en: 'Categories with large price gaps',
+              cls: 'rounded-xl border border-amber-200 bg-amber-50 p-4 cursor-pointer transition-all',
+              activeCls: 'ring-2 ring-amber-500',
+              style: {},
+              titleColor: '#92400e', descColor: '#b45309', badge: 'warning' as const,
+            },
+          ].map(tile => (
+            <button
+              key={tile.key}
+              type="button"
+              className={`${tile.cls} text-start ${quickFilter === tile.key ? tile.activeCls : 'hover:opacity-90'}`}
+              style={tile.style}
+              onClick={() => {
+                setQuickFilter(quickFilter === tile.key ? null : tile.key)
+                setSelected(null)
+                requestAnimationFrame(() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+              }}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-sm font-semibold" style={{ color: tile.titleColor }}>{isAr ? tile.title_ar : tile.title_en}</p>
+                <Badge variant={tile.badge}>{tile.count}</Badge>
+              </div>
+              <p className="text-xs" style={{ color: tile.descColor }}>{isAr ? tile.desc_ar : tile.desc_en}</p>
+              <p className="text-[10px] mt-1.5 font-medium opacity-60" style={{ color: tile.titleColor }}>
+                {quickFilter === tile.key
+                  ? (isAr ? '← انقر لإلغاء الفلتر' : '← Click to clear filter')
+                  : (isAr ? 'انقر للعرض في الجدول ↓' : 'Click to filter table ↓')}
+              </p>
+            </button>
+          ))}
         </div>
+        {quickFilter && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              {isAr ? `فلتر نشط: ${quickFilter === 'opportunity' ? 'فرص عالية' : quickFilter === 'risk' ? 'أصناف خطرة' : 'حساسة للسعر'} — ${sorted.length} صنف` : `Active filter: ${quickFilter} — ${sorted.length} categories`}
+            </span>
+            <button
+              type="button"
+              className="text-xs underline"
+              style={{ color: 'var(--color-interactive)' }}
+              onClick={() => setQuickFilter(null)}
+            >
+              {isAr ? 'إلغاء' : 'Clear'}
+            </button>
+          </div>
+        )}
 
         {/* Charts */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
@@ -124,6 +189,7 @@ export default function CategoriesPage() {
         </div>
 
         {/* Full Category Table */}
+        <div ref={tableRef} className="scroll-mt-24">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -154,7 +220,7 @@ export default function CategoriesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-neutral-50 border-b border-neutral-100">
-                    <th className="text-start px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'الصنف' : 'Category'}</th>
+                    <th className="text-start px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'الصنف ↕' : 'Category ↕'}</th>
                     <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'منتجات' : 'Products'}</th>
                     <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'متوسط سعرك' : 'Avg Price'}</th>
                     <th className="text-end px-4 py-[var(--density-table-cell-y)] text-xs font-semibold text-neutral-600">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
@@ -197,6 +263,50 @@ export default function CategoriesPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
+
+        {/* Category detail panel */}
+        {selected && (
+          <Card className="animate-fade-in border-[var(--color-interactive)] ring-1 ring-[var(--color-interactive)]/20">
+            <CardHeader>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <CardTitle>{isAr ? selected.name_ar : selected.name_en}</CardTitle>
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                    {isAr ? selected.name_en : selected.name_ar}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="text-xs px-3 py-1.5 rounded-lg border"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                  onClick={() => setSelected(null)}
+                >
+                  {isAr ? 'إغلاق' : 'Close'}
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {[
+                  { label: isAr ? 'عدد المنتجات' : 'Products', value: selected.product_count },
+                  { label: isAr ? 'متوسط سعرك' : 'Your Avg Price', value: `${selected.avg_price.toFixed(2)} SAR` },
+                  { label: isAr ? 'متوسط السوق' : 'Market Avg', value: `${selected.market_avg_price.toFixed(2)} SAR` },
+                  { label: isAr ? 'مؤشر السعر' : 'Pricing Index', value: `${Math.round(selected.pricing_index)}%` },
+                  { label: isAr ? 'تنافسي + الأرخص' : 'Competitive + Cheapest', value: selected.competitive_count + selected.cheapest_count },
+                  { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: selected.overpriced_count ?? '—' },
+                  { label: isAr ? 'الأرخص في السوق' : 'Cheapest in Market', value: selected.cheapest_count ?? '—' },
+                  { label: isAr ? 'الحالة' : 'Status', value: <CategoryStatus kpi={selected} isAr={isAr} /> },
+                ].map((item, i) => (
+                  <div key={i} className="rounded-lg p-3" style={{ background: 'var(--color-surface-muted)' }}>
+                    <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{item.label}</p>
+                    <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       </div>
     </div>

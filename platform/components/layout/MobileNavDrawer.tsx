@@ -47,7 +47,7 @@ export function MobileNavDrawer() {
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-lg border touch-manipulation"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                aria-label="Close menu"
+                aria-label={lang === 'ar' ? 'إغلاق القائمة' : 'Close menu'}
               >
                 <X className="h-5 w-5" />
               </button>

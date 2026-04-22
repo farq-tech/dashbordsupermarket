@@ -5,6 +5,7 @@ import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import { TrendingUp, TrendingDown, Award, Target, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -64,11 +65,15 @@ function CompareBar({ label, myVal, competitorVal, myColor, compColor, unit = ''
 }
 
 export default function ProfilePage() {
-  const { lang, dashboardData, loading, selectedRetailer } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
   const isAr = lang === 'ar'
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   const { kpis, all_kpis } = dashboardData

@@ -6,12 +6,12 @@ import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
-import { MultiBarChart } from '@/components/charts/BarChartComponent'
-import { SimplePieChart } from '@/components/charts/PieChartComponent'
+import { ErrorState } from '@/components/ui/error-state'
+import { MultiBarChart, HorizontalBarChart } from '@/components/charts/BarChartComponent'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 export default function CompetitorsPage() {
-  const { lang, dashboardData, loading, selectedRetailer } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
   const isAr = lang === 'ar'
 
   const allKpis = dashboardData?.all_kpis ?? []
@@ -72,8 +72,12 @@ export default function CompetitorsPage() {
     color: k.retailer.color,
   }))
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   return (
@@ -141,10 +145,16 @@ export default function CompetitorsPage() {
           <Card>
             <CardHeader>
               <CardTitle>{isAr ? 'تموضع الأسعار في السوق' : 'Market Price Positioning'}</CardTitle>
-              <p className="text-xs text-neutral-400 mt-0.5">{isAr ? 'متوسط سعر كل سلسلة' : 'Average price per chain'}</p>
+              <p className="text-xs text-neutral-400 mt-0.5">{isAr ? 'متوسط سعر كل سلسلة (ريال) — كلما كان الشريط أقصر = أرخص' : 'Average price per chain (SAR) — shorter bar = cheaper'}</p>
             </CardHeader>
             <CardContent>
-              <SimplePieChart data={pricePie} height={240} innerRadius={50} outerRadius={85} />
+              <HorizontalBarChart
+                data={pricePie.map(p => ({ name: p.name, [isAr ? 'متوسط السعر' : 'Avg Price']: p.value, _color: p.color }))}
+                dataKey={isAr ? 'متوسط السعر' : 'Avg Price'}
+                colors={pricePie.map(p => p.color)}
+                unit=" SAR"
+                height={Math.max(180, pricePie.length * 40)}
+              />
             </CardContent>
           </Card>
 

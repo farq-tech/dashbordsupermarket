@@ -1,5 +1,7 @@
 'use client'
 
+import * as Tooltip from '@radix-ui/react-tooltip'
+import { Info } from 'lucide-react'
 import { cn } from './cn'
 import { Card } from './card'
 import { CountUp } from './count-up'
@@ -20,6 +22,9 @@ interface KpiCardProps {
   /** Animate main value from 0 (large KPIs only) */
   countUp?: boolean
   countDecimals?: number
+  /** Optional info tooltip explaining how this KPI is calculated */
+  tooltip_ar?: string
+  tooltip_en?: string
 }
 
 export function KpiCard({
@@ -36,8 +41,11 @@ export function KpiCard({
   focused,
   countUp,
   countDecimals = 0,
+  tooltip_ar,
+  tooltip_en,
 }: KpiCardProps) {
   const title = lang === 'ar' ? title_ar : title_en
+  const tooltipText = lang === 'ar' ? tooltip_ar : tooltip_en
   const trendPositive = trend !== undefined && trend > 0
   const trendNegative = trend !== undefined && trend < 0
 
@@ -56,12 +64,46 @@ export function KpiCard({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p
-            className="text-xs font-medium mb-[var(--density-kpi-title-mb)]"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            {title}
-          </p>
+          <div className="flex items-center gap-1 mb-[var(--density-kpi-title-mb)]">
+            <p
+              className="text-xs font-medium"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              {title}
+            </p>
+            {tooltipText && (
+              <Tooltip.Provider delayDuration={300}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      type="button"
+                      className="shrink-0 opacity-40 hover:opacity-80 transition-opacity"
+                      aria-label={lang === 'ar' ? 'مزيد من المعلومات' : 'More info'}
+                    >
+                      <Info className="h-3 w-3" style={{ color: 'var(--color-text-muted)' }} />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      side="top"
+                      align="start"
+                      sideOffset={4}
+                      className="z-50 max-w-[220px] rounded-lg border px-3 py-2 text-xs leading-relaxed shadow-lg animate-fade-in"
+                      style={{
+                        background: 'var(--color-surface)',
+                        borderColor: 'var(--color-border)',
+                        color: 'var(--color-text-secondary)',
+                      }}
+                      dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                    >
+                      {tooltipText}
+                      <Tooltip.Arrow style={{ fill: 'var(--color-border)' }} />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            )}
+          </div>
           <div className="flex items-baseline gap-1.5">
             {canCountUp ? (
               <>

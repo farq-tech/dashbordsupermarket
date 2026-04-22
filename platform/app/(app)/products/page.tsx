@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import { TagBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { Search, Download } from 'lucide-react'
 import type { ProductComparison } from '@/lib/types'
 import { cn } from '@/components/ui/cn'
@@ -26,6 +27,12 @@ function exportCsv(data: ProductComparison[], lang: string) {
   const headers = isAr
     ? ['المنتج', 'الصنف', 'الماركة', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية']
     : ['Product', 'Category', 'Brand', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action']
+  const escCsv = (v: unknown) => {
+    const s = String(v ?? '')
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? `"${s.replace(/"/g, '""')}"`
+      : s
+  }
   const rows = data.map(d => [
     isAr ? d.title_ar : d.title_en,
     isAr ? d.category_ar : d.category_en,
@@ -38,7 +45,7 @@ function exportCsv(data: ProductComparison[], lang: string) {
     d.tag,
     d.recommended_action,
   ])
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
+  const csv = [headers, ...rows].map(r => r.map(escCsv).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -49,7 +56,7 @@ function exportCsv(data: ProductComparison[], lang: string) {
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()
-  const { lang, dashboardData, loading } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
   const [search, setSearch] = useState('')
   const [filterTag, setFilterTag] = useState('')
@@ -95,8 +102,12 @@ function ProductsPageContent() {
   const effectivePage = deepLinkOnly && filtered.length <= PAGE_SIZE ? 1 : Math.min(page, totalPages)
   const paged = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE)
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   const tagCounts = {
@@ -189,7 +200,7 @@ function ProductsPageContent() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-neutral-50 border-b border-neutral-100">
-                  <th className="text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'المنتج' : 'Product'}</th>
+                  <th className="sticky start-0 z-10 bg-neutral-50 text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'المنتج' : 'Product'}</th>
                   <th className="text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الصنف' : 'Category'}</th>
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'سعرك' : 'Your Price'}</th>
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
@@ -212,7 +223,10 @@ function ProductsPageContent() {
                         isHi && 'bg-blue-50 ring-2 ring-inset ring-blue-400',
                       )}
                     >
-                      <td className="px-4 py-[var(--density-table-cell-y)]">
+                      <td
+                        className="sticky start-0 z-10 px-4 py-[var(--density-table-cell-y)]"
+                        style={{ background: isHi ? '#eff6ff' : 'var(--color-surface)' }}
+                      >
                         <p className="font-medium text-neutral-800 leading-tight">
                           {isAr ? row.title_ar : row.title_en}
                         </p>

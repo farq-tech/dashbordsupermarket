@@ -11,7 +11,8 @@ import { SimplePieChart } from '@/components/charts/PieChartComponent'
 import { ChartReveal } from '@/components/ui/chart-reveal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { KpiCardSkeleton, ChartCardSkeleton } from '@/components/ui/skeleton'
-import { Store, MapPin, Layers, ShieldCheck, ChevronDown, Eye } from 'lucide-react'
+import { Store, MapPin, Layers, ShieldCheck, ChevronDown, Eye, ChevronRight } from 'lucide-react'
+import { ErrorState } from '@/components/ui/error-state'
 import Image from 'next/image'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
@@ -75,21 +76,30 @@ export default function CoveragePage() {
 
   const [data, setData] = useState<ApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [selectedCity, setSelectedCity] = useState<string>('__all__')
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
+  const [citySearch, setCitySearch] = useState('')
 
   useEffect(() => {
     setLoading(true)
+    setFetchError(false)
     const url = selectedCity === '__all__' ? '/api/coverage' : `/api/coverage?city=${encodeURIComponent(selectedCity)}`
     fetch(url)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then((d: ApiResponse) => {
         setData(d)
         setSelectedBrand(null)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {
+        setFetchError(true)
+        setLoading(false)
+      })
   }, [selectedCity])
 
   const brandDetail = useMemo(() => {
@@ -97,15 +107,41 @@ export default function CoveragePage() {
     return data.brands.find(b => b.brand_en === selectedBrand) ?? null
   }, [data, selectedBrand])
 
+  const coverageTopbar = (
+    <Topbar
+      title_ar={t.ar}
+      title_en={t.en}
+      description_ar="تغطية السوبرماركتات والعلامات التجارية في السوق — بيانات مسح ميداني مستقلة."
+      description_en="Supermarket and grocery brand coverage — independent field survey data."
+    />
+  )
+
+  if (!loading && fetchError) {
+    return (
+      <div>
+        {coverageTopbar}
+        <div className="page-shell">
+          <ErrorState
+            lang={isAr ? 'ar' : 'en'}
+            onRetry={() => {
+              setFetchError(false)
+              setLoading(true)
+              const url = selectedCity === '__all__' ? '/api/coverage' : `/api/coverage?city=${encodeURIComponent(selectedCity)}`
+              fetch(url)
+                .then(r => { if (!r.ok) throw new Error(); return r.json() })
+                .then((d: ApiResponse) => { setData(d); setLoading(false) })
+                .catch(() => { setFetchError(true); setLoading(false) })
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
   if (loading || !data) {
     return (
       <div>
-        <Topbar
-          title_ar={t.ar}
-          title_en={t.en}
-          description_ar="تغطية السوبرماركتات والعلامات التجارية في السوق."
-          description_en="Supermarket and grocery brand coverage in the market."
-        />
+        {coverageTopbar}
         <div className="page-shell">
           <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
@@ -122,7 +158,7 @@ export default function CoveragePage() {
   if (!data.brands.length) {
     return (
       <div>
-        <Topbar title_ar={t.ar} title_en={t.en} />
+        {coverageTopbar}
         <div className="page-shell">
           <EmptyState
             title={isAr ? 'لا توجد بيانات تغطية' : 'No coverage data'}
@@ -162,12 +198,7 @@ export default function CoveragePage() {
 
   return (
     <div>
-      <Topbar
-        title_ar={t.ar}
-        title_en={t.en}
-        description_ar="تغطية السوبرماركتات والعلامات التجارية في السوق."
-        description_en="Supermarket and grocery brand coverage in the market."
-      />
+      {coverageTopbar}
       <div className="page-shell space-y-[var(--density-grid-gap)]">
         {/* City filter */}
         <div className="relative inline-block">
@@ -195,41 +226,60 @@ export default function CoveragePage() {
             <>
               <div className="fixed inset-0 z-30" onClick={() => setCityDropdownOpen(false)} />
               <div
-                className="absolute top-full mt-1 z-40 min-w-[220px] rounded-[var(--radius-lg)] border shadow-lg overflow-hidden"
+                className="absolute top-full mt-1 z-40 min-w-[240px] rounded-[var(--radius-lg)] border shadow-lg overflow-hidden flex flex-col"
                 style={{
                   background: 'var(--color-surface)',
                   borderColor: 'var(--color-border)',
                   insetInlineStart: 0,
+                  maxHeight: '320px',
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => { setSelectedCity('__all__'); setCityDropdownOpen(false) }}
-                  className="w-full px-4 py-2.5 text-start text-sm hover:bg-[var(--color-surface-muted)] transition-colors"
-                  style={{
-                    color: selectedCity === '__all__' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
-                    fontWeight: selectedCity === '__all__' ? 600 : 400,
-                  }}
-                >
-                  {isAr ? 'جميع المدن' : 'All cities'}
-                </button>
-                {data.cities.map(c => (
-                  <button
-                    key={c.city_en}
-                    type="button"
-                    onClick={() => { setSelectedCity(c.city_en); setCityDropdownOpen(false) }}
-                    className="w-full px-4 py-2.5 text-start text-sm hover:bg-[var(--color-surface-muted)] transition-colors flex items-center justify-between"
-                    style={{
-                      color: selectedCity === c.city_en ? 'var(--color-interactive)' : 'var(--color-text-primary)',
-                      fontWeight: selectedCity === c.city_en ? 600 : 400,
-                    }}
-                  >
-                    <span>{isAr ? c.city_ar : c.city_en}</span>
-                    <span className="text-xs tabular-nums opacity-60">
-                      {c.brands} {isAr ? 'علامة' : 'brands'}
-                    </span>
-                  </button>
-                ))}
+                {/* Search input */}
+                <div className="border-b px-2 py-2" style={{ borderColor: 'var(--color-border)' }}>
+                  <input
+                    type="search"
+                    autoFocus
+                    value={citySearch}
+                    onChange={e => setCitySearch(e.target.value)}
+                    placeholder={isAr ? 'بحث عن مدينة...' : 'Search city...'}
+                    className="w-full px-3 py-1.5 text-sm rounded-lg border focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
+                    style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-muted)', color: 'var(--color-text-primary)' }}
+                  />
+                </div>
+                <div className="overflow-y-auto">
+                  {!citySearch && (
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedCity('__all__'); setCityDropdownOpen(false); setCitySearch('') }}
+                      className="w-full px-4 py-2.5 text-start text-sm hover:bg-[var(--color-surface-muted)] transition-colors"
+                      style={{
+                        color: selectedCity === '__all__' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+                        fontWeight: selectedCity === '__all__' ? 600 : 400,
+                      }}
+                    >
+                      {isAr ? 'جميع المدن' : 'All cities'}
+                    </button>
+                  )}
+                  {data.cities
+                    .filter(c => !citySearch || (isAr ? c.city_ar : c.city_en).toLowerCase().includes(citySearch.toLowerCase()))
+                    .map(c => (
+                      <button
+                        key={c.city_en}
+                        type="button"
+                        onClick={() => { setSelectedCity(c.city_en); setCityDropdownOpen(false); setCitySearch('') }}
+                        className="w-full px-4 py-2.5 text-start text-sm hover:bg-[var(--color-surface-muted)] transition-colors flex items-center justify-between"
+                        style={{
+                          color: selectedCity === c.city_en ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+                          fontWeight: selectedCity === c.city_en ? 600 : 400,
+                        }}
+                      >
+                        <span>{isAr ? c.city_ar : c.city_en}</span>
+                        <span className="text-xs tabular-nums opacity-60">
+                          {c.brands} {isAr ? 'علامة' : 'brands'}
+                        </span>
+                      </button>
+                    ))}
+                </div>
               </div>
             </>
           )}
@@ -289,6 +339,11 @@ export default function CoveragePage() {
             <Card>
               <CardHeader>
                 <CardTitle>{isAr ? 'عدد الفروع لكل علامة' : 'Branches per Brand'}</CardTitle>
+                {data.brands.length > 15 && (
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                    {isAr ? `يعرض أعلى 15 من ${data.brands.length} علامة` : `Showing top 15 of ${data.brands.length} brands`}
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 <SimpleBarChart
@@ -304,6 +359,11 @@ export default function CoveragePage() {
             <Card>
               <CardHeader>
                 <CardTitle>{isAr ? 'حصة الفروع' : 'Branch Share'}</CardTitle>
+                {data.brands.length > 10 && (
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                    {isAr ? `يعرض أعلى 10 من ${data.brands.length} علامة` : `Showing top 10 of ${data.brands.length} brands`}
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 <SimplePieChart data={pieData} height={320} />
@@ -342,13 +402,14 @@ export default function CoveragePage() {
                     className="border-b text-start"
                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
                   >
-                    <th className="py-3 px-3 text-start font-medium">{isAr ? 'العلامة التجارية' : 'Brand'}</th>
+                    <th className="py-3 px-3 text-start font-medium sticky start-0 z-10" style={{ background: 'var(--color-surface)' }}>{isAr ? 'العلامة التجارية' : 'Brand'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'الفروع' : 'Branches'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'المدن' : 'Cities'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'المناطق' : 'Territories'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'التغطية' : 'Coverage'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'الصور' : 'Media'}</th>
                     <th className="py-3 px-3 text-start font-medium">{isAr ? 'التوزيع' : 'Distribution'}</th>
+                    <th className="py-3 px-3 w-8" />
                   </tr>
                 </thead>
                 <tbody>
@@ -364,7 +425,14 @@ export default function CoveragePage() {
                       }}
                       onClick={() => setSelectedBrand(selectedBrand === b.brand_en ? null : b.brand_en)}
                     >
-                      <td className="py-3 px-3">
+                      <td
+                        className="py-3 px-3 sticky start-0 z-10"
+                        style={{
+                          background: selectedBrand === b.brand_en
+                            ? 'color-mix(in srgb, var(--color-interactive) 8%, var(--color-surface))'
+                            : 'var(--color-surface)',
+                        }}
+                      >
                         <div className="flex items-center gap-2">
                           {b.logo ? (
                             <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-black/[0.06]">
@@ -419,6 +487,15 @@ export default function CoveragePage() {
                             </span>
                           ))}
                         </div>
+                      </td>
+                      <td className="py-3 px-2 text-center">
+                        <ChevronRight
+                          className="h-4 w-4 transition-transform duration-200 opacity-40"
+                          style={{
+                            color: 'var(--color-text-muted)',
+                            transform: selectedBrand === b.brand_en ? 'rotate(90deg)' : undefined,
+                          }}
+                        />
                       </td>
                     </tr>
                   ))}

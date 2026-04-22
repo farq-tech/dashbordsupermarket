@@ -6,12 +6,13 @@ import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
 import { PriceScatterChart } from '@/components/charts/ScatterChartComponent'
 import { fareeqChart } from '@/lib/design-system'
 
 export default function PricingPage() {
-  const { lang, dashboardData, loading } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
 
   const comparisons = useMemo(
@@ -78,8 +79,12 @@ export default function PricingPage() {
   // Recommendations for pricing
   const pricingRecs = dashboardData?.recommendations.filter(r => r.type === 'pricing') ?? []
 
+  if (!loading && error && !dashboardData) {
+    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+  }
+
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><LoadingOverlay /></div>
+    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><LoadingOverlay lang={lang} /></div>
   }
 
   const stocked = comparisons.filter(c => c.your_price !== null)
@@ -116,6 +121,13 @@ export default function PricingPage() {
               <p className="text-xs text-neutral-400 mt-0.5">
                 {isAr ? 'كل نقطة = منتج. فوق الخط = أغلى، تحته = أرخص' : 'Each dot = product. Above line = costlier, below = cheaper'}
               </p>
+              {comparisons.filter(c => c.your_price !== null).length > 300 && (
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                  {isAr
+                    ? `يعرض 300 منتج من ${comparisons.filter(c => c.your_price !== null).length} (عينة)`
+                    : `Showing 300 of ${comparisons.filter(c => c.your_price !== null).length} products (sample)`}
+                </p>
+              )}
             </CardHeader>
             <CardContent>
               <PriceScatterChart

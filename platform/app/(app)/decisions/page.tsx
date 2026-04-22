@@ -8,6 +8,7 @@ import { PAGE_TITLES } from '@/lib/navConfig'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
+import { ErrorState } from '@/components/ui/error-state'
 import { Button } from '@/components/ui/button'
 import {
   Scale,
@@ -57,7 +58,7 @@ function pillarColor(score: number) {
 }
 
 export default function DecisionsPage() {
-  const { lang, dashboardData, loading, fetchData, selectedRetailer, dataSource } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, fetchData, selectedRetailer, dataSource } = useAppStore()
   const isAr = lang === 'ar'
   const [kindFilter, setKindFilter] = useState<string>('')
   const [wfTick, setWfTick] = useState(0)
@@ -137,11 +138,20 @@ export default function DecisionsPage() {
     downloadHtmlFile(html, `decision_brief_${Date.now()}.html`)
   }
 
+  if (!loading && error && !dashboardData) {
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
+  }
+
   if (loading || !dashboardData) {
     return (
       <div>
         <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
-        <LoadingOverlay />
+        <LoadingOverlay lang={lang} />
       </div>
     )
   }

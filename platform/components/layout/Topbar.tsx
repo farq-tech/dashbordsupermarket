@@ -112,34 +112,32 @@ export function Topbar({
         )}
 
         <div
-          className="hidden md:flex shrink-0 items-center gap-0.5 p-1 rounded-lg border"
+          className="flex shrink-0 items-center gap-0.5 p-0.5 rounded-lg border"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
         >
           <button
             type="button"
             onClick={() => setDataSource('supermarket')}
-            className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors whitespace-nowrap"
+            className="px-2 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-xs rounded-md transition-colors whitespace-nowrap"
             style={{
               background: dataSource === 'supermarket' ? 'var(--color-surface-muted)' : 'transparent',
-              color:
-                dataSource === 'supermarket' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              color: dataSource === 'supermarket' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
               fontWeight: dataSource === 'supermarket' ? 600 : 500,
             }}
           >
-            {lang === 'ar' ? 'متاجر التجزئة' : 'Retail Market'}
+            {lang === 'ar' ? 'متاجر' : 'Retail'}
           </button>
           <button
             type="button"
             onClick={() => setDataSource('restaurants')}
-            className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors whitespace-nowrap"
+            className="px-2 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-xs rounded-md transition-colors whitespace-nowrap"
             style={{
               background: dataSource === 'restaurants' ? 'var(--color-surface-muted)' : 'transparent',
-              color:
-                dataSource === 'restaurants' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
+              color: dataSource === 'restaurants' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
               fontWeight: dataSource === 'restaurants' ? 600 : 500,
             }}
           >
-            {lang === 'ar' ? 'تطبيقات التوصيل' : 'Delivery Apps'}
+            {lang === 'ar' ? 'توصيل' : 'Delivery'}
           </button>
         </div>
 
@@ -158,7 +156,7 @@ export function Topbar({
           {desktopSidebarHidden ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
         </button>
 
-        <span className="text-xs hidden lg:block shrink-0 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+        <span className="text-xs hidden md:block shrink-0 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
           {lang === 'ar' ? 'آخر تحديث:' : 'Last updated:'} {formatDate(lastUpdated)}
         </span>
 

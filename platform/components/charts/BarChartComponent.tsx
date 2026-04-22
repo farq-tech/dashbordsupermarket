@@ -63,6 +63,56 @@ export function SimpleBarChart({
   )
 }
 
+interface HorizontalBarChartProps {
+  data: Record<string, unknown>[]
+  dataKey: string
+  nameKey?: string
+  color?: string
+  height?: number
+  unit?: string
+  colors?: string[]
+}
+
+export function HorizontalBarChart({
+  data, dataKey, nameKey = 'name', color,
+  height = 240, unit = '', colors,
+}: HorizontalBarChartProps) {
+  const theme = useChartTheme()
+  const barColor = color ?? theme.interactive
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} horizontal={false} />
+        <XAxis
+          type="number"
+          tick={{ fontSize: 11, fill: theme.axisTick }}
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={v => `${v}${unit}`}
+        />
+        <YAxis
+          type="category"
+          dataKey={nameKey}
+          tick={{ fontSize: 11, fill: theme.axisTick }}
+          axisLine={false}
+          tickLine={false}
+          width={80}
+        />
+        <Tooltip
+          contentStyle={chartTooltipStyle(theme)}
+          formatter={(v: unknown) => [`${v}${unit}`, '']}
+        />
+        <Bar dataKey={dataKey} radius={[0, 6, 6, 0]} maxBarSize={32}>
+          {colors
+            ? data.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)
+            : <Cell fill={barColor} />
+          }
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
 interface MultiBarProps {
   data: Record<string, unknown>[]
   keys: { dataKey: string; name: string; color: string }[]

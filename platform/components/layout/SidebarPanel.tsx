@@ -203,7 +203,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
                       )}
                       style={{
                         background: 'var(--color-interactive)',
-                        right: '0.5rem',
+                        insetInlineEnd: '0.5rem',
                       }}
                     />
                     <Icon className="h-4 w-4 shrink-0 opacity-90" />
@@ -218,12 +218,18 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
 
       {alertsCount > 0 && (
         <div className="px-3 pb-3">
-          <div className="rounded-lg px-3 py-2.5 flex items-center gap-2 border" style={{ background: '#FFFBEB', borderColor: '#FCD34D' }}>
+          <Link
+            href="/recommendations"
+            onClick={() => onInteract?.()}
+            className="rounded-lg px-3 py-2.5 flex items-center gap-2 border hover:opacity-90 transition-opacity"
+            style={{ background: '#FFFBEB', borderColor: '#FCD34D' }}
+          >
             <Bell className="h-4 w-4 shrink-0" style={{ color: '#B45309' }} />
-            <span className="text-xs font-medium" style={{ color: '#92400E' }}>
-              {alertsCount} {lang === 'ar' ? 'تنبيه' : 'alerts'}
+            <span className="text-xs font-medium flex-1" style={{ color: '#92400E' }}>
+              {alertsCount} {lang === 'ar' ? 'تنبيه — انقر للعرض' : 'alerts — tap to view'}
             </span>
-          </div>
+            <ChevronDown className="h-3 w-3 shrink-0 -rotate-90" style={{ color: '#B45309' }} />
+          </Link>
         </div>
       )}
 
