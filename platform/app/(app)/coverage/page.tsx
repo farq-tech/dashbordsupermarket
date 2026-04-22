@@ -125,10 +125,8 @@ export default function CoveragePage() {
         <Topbar title_ar={t.ar} title_en={t.en} />
         <div className="page-shell">
           <EmptyState
-            title_ar="لا توجد بيانات تغطية"
-            title_en="No coverage data"
-            description_ar="لم يتم العثور على بيانات السوبرماركتات."
-            description_en="Supermarket coverage data not found."
+            title={isAr ? 'لا توجد بيانات تغطية' : 'No coverage data'}
+            description={isAr ? 'لم يتم العثور على بيانات السوبرماركتات.' : 'Supermarket coverage data not found.'}
           />
         </div>
       </div>
