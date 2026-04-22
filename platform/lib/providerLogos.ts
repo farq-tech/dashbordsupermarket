@@ -11,7 +11,7 @@ export function getRetailerLogoUrl(
 ): string | undefined {
   if (source === 'supermarket') {
     const map: Record<number, string> = {
-      1: '/logos/carrefour.webp',
+      1: '/logos/farq.png',
       2: '/logos/panda.jpg',
       3: '/logos/danube.jpg',
       4: '/logos/tamimi.png',
@@ -21,8 +21,7 @@ export function getRetailerLogoUrl(
     return map[storeKey]
   }
   const map: Record<number, string> = {
-    /** First-party / direct ordering channel (see stores CSV — not a supermarket chain). */
-    1: '/logos/official-app.png',
+    1: '/logos/farq.png',
     2: '/logos/hungerstation.png',
     3: '/logos/jahez.png',
     4: '/logos/chefz.png',

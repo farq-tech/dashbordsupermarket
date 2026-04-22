@@ -55,7 +55,7 @@ const BRAND_COLORS = [
   fareeqChart.green,
   fareeqHex.amber,
   fareeqChart.coral,
-  fareeqHex.mintDark,
+  '#065f46',
   '#8B5CF6',
   '#EC4899',
   '#14B8A6',
