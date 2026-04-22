@@ -2991,7 +2991,7 @@
     {
       "brand_ar": "ترولي",
       "brand_en": "Trolley",
-      "logo": "/logos/trolley.png",
+      "logo": null,
       "total_branches": 59,
       "cities": [
         {
@@ -3913,7 +3913,7 @@
     {
       "brand_ar": "باجة",
       "brand_en": "Baja",
-      "logo": "/logos/baja.png",
+      "logo": null,
       "total_branches": 50,
       "cities": [
         {
@@ -4983,7 +4983,7 @@
     {
       "brand_ar": "المزرعة",
       "brand_en": "Farm",
-      "logo": "/logos/farm.png",
+      "logo": null,
       "total_branches": 32,
       "cities": [
         {
@@ -6697,7 +6697,7 @@
     {
       "brand_ar": "بن داود",
       "brand_en": "BinDawood",
-      "logo": "/logos/bindawood.png",
+      "logo": null,
       "total_branches": 15,
       "cities": [
         {
@@ -7792,7 +7792,7 @@
     {
       "brand_ar": "نستو",
       "brand_en": "Nesto",
-      "logo": "/logos/nesto.png",
+      "logo": null,
       "total_branches": 6,
       "cities": [
         {
