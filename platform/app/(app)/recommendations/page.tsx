@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
@@ -116,10 +116,17 @@ function AlertCard({ alert, lang }: { alert: Alert; lang: string }) {
   )
 }
 
+const escCsv = (v: unknown): string => {
+  const s = String(v ?? '')
+  return s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')
+    ? `"${s.replace(/"/g, '""')}"`
+    : s
+}
+
 function exportRecs(recs: Recommendation[], lang: string) {
   const isAr = lang === 'ar'
   const headers = isAr
-            ? ['العنوان', 'النوع', 'الأثر', 'الصنف', 'الإجراء', 'السبب', 'القيمة (ريال من البيانات)']
+    ? ['العنوان', 'النوع', 'الأثر', 'الصنف', 'الإجراء', 'السبب', 'القيمة (ريال من البيانات)']
     : ['Title', 'Type', 'Impact', 'Category', 'Action', 'Reason', 'Value (SAR from data)']
   const rows = recs.map(r => [
     isAr ? r.title_ar : r.title_en,
@@ -130,13 +137,14 @@ function exportRecs(recs: Recommendation[], lang: string) {
     isAr ? r.reason_ar : r.reason_en,
     r.value_estimate ?? '',
   ])
-  const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+  const csv = [headers, ...rows].map(r => r.map(escCsv).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = `recommendations_${Date.now()}.csv`
   a.click()
+  URL.revokeObjectURL(url)
 }
 
 export default function RecommendationsPage() {
@@ -153,6 +161,7 @@ export default function RecommendationsPage() {
   })
   const [lastUndone, setLastUndone] = useState<string | null>(null)
   const [tab, setTab] = useState<'recs' | 'alerts'>('recs')
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     try { localStorage.setItem('recs_done', JSON.stringify([...done])) } catch { /* ignore */ }
@@ -161,8 +170,8 @@ export default function RecommendationsPage() {
   const markDone = useCallback((id: string) => {
     setDone(prev => new Set([...prev, id]))
     setLastUndone(id)
-    const t = setTimeout(() => setLastUndone(null), 5000)
-    return () => clearTimeout(t)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = setTimeout(() => setLastUndone(null), 5000)
   }, [])
 
   const undoDone = useCallback((id: string) => {
@@ -243,13 +252,17 @@ export default function RecommendationsPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex border-b border-neutral-200 gap-1">
+        <div role="tablist" aria-label={isAr ? 'التوصيات والتنبيهات' : 'Recommendations and alerts'} className="flex border-b border-neutral-200 gap-1">
           {[
             { key: 'recs', ar: 'التوصيات', en: 'Recommendations', count: filtered.length },
             { key: 'alerts', ar: 'التنبيهات', en: 'Alerts', count: alerts.length },
           ].map(t => (
             <button
               key={t.key}
+              role="tab"
+              aria-selected={tab === t.key}
+              aria-controls={`tabpanel-${t.key}`}
+              id={`tab-${t.key}`}
               onClick={() => setTab(t.key as 'recs' | 'alerts')}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                 tab === t.key
@@ -269,7 +282,7 @@ export default function RecommendationsPage() {
         </div>
 
         {tab === 'recs' && (
-          <>
+          <div role="tabpanel" id="tabpanel-recs" aria-labelledby="tab-recs">
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-2">
             {done.size > 0 && (
@@ -360,11 +373,11 @@ export default function RecommendationsPage() {
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {tab === 'alerts' && (
-          <div className="space-y-3">
+          <div role="tabpanel" id="tabpanel-alerts" aria-labelledby="tab-alerts" className="space-y-3">
             {alerts.length === 0 ? (
               <Card className="py-12 text-center">
                 <p className="text-neutral-400 text-sm">{isAr ? 'لا توجد تنبيهات حالياً' : 'No active alerts'}</p>

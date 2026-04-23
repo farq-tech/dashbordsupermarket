@@ -83,10 +83,11 @@ export default function CoveragePage() {
   const [citySearch, setCitySearch] = useState('')
 
   useEffect(() => {
+    const controller = new AbortController()
     setLoading(true)
     setFetchError(false)
     const url = selectedCity === '__all__' ? '/api/coverage' : `/api/coverage?city=${encodeURIComponent(selectedCity)}`
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.json()
@@ -96,10 +97,12 @@ export default function CoveragePage() {
         setSelectedBrand(null)
         setLoading(false)
       })
-      .catch(() => {
+      .catch((err) => {
+        if ((err as Error).name === 'AbortError') return
         setFetchError(true)
         setLoading(false)
       })
+    return () => controller.abort()
   }, [selectedCity])
 
   const brandDetail = useMemo(() => {

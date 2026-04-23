@@ -131,7 +131,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       kpis,
-      comparisons: comparisons.slice(0, 200),
+      comparisons,
       recommendations: recs,
       alerts,
       market: marketSummary,

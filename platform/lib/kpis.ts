@@ -7,6 +7,27 @@ import type {
   CategoryKPI,
   ProductComparison,
 } from './types'
+
+/**
+ * Returns a / b, or `fallback` (default 0) when b is zero, negative, or non-finite.
+ * Prevents Infinity / NaN from reaching KPIs and charts.
+ */
+export function safeDivide(a: number, b: number, fallback = 0): number {
+  if (!Number.isFinite(b) || b <= 0) return fallback
+  const result = a / b
+  return Number.isFinite(result) ? result : fallback
+}
+
+/**
+ * Unified price-gap thresholds (% relative to min_price in the market).
+ * Single source of truth used across KPI computation and tooltips.
+ */
+export const PRICE_THRESHOLDS = {
+  cheapest: 2,      // ≤ 2 % above min → "cheapest in market"
+  competitive: 10,  // 2–10 % above min → "competitive"
+  overpriced: 10,   // > 10 % above min → "overpriced"
+  underpriced: -5,  // < −5 % below min → "underpriced"
+} as const
 import { getSupermarketChainDisplay } from './supermarketChainLabels'
 import { getRetailerLogoUrl } from './providerLogos'
 
@@ -124,15 +145,17 @@ export function computeRetailerKPIs(
 
   covered.forEach(m => {
     const myPrice = myPriceMap.get(m.FID)!
+    if (m.min_price <= 0) return  // skip invalid pricing rows to avoid Infinity / NaN
     const marketAvg = (m.min_price + m.max_price) / 2
     sumMy += myPrice
     sumMarket += marketAvg
     count++
 
-    const gapPct = ((myPrice - m.min_price) / m.min_price) * 100
-    if (gapPct <= 2) cheapestCount++
-    if (gapPct > 10) overpricedCount++
-    else if (gapPct < -5) underpricedCount++
+    const gapPct = safeDivide(myPrice - m.min_price, m.min_price) * 100
+    // Mutually exclusive buckets
+    if (gapPct <= PRICE_THRESHOLDS.cheapest) cheapestCount++
+    else if (gapPct > PRICE_THRESHOLDS.overpriced) overpricedCount++
+    else if (gapPct < PRICE_THRESHOLDS.underpriced) underpricedCount++
     else competitiveCount++
   })
 
@@ -169,16 +192,22 @@ export function computeRetailerKPIs(
       const marketAvg = c.products.length > 0
         ? c.products.reduce((a, m) => a + (m.min_price + m.max_price) / 2, 0) / c.products.length
         : 0
-      const pi = marketAvg > 0 ? (myAvg / marketAvg) * 100 : 100
+      const pi = safeDivide(myAvg, marketAvg, 100) * 100
       const cheapest = c.products.filter(m => {
         const mp = myPriceMap.get(m.FID)
-        return mp !== undefined && ((mp - m.min_price) / m.min_price) * 100 <= 2
+        return mp !== undefined && m.min_price > 0 &&
+          safeDivide(mp - m.min_price, m.min_price) * 100 <= PRICE_THRESHOLDS.cheapest
       }).length
       const competitive = c.products.filter(m => {
         const mp = myPriceMap.get(m.FID)
-        if (!mp) return false
-        const gap = ((mp - m.min_price) / m.min_price) * 100
-        return gap > 2 && gap <= 10
+        if (!mp || m.min_price <= 0) return false
+        const gap = safeDivide(mp - m.min_price, m.min_price) * 100
+        return gap > PRICE_THRESHOLDS.cheapest && gap <= PRICE_THRESHOLDS.competitive
+      }).length
+      const overpriced = c.products.filter(m => {
+        const mp = myPriceMap.get(m.FID)
+        if (!mp || m.min_price <= 0) return false
+        return safeDivide(mp - m.min_price, m.min_price) * 100 > PRICE_THRESHOLDS.overpriced
       }).length
       return {
         name_ar: c.name_ar,
@@ -189,6 +218,7 @@ export function computeRetailerKPIs(
         pricing_index: pi,
         cheapest_count: cheapest,
         competitive_count: competitive,
+        overpriced_count: overpriced,
       }
     })
     .sort((a, b) => b.product_count - a.product_count)
@@ -243,7 +273,9 @@ export function buildProductComparisons(
     const priceRank = myPrice !== null ? sortedPrices.indexOf(myPrice) + 1 : -1
 
     const priceSpreads = Array.from(storePrices.entries())
-    const gapPct = myPrice !== null ? ((myPrice - m.min_price) / m.min_price) * 100 : 0
+    const gapPct = (myPrice !== null && m.min_price > 0)
+      ? safeDivide(myPrice - m.min_price, m.min_price) * 100
+      : 0
     const gapSar = myPrice !== null ? (myPrice - m.cheapest_price) : 0
 
     // Tag
@@ -305,7 +337,7 @@ export function getMarketSummary(prices: PriceRow[], matching: MatchingRow[], re
       : 0
     const cheapestCount = covered.filter(m => {
       const mp = rMap.get(m.FID)!
-      return ((mp - m.min_price) / m.min_price) * 100 <= 2
+      return m.min_price > 0 && safeDivide(mp - m.min_price, m.min_price) * 100 <= PRICE_THRESHOLDS.cheapest
     }).length
 
     return {

@@ -22,6 +22,15 @@ export function PriceScatterChart({ data, height = 300, xLabel = 'Market Avg', y
   const tagColor = (tag: string | undefined) =>
     (tag && theme.scatterTags[tag as keyof typeof theme.scatterTags]) || theme.interactive
 
+  // Compute parity line domain from actual data so y = x always spans the visible range
+  const maxVal = data.length > 0
+    ? Math.ceil(Math.max(...data.map(d => Math.max(d.x, d.y))) * 1.1)
+    : 200
+  const paritySegment: [{ x: number; y: number }, { x: number; y: number }] = [
+    { x: 0, y: 0 },
+    { x: maxVal, y: maxVal },
+  ]
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
@@ -48,11 +57,12 @@ export function PriceScatterChart({ data, height = 300, xLabel = 'Market Avg', y
           contentStyle={chartTooltipStyle(theme, { fontSize: 11 })}
           cursor={{ strokeDasharray: '3 3' }}
         />
+        {/* y = x parity line — points above the line are priced above market, below are cheaper */}
         <ReferenceLine
-          y={0}
           stroke={theme.grid}
-          strokeDasharray="0"
-          segment={[{ x: 0, y: 0 }, { x: 200, y: 200 }]}
+          strokeDasharray="5 4"
+          strokeWidth={1.5}
+          segment={paritySegment}
         />
         <Scatter
           data={data}

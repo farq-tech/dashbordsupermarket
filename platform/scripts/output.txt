@@ -1,0 +1,24 @@
+﻿Total grocery POIs: 12505
+Unique brands identified: 8035
+
+TOP 50 BRANDS:
+  Baqala: 1539 POIs | cities: Riyadh(913), Makkah Al Mukarramah(609), Ad Diriyah(17)
+python : Traceback (most recent call last):
+At C:\Users\abdul\AppData\Local\Temp\ps-script-e1ba749d-fd25-4754-b612-ee7cb7a6b9aa.ps1:90 char:1
++ python "E:\dashbord b to b\platform\scripts\find_supermarkets.py" 2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "E:\dashbord b to b\platform\scripts\find_supermarkets.py", line 149, in <module>
+    main()
+    ~~~~^^
+  File "E:\dashbord b to b\platform\scripts\find_supermarkets.py", line 78, in main
+    print(f"    sample: {s}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program 
+Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3568.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 
+19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 12-16: character maps to <undefined>

@@ -44,6 +44,12 @@ const KIND_LABEL = {
   alert: { ar: 'تنبيه', en: 'Alert' },
 } as const
 
+const IMPACT_I18N = {
+  high: { ar: 'تأثير عالٍ', en: 'High impact' },
+  medium: { ar: 'تأثير متوسط', en: 'Medium impact' },
+  low: { ar: 'تأثير منخفض', en: 'Low impact' },
+} as const
+
 const WF_STATUS: { value: DecisionWorkflowStatus; ar: string; en: string }[] = [
   { value: 'new', ar: 'جديد', en: 'New' },
   { value: 'doing', ar: 'قيد التنفيذ', en: 'In progress' },
@@ -103,9 +109,9 @@ export default function DecisionsPage() {
       top_n: String(scenarioTopN),
     })
     fetch(`/api/data?${q}`)
-      .then(r => r.json())
-      .then((j) => {
-        if (!cancelled && j.scenario) setScenario(j.scenario as ScenarioResult)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
+      .then((j: { scenario?: ScenarioResult }) => {
+        if (!cancelled && j.scenario) setScenario(j.scenario)
       })
       .catch(() => {
         if (!cancelled) setScenario(null)
@@ -210,9 +216,9 @@ export default function DecisionsPage() {
           >
             {isAr ? 'تصدير سير العمل' : 'Export workflow JSON'}
           </Button>
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm">{isAr ? 'اللوحة' : 'Dashboard'}</Button>
-          </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard">{isAr ? 'اللوحة' : 'Dashboard'}</Link>
+          </Button>
         </div>
 
         {/* Executive snapshot */}
@@ -298,8 +304,9 @@ export default function DecisionsPage() {
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-3 items-end">
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">{isAr ? 'الاستراتيجية' : 'Strategy'}</label>
+                <label htmlFor="scenario-strategy" className="text-xs text-neutral-500 block mb-1">{isAr ? 'الاستراتيجية' : 'Strategy'}</label>
                 <select
+                  id="scenario-strategy"
                   value={scenarioStrategy}
                   onChange={e => setScenarioStrategy(e.target.value as 'match_cheapest' | 'lift_to_market_avg')}
                   className="border rounded-lg px-2 py-1.5 text-sm"
@@ -309,8 +316,9 @@ export default function DecisionsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">N</label>
+                <label htmlFor="scenario-topn" className="text-xs text-neutral-500 block mb-1">{isAr ? 'عدد المنتجات (N)' : 'Number of SKUs (N)'}</label>
                 <input
+                  id="scenario-topn"
                   type="number"
                   min={1}
                   max={DECISION_POLICY.scenarios.maxScenarioLineItems}
@@ -438,7 +446,7 @@ export default function DecisionsPage() {
                             variant={item.impact === 'high' ? 'danger' : item.impact === 'medium' ? 'warning' : 'neutral'}
                             size="sm"
                           >
-                            {item.impact}
+                            {isAr ? IMPACT_I18N[item.impact].ar : IMPACT_I18N[item.impact].en}
                           </Badge>
                           <span className="text-xs text-neutral-400 tabular-nums ms-auto">
                             score {item.score}
@@ -470,7 +478,9 @@ export default function DecisionsPage() {
 
                         <div className="no-print flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100">
                           <UserCircle className="h-4 w-4 text-neutral-400" />
+                          <label htmlFor={`wf-status-${item.id}`} className="sr-only">{isAr ? 'الحالة' : 'Status'}</label>
                           <select
+                            id={`wf-status-${item.id}`}
                             value={wf?.status ?? 'new'}
                             onChange={(e) => {
                               setWorkflowEntry(item.id, { status: e.target.value as DecisionWorkflowStatus })
@@ -482,7 +492,9 @@ export default function DecisionsPage() {
                               <option key={s.value} value={s.value}>{isAr ? s.ar : s.en}</option>
                             ))}
                           </select>
+                          <label htmlFor={`wf-owner-${item.id}`} className="sr-only">{isAr ? 'المسؤول' : 'Owner'}</label>
                           <input
+                            id={`wf-owner-${item.id}`}
                             type="text"
                             placeholder={isAr ? 'المسؤول' : 'Owner'}
                             defaultValue={wf?.assignee ?? ''}

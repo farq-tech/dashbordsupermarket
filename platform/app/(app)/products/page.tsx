@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
@@ -10,7 +10,8 @@ import { TagBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { ErrorState } from '@/components/ui/error-state'
-import { Search, Download } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Search, Download, X } from 'lucide-react'
 import type { ProductComparison } from '@/lib/types'
 import { cn } from '@/components/ui/cn'
 
@@ -52,10 +53,12 @@ function exportCsv(data: ProductComparison[], lang: string) {
   a.href = url
   a.download = `product_comparison_${Date.now()}.csv`
   a.click()
+  URL.revokeObjectURL(url)
 }
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
   const [search, setSearch] = useState('')
@@ -125,18 +128,29 @@ function ProductsPageContent() {
       <div className="page-shell">
 
         {deepLinkOnly && (
-          <p
-            className="text-xs rounded-lg border px-3 py-2"
+          <div
+            className="flex items-center justify-between gap-3 text-xs rounded-lg border px-3 py-2"
             style={{
               color: 'var(--color-interactive)',
               background: 'var(--color-surface-muted)',
               borderColor: 'var(--color-border)',
             }}
           >
-            {isAr
-              ? 'عرض منتج مرتبط بالرابط. امسح البحث أو أضف فلاتر لعرض القائمة الكاملة.'
-              : 'Showing linked product. Use search or filters to see the full list again.'}
-          </p>
+            <span>
+              {isAr
+                ? 'عرض منتج محدد بالرابط.'
+                : 'Showing linked product.'}
+            </span>
+            <button
+              type="button"
+              onClick={() => router.replace('/products')}
+              className="flex items-center gap-1 font-medium hover:underline shrink-0"
+              style={{ color: 'var(--color-interactive)' }}
+            >
+              <X className="h-3.5 w-3.5" />
+              {isAr ? 'عرض كل المنتجات' : 'Show all products'}
+            </button>
+          </div>
         )}
 
         {/* Summary chips */}
@@ -151,8 +165,8 @@ function ProductsPageContent() {
             >
               {count.toLocaleString()}
               <span>{isAr
-                ? { overpriced: 'مرتفع', risk: 'خطر', competitive: 'تنافسي', underpriced: 'منخفض', opportunity: 'فرصة', not_stocked: 'غير متوفر' }[tag]
-                : tag}</span>
+                ? ({ overpriced: 'مرتفع', risk: 'خطر', competitive: 'تنافسي', underpriced: 'منخفض', opportunity: 'فرصة', not_stocked: 'غير متوفر' } as Record<string, string>)[tag] ?? tag
+                : ({ overpriced: 'Overpriced', risk: 'Risk', competitive: 'Competitive', underpriced: 'Underpriced', opportunity: 'Opportunity', not_stocked: 'Not Stocked' } as Record<string, string>)[tag] ?? tag}</span>
             </button>
           ))}
         </div>
@@ -194,7 +208,21 @@ function ProductsPageContent() {
           </p>
         </Card>
 
+        {/* Empty state */}
+        {paged.length === 0 && !loading && (
+          <EmptyState
+            title={isAr ? 'لا توجد منتجات تطابق البحث' : 'No products match your search'}
+            description={isAr ? 'جرّب تغيير الفلاتر أو مسح البحث لعرض القائمة الكاملة.' : 'Try adjusting filters or clearing the search to see all products.'}
+            action={(search || filterTag || filterCat) ? (
+              <Button variant="outline" size="sm" onClick={() => { setSearch(''); setFilterTag(''); setFilterCat(''); setPage(1) }}>
+                {isAr ? 'مسح الفلاتر' : 'Clear filters'}
+              </Button>
+            ) : undefined}
+          />
+        )}
+
         {/* Table */}
+        {paged.length > 0 && (
         <Card className="p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -289,6 +317,7 @@ function ProductsPageContent() {
             </div>
           </div>
         </Card>
+        )}
       </div>
     </div>
   )

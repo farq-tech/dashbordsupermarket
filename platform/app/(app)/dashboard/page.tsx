@@ -112,7 +112,9 @@ function DashboardPageInner() {
       : null
   const prevSnapshot = currentSnapshot ? getPreviousSnapshot(currentSnapshot) : null
   const priceDriftRatio =
-    prevSnapshot && kpis.pricing_index ? prevSnapshot.pricing_index / kpis.pricing_index : 1
+    prevSnapshot && kpis.pricing_index > 0
+      ? Math.min(2, Math.max(0.5, prevSnapshot.pricing_index / kpis.pricing_index))
+      : 1
 
   const catChartData = topCats.map(c => ({
     name: isAr ? c.name_ar.slice(0, 14) : c.name_en.slice(0, 14),
@@ -144,8 +146,9 @@ function DashboardPageInner() {
   const piLabel = getPricingIndexLabel(kpis.pricing_index)
 
   const myKpis = all_kpis.find(k => k.retailer.store_key === selectedRetailer?.store_key) ?? kpis
-  const marketRank = [...all_kpis].sort((a, b) => b.performance_score - a.performance_score)
-    .findIndex(k => k.retailer.store_key === selectedRetailer?.store_key) + 1
+  const _rankIdx = [...all_kpis].sort((a, b) => b.performance_score - a.performance_score)
+    .findIndex(k => k.retailer.store_key === selectedRetailer?.store_key)
+  const marketRank = _rankIdx === -1 ? null : _rankIdx + 1
 
   const pageTitle = PAGE_TITLES['/dashboard']
   let insightBlock: {
@@ -256,7 +259,10 @@ function DashboardPageInner() {
             title_en="Performance Score"
             value={myKpis.performance_score}
             unit="/100"
-            subtitle={isAr ? `ترتيبك: #${marketRank} بين السلاسل` : `Rank: #${marketRank} among chains`}
+            subtitle={marketRank != null
+              ? (isAr ? `ترتيبك: #${marketRank} بين السلاسل` : `Rank: #${marketRank} among chains`)
+              : (isAr ? 'الترتيب: غير متوفر' : 'Rank: —')
+            }
             color="var(--color-interactive-pressed)"
             icon={<Target className="h-5 w-5" />}
             lang={lang}
@@ -434,18 +440,25 @@ function DashboardPageInner() {
                   }
                   />
                 ) : (
-                  <ChartReveal>
-                    <CategoryPerformanceComboChart
-                      data={catChartData}
-                      productsKey={productsKey}
-                      priceKey={priceKey}
-                      pricePrevKey={pricePrevKey}
-                      productsLabel={isAr ? 'المنتجات' : 'Products'}
-                      priceLabel={priceKey}
-                      prevLineLabel={pricePrevKey}
-                      height={260}
-                    />
-                  </ChartReveal>
+                  <>
+                    <ChartReveal>
+                      <CategoryPerformanceComboChart
+                        data={catChartData}
+                        productsKey={productsKey}
+                        priceKey={priceKey}
+                        pricePrevKey={pricePrevKey}
+                        productsLabel={isAr ? 'المنتجات' : 'Products'}
+                        priceLabel={priceKey}
+                        prevLineLabel={pricePrevKey}
+                        height={260}
+                      />
+                    </ChartReveal>
+                    <p className="text-[11px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                      {isAr
+                        ? 'المحور الأيسر: عدد المنتجات — المحور الأيمن: مؤشر التسعير (%) — الخط المتقطع: تقدير الفترة السابقة.'
+                        : 'Left axis: product count — Right axis: pricing index (%) — dashed line: prior period estimate.'}
+                    </p>
+                  </>
                 )}
               </CardContent>
             </Card>

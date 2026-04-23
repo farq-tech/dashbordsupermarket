@@ -86,6 +86,7 @@ export interface CategoryKPI {
   pricing_index: number
   cheapest_count: number
   competitive_count: number
+  overpriced_count: number
 }
 
 export interface ProductComparison {

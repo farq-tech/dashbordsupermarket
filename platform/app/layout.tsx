@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
+import { HtmlLangSync } from './HtmlLangSync'
 
 /** ITF Huwiya Arabic — primary UI Arabic/Latin stack (see `fonts/itfHuwiyaArabic/*.otf`). */
 const huwiyaArabic = localFont({
@@ -44,7 +45,10 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={`${huwiyaArabic.variable} ${inter.variable} ${poppins.variable}`}>
-      <body>{children}</body>
+      <body>
+        <HtmlLangSync />
+        {children}
+      </body>
     </html>
   )
 }
