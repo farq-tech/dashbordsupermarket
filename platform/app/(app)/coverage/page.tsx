@@ -573,6 +573,9 @@ export default function CoveragePage() {
             </CardContent>
           </Card>
         )}
+
+        {/* ── Expansion Intelligence ── */}
+        <ExpansionIntelligence data={data} isAr={isAr} />
       </div>
     </div>
   )
@@ -613,6 +616,385 @@ function StatBlock({ label, value }: { label: string; value: string | number }) 
       <p className="text-lg font-bold tabular-nums mt-0.5" style={{ color: 'var(--color-text-primary)' }}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// Expansion Intelligence
+// ─────────────────────────────────────────────────────────────
+
+interface ExpansionCity extends CityInfo {
+  expansionScore: number
+  opportunityLevel: 'high' | 'medium' | 'mature'
+}
+
+function computeExpansionScore(c: CityInfo): number {
+  return Math.round(c.brands * 10 + c.pois * 0.5)
+}
+
+function opportunityLevel(score: number): 'high' | 'medium' | 'mature' {
+  if (score > 200) return 'high'
+  if (score >= 100) return 'medium'
+  return 'mature'
+}
+
+function OpportunityBadge({ level, isAr }: { level: 'high' | 'medium' | 'mature'; isAr: boolean }) {
+  const styles: Record<typeof level, { bg: string; color: string; label_ar: string; label_en: string }> = {
+    high: {
+      bg: 'color-mix(in srgb, var(--color-trend-up) 12%, transparent)',
+      color: 'var(--color-trend-up)',
+      label_ar: 'فرصة عالية',
+      label_en: 'High Opportunity',
+    },
+    medium: {
+      bg: 'color-mix(in srgb, #f59e0b 12%, transparent)',
+      color: '#b45309',
+      label_ar: 'فرصة متوسطة',
+      label_en: 'Medium Opportunity',
+    },
+    mature: {
+      bg: 'var(--color-surface-muted)',
+      color: 'var(--color-text-muted)',
+      label_ar: 'سوق ناضج',
+      label_en: 'Mature Market',
+    },
+  }
+  const s = styles[level]
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+      style={{ background: s.bg, color: s.color }}
+    >
+      {isAr ? s.label_ar : s.label_en}
+    </span>
+  )
+}
+
+function ExpansionIntelligence({ data, isAr }: { data: ApiResponse; isAr: boolean }) {
+  const expansionCities = useMemo<ExpansionCity[]>(() => {
+    return data.cities
+      .map(c => {
+        const score = computeExpansionScore(c)
+        return { ...c, expansionScore: score, opportunityLevel: opportunityLevel(score) }
+      })
+      .sort((a, b) => b.expansionScore - a.expansionScore)
+  }, [data.cities])
+
+  // Top 8 cities by POI for brand distribution grid
+  const top8Cities = useMemo(() => {
+    return [...data.cities].sort((a, b) => b.pois - a.pois).slice(0, 8)
+  }, [data.cities])
+
+  // Brand lookup per city: for each city_en, find brands that have that city
+  const brandsByCity = useMemo(() => {
+    const map: Record<string, { brand: BrandSummary; count: number }[]> = {}
+    for (const city of top8Cities) {
+      const entries = data.brands
+        .map(b => {
+          const cityEntry = b.cities.find(c => c.city_en === city.city_en)
+          return cityEntry ? { brand: b, count: cityEntry.count } : null
+        })
+        .filter((x): x is { brand: BrandSummary; count: number } => x !== null)
+        .sort((a, b) => b.count - a.count)
+      map[city.city_en] = entries
+    }
+    return map
+  }, [top8Cities, data.brands])
+
+  // Section C: competitive intensity stats
+  const mostCompetitive = useMemo(
+    () => [...data.cities].sort((a, b) => b.brands - a.brands)[0] ?? null,
+    [data.cities]
+  )
+  const leastCompetitive = useMemo(
+    () => data.cities.filter(c => c.pois > 0).sort((a, b) => a.brands - b.brands)[0] ?? null,
+    [data.cities]
+  )
+  const avgBrandsPerCity = useMemo(() => {
+    if (!data.cities.length) return 0
+    const sum = data.cities.reduce((s, c) => s + c.brands, 0)
+    return Math.round((sum / data.cities.length) * 10) / 10
+  }, [data.cities])
+
+  const lowOpportunityCities = expansionCities.filter(c => c.opportunityLevel === 'mature')
+  const lowCityNames = lowOpportunityCities.map(c => (isAr ? c.city_ar : c.city_en)).join('، ')
+
+  return (
+    <div className="animate-fade-in space-y-[var(--density-grid-gap)]">
+      {/* Divider */}
+      <div className="border-t" style={{ borderColor: 'var(--color-border)' }} />
+
+      {/* Section header */}
+      <div>
+        <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          {isAr ? 'ذكاء التوسع' : 'Expansion Intelligence'}
+        </h2>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+          {isAr
+            ? 'تحليل الفرص الجغرافية وكثافة المنافسة لدعم قرارات التوسع.'
+            : 'Geographic opportunity analysis and competitive intensity to support expansion decisions.'}
+        </p>
+      </div>
+
+      {/* ── Section A: City Expansion Scorecard ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isAr
+              ? 'فرص التوسع الجغرافي / Geographic Expansion Opportunities'
+              : 'Geographic Expansion Opportunities / فرص التوسع الجغرافي'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr
+                  className="border-b text-start"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                >
+                  <th className="py-3 px-3 text-start font-medium">{isAr ? 'المدينة' : 'City'}</th>
+                  <th className="py-3 px-3 text-start font-medium">{isAr ? 'العلامات الموجودة' : 'Brands Present'}</th>
+                  <th className="py-3 px-3 text-start font-medium">{isAr ? 'إجمالي المنافذ' : 'Total POIs'}</th>
+                  <th className="py-3 px-3 text-start font-medium">{isAr ? 'درجة التوسع' : 'Expansion Score'}</th>
+                  <th className="py-3 px-3 text-start font-medium">{isAr ? 'مستوى الفرصة' : 'Opportunity Level'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expansionCities.map(city => (
+                  <tr
+                    key={city.city_en}
+                    className="border-b transition-colors hover:bg-[var(--color-surface-muted)]"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <td className="py-3 px-3">
+                      <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                        {isAr ? city.city_ar : city.city_en}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                        {isAr ? city.city_en : city.city_ar}
+                      </p>
+                    </td>
+                    <td className="py-3 px-3 tabular-nums font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                      {city.brands}
+                    </td>
+                    <td className="py-3 px-3 tabular-nums" style={{ color: 'var(--color-text-secondary)' }}>
+                      {city.pois.toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-1.5 w-16 rounded-full overflow-hidden"
+                          style={{ background: 'var(--color-surface-muted)' }}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${Math.min(100, (city.expansionScore / Math.max(...expansionCities.map(c => c.expansionScore), 1)) * 100)}%`,
+                              background: city.opportunityLevel === 'high'
+                                ? 'var(--color-trend-up)'
+                                : city.opportunityLevel === 'medium'
+                                  ? '#f59e0b'
+                                  : 'var(--color-text-muted)',
+                            }}
+                          />
+                        </div>
+                        <span className="tabular-nums text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                          {city.expansionScore}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <OpportunityBadge level={city.opportunityLevel} isAr={isAr} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Section B: Brand Distribution by City ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isAr
+              ? 'توزيع العلامات التجارية بالمدن / Brand Distribution by City'
+              : 'Brand Distribution by City / توزيع العلامات التجارية بالمدن'}
+          </CardTitle>
+          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+            {isAr ? 'أعلى 8 مدن حسب عدد المنافذ' : 'Top 8 cities by POI count'}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {top8Cities.map(city => {
+              const cityBrands = brandsByCity[city.city_en] ?? []
+              const top5 = cityBrands.slice(0, 5)
+              return (
+                <div
+                  key={city.city_en}
+                  className="rounded-[var(--radius-lg)] border p-4"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                        {isAr ? city.city_ar : city.city_en}
+                      </p>
+                      <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                        {cityBrands.length} {isAr ? 'علامة تجارية' : 'brands'}
+                      </p>
+                    </div>
+                    <span
+                      className="text-xs tabular-nums font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: 'color-mix(in srgb, var(--color-interactive) 10%, transparent)',
+                        color: 'var(--color-interactive)',
+                      }}
+                    >
+                      {city.pois.toLocaleString()} {isAr ? 'منفذ' : 'POIs'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {top5.map(({ brand, count }) => (
+                      <div
+                        key={brand.brand_en}
+                        className="flex items-center gap-1 rounded-full border px-2 py-1"
+                        style={{
+                          borderColor: 'var(--color-border)',
+                          background: 'var(--color-surface-muted)',
+                        }}
+                      >
+                        {brand.logo ? (
+                          <span className="relative h-4 w-4 shrink-0 overflow-hidden rounded bg-white">
+                            <Image
+                              src={brand.logo}
+                              alt={brand.brand_en}
+                              width={16}
+                              height={16}
+                              className="object-contain"
+                            />
+                          </span>
+                        ) : (
+                          <span
+                            className="h-4 w-4 rounded flex items-center justify-center text-[9px] font-bold text-white shrink-0"
+                            style={{ background: BRAND_COLORS[data.brands.indexOf(brand) % BRAND_COLORS.length] }}
+                          >
+                            {brand.brand_ar.charAt(0)}
+                          </span>
+                        )}
+                        <span className="text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
+                          {isAr ? brand.brand_ar : brand.brand_en}
+                        </span>
+                        <span
+                          className="text-[10px] tabular-nums font-semibold"
+                          style={{ color: 'var(--color-text-muted)' }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                    {cityBrands.length > 5 && (
+                      <span
+                        className="flex items-center rounded-full px-2 py-1 text-[11px]"
+                        style={{ background: 'var(--color-surface-muted)', color: 'var(--color-text-muted)' }}
+                      >
+                        +{cityBrands.length - 5}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Section C: Competitive Intensity ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isAr
+              ? 'كثافة المنافسة / Competitive Intensity'
+              : 'Competitive Intensity / كثافة المنافسة'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Most competitive */}
+            <div
+              className="rounded-[var(--radius-lg)] border p-4"
+              style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+            >
+              <p className="text-[11px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr ? 'أكثر مدينة منافسة' : 'Most Competitive City'}
+              </p>
+              <p className="text-lg font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>
+                {mostCompetitive ? (isAr ? mostCompetitive.city_ar : mostCompetitive.city_en) : '—'}
+              </p>
+              {mostCompetitive && (
+                <p className="text-xs mt-0.5 tabular-nums" style={{ color: 'var(--color-text-secondary)' }}>
+                  {mostCompetitive.brands} {isAr ? 'علامة' : 'brands'} · {mostCompetitive.pois.toLocaleString()} {isAr ? 'منفذ' : 'POIs'}
+                </p>
+              )}
+            </div>
+
+            {/* Least competitive */}
+            <div
+              className="rounded-[var(--radius-lg)] border p-4"
+              style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+            >
+              <p className="text-[11px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr ? 'أقل مدينة منافسة' : 'Least Competitive City'}
+              </p>
+              <p className="text-lg font-bold mt-1" style={{ color: 'var(--color-trend-up)' }}>
+                {leastCompetitive ? (isAr ? leastCompetitive.city_ar : leastCompetitive.city_en) : '—'}
+              </p>
+              {leastCompetitive && (
+                <p className="text-xs mt-0.5 tabular-nums" style={{ color: 'var(--color-text-secondary)' }}>
+                  {leastCompetitive.brands} {isAr ? 'علامة' : 'brands'} · {leastCompetitive.pois.toLocaleString()} {isAr ? 'منفذ' : 'POIs'}
+                </p>
+              )}
+            </div>
+
+            {/* Average brands */}
+            <div
+              className="rounded-[var(--radius-lg)] border p-4"
+              style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+            >
+              <p className="text-[11px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr ? 'متوسط العلامات لكل مدينة' : 'Avg Brands per City'}
+              </p>
+              <p className="text-lg font-bold tabular-nums mt-1" style={{ color: 'var(--color-interactive)' }}>
+                {avgBrandsPerCity}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                {isAr ? `عبر ${data.cities.length} مدينة` : `across ${data.cities.length} cities`}
+              </p>
+            </div>
+          </div>
+
+          {/* Insight text */}
+          {lowOpportunityCities.length > 0 && (
+            <div
+              className="rounded-[var(--radius-lg)] border-s-4 px-4 py-3"
+              style={{
+                borderColor: 'var(--color-interactive)',
+                background: 'color-mix(in srgb, var(--color-interactive) 6%, transparent)',
+              }}
+            >
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                {isAr
+                  ? `المدن ذات الكثافة المنخفضة (${lowCityNames}) قد تمثل فرصاً للتوسع بمنافسة أقل.`
+                  : `Cities with low competitive density (${lowCityNames}) may represent expansion opportunities with less competition.`}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
