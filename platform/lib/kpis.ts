@@ -263,6 +263,15 @@ export function buildProductComparisons(
     allPricesMap.get(p.FID)!.set(p.StoreKey, p.Price)
   })
 
+  // Build attr map: FID -> first non-empty AttrUnit / AttrVal across all price rows
+  const attrMap = new Map<number, { attr_unit: string; attr_val: string }>()
+  prices.forEach(p => {
+    if (attrMap.has(p.FID)) return
+    const unit = p.AttrUnit != null ? String(p.AttrUnit).trim() : ''
+    const val  = p.AttrVal  != null ? String(p.AttrVal).trim()  : ''
+    if (unit || val) attrMap.set(p.FID, { attr_unit: unit, attr_val: val })
+  })
+
   return matching.map(m => {
     const myPrice = myPriceMap.get(m.FID) ?? null
     const storePrices = allPricesMap.get(m.FID) ?? new Map()
@@ -315,6 +324,8 @@ export function buildProductComparisons(
       tag,
       recommended_action: action,
       prices_by_store: Object.fromEntries(priceSpreads),
+      price_spread: Math.round((m.max_price - m.min_price) * 100) / 100,
+      ...(attrMap.get(m.FID) ?? {}),
     }
   })
 }

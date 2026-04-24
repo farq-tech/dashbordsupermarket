@@ -101,6 +101,7 @@ export interface ProductComparison {
   market_avg: number
   min_price: number
   max_price: number
+  price_spread?: number   // max_price - min_price across all stores
   cheapest_price: number
   cheapest_store_key: number
   cheapest_store_name_ar: string
@@ -114,6 +115,8 @@ export interface ProductComparison {
   tag: 'overpriced' | 'underpriced' | 'competitive' | 'opportunity' | 'risk' | 'not_stocked'
   recommended_action: 'increase' | 'decrease' | 'keep' | 'expand' | 'stock'
   prices_by_store: Record<number, number>
+  attr_unit?: string   // e.g. "جرام", "مل", "كجم"
+  attr_val?: string    // e.g. "500", "1000", "6"
 }
 
 export interface Recommendation {
