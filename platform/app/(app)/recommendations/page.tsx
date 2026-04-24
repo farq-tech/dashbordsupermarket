@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/spinner'
 import { ErrorState } from '@/components/ui/error-state'
-import { Lightbulb, TrendingUp, Map, Zap, Download, CheckCircle } from 'lucide-react'
+import { Lightbulb, TrendingUp, Map, Zap, Download, CheckCircle, Store } from 'lucide-react'
 import type { Recommendation, Alert } from '@/lib/types'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
@@ -54,6 +54,17 @@ function RecCard({ rec, lang, onDone }: { rec: Recommendation; lang: string; onD
           <p className="text-sm text-neutral-500 leading-relaxed">
             {isAr ? rec.reason_ar : rec.reason_en}
           </p>
+          {(rec.competitor_hint_ar || rec.competitor_hint_en) && (
+            <div className="mt-1.5">
+              <span
+                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--color-surface-muted)', color: 'var(--color-text-muted)' }}
+              >
+                <Store className="h-3 w-3" />
+                {isAr ? rec.competitor_hint_ar : rec.competitor_hint_en}
+              </span>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <span
               className="inline-flex items-center gap-1.5 text-xs font-medium"
@@ -147,11 +158,14 @@ function exportRecs(recs: Recommendation[], lang: string) {
   URL.revokeObjectURL(url)
 }
 
+type SortBy = 'priority' | 'value_desc'
+
 export default function RecommendationsPage() {
   const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
   const isAr = lang === 'ar'
   const [filterType, setFilterType] = useState<string>('')
   const [filterImpact, setFilterImpact] = useState<string>('')
+  const [sortBy, setSortBy] = useState<SortBy>('priority')
   const [done, setDone] = useState<Set<string>>(() => {
     if (typeof window === 'undefined') return new Set()
     try {
@@ -182,14 +196,28 @@ export default function RecommendationsPage() {
   const allRecs = dashboardData?.recommendations ?? []
   const alerts = dashboardData?.alerts ?? []
 
-  const filtered = allRecs.filter(r => {
-    if (done.has(r.id)) return false
-    if (filterType && r.type !== filterType) return false
-    if (filterImpact && r.impact !== filterImpact) return false
-    return true
-  })
+  const filtered = useMemo(() => {
+    const base = allRecs.filter(r => {
+      if (done.has(r.id)) return false
+      if (filterType && r.type !== filterType) return false
+      if (filterImpact && r.impact !== filterImpact) return false
+      return true
+    })
+    if (sortBy === 'value_desc') {
+      return [...base].sort((a, b) => (b.value_estimate ?? 0) - (a.value_estimate ?? 0))
+    }
+    return [...base].sort((a, b) => a.priority - b.priority)
+  }, [allRecs, done, filterType, filterImpact, sortBy])
 
-  const totalValue = filtered.reduce((s, r) => s + (r.value_estimate ?? 0), 0)
+  const totalValue = useMemo(
+    () => filtered.reduce((s, r) => s + (r.value_estimate ?? 0), 0),
+    [filtered],
+  )
+
+  const filterSubtotal = useMemo(() => {
+    if (!filterType && !filterImpact) return 0
+    return filtered.reduce((s, r) => s + (r.value_estimate ?? 0), 0)
+  }, [filtered, filterType, filterImpact])
 
   if (!loading && error && !dashboardData) {
     return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
@@ -334,7 +362,35 @@ export default function RecommendationsPage() {
                   {isAr ? IMPACT_MAP[impact].ar : IMPACT_MAP[impact].en}
                 </button>
               ))}
+              {totalValue > 0 && (
+                <>
+                  <div className="border-r border-neutral-200 mx-1" />
+                  {([
+                    { value: 'priority' as SortBy, ar: 'الأولوية ↓', en: 'Priority ↓' },
+                    { value: 'value_desc' as SortBy, ar: 'القيمة ↓', en: 'Value ↓' },
+                  ]).map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setSortBy(opt.value)}
+                      className={`px-3 py-1.5 text-xs rounded-full border font-medium transition-colors ${
+                        sortBy === opt.value
+                          ? 'bg-[var(--color-interactive)] text-white border-[var(--color-interactive)]'
+                          : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                      }`}
+                    >
+                      {isAr ? opt.ar : opt.en}
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
+            {(filterType || filterImpact) && filterSubtotal > 0 && (
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr
+                  ? `مجموع القيمة للفلتر الحالي: ${filterSubtotal.toLocaleString()} ريال`
+                  : `Filter subtotal: ${filterSubtotal.toLocaleString()} SAR`}
+              </p>
+            )}
 
             {/* Undo toast */}
             {lastUndone && (

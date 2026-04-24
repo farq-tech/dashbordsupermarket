@@ -61,6 +61,8 @@ export function generateRecommendations(
         priority: 1,
         type: 'pricing',
         value_estimate: totalGapSar,
+        competitor_hint_ar: `المنافس الأرخص: ${topCheapest.ar}`,
+        competitor_hint_en: `Cheapest competitor: ${topCheapest.en}`,
       })
     }
   }
@@ -86,6 +88,8 @@ export function generateRecommendations(
       priority: 1,
       type: 'pricing',
       value_estimate: gapSar,
+      competitor_hint_ar: `المنافس الأرخص: ${worst.cheapest_store_name_ar}`,
+      competitor_hint_en: `Cheapest competitor: ${worst.cheapest_store_name_en}`,
     })
   }
 
@@ -108,6 +112,14 @@ export function generateRecommendations(
     .slice(0, 2)
     .forEach(b => {
       const totalGapSar = Math.round(b.gapSar)
+      const brandCheapestCounts = new Map<string, { ar: string; en: string; count: number }>()
+      b.items.forEach(p => {
+        const k = String(p.cheapest_store_key)
+        const prev = brandCheapestCounts.get(k) ?? { ar: p.cheapest_store_name_ar, en: p.cheapest_store_name_en, count: 0 }
+        prev.count += 1
+        brandCheapestCounts.set(k, prev)
+      })
+      const topBrandCheapest = Array.from(brandCheapestCounts.values()).sort((a, b) => b.count - a.count)[0]
       recs.push({
         id: id(),
         title_ar: `براند مرتفع السعر بشكل ممنهج: ${b.ar}`,
@@ -122,6 +134,8 @@ export function generateRecommendations(
         priority: 2,
         type: 'pricing',
         value_estimate: totalGapSar,
+        competitor_hint_ar: topBrandCheapest ? `المنافس الأرخص: ${topBrandCheapest.ar}` : undefined,
+        competitor_hint_en: topBrandCheapest ? `Cheapest competitor: ${topBrandCheapest.en}` : undefined,
       })
     })
 
@@ -138,6 +152,14 @@ export function generateRecommendations(
     if (products.length >= 3) {
       const avgGap = products.reduce((s, p) => s + p.price_gap_pct, 0) / products.length
       const catGapSar = Math.round(products.reduce((s, p) => s + Math.max(0, p.price_gap_sar), 0))
+      const catCheapestCounts = new Map<string, { ar: string; en: string; count: number }>()
+      products.forEach(p => {
+        const k = String(p.cheapest_store_key)
+        const prev = catCheapestCounts.get(k) ?? { ar: p.cheapest_store_name_ar, en: p.cheapest_store_name_en, count: 0 }
+        prev.count += 1
+        catCheapestCounts.set(k, prev)
+      })
+      const topCatCheapest = Array.from(catCheapestCounts.values()).sort((a, b) => b.count - a.count)[0]
       recs.push({
         id: id(),
         title_ar: `خفض أسعار ${products.length} منتج في ${catAr}`,
@@ -152,6 +174,8 @@ export function generateRecommendations(
         priority: avgGap > 15 ? 1 : 2,
         type: 'pricing',
         value_estimate: catGapSar,
+        competitor_hint_ar: topCatCheapest ? `المنافس الأرخص: ${topCatCheapest.ar}` : undefined,
+        competitor_hint_en: topCatCheapest ? `Cheapest competitor: ${topCatCheapest.en}` : undefined,
       })
     }
   })

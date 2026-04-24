@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
@@ -12,13 +12,36 @@ import { SimplePieChart } from '@/components/charts/PieChartComponent'
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Lightbulb, Target } from 'lucide-react'
 import Link from 'next/link'
 import { PAGE_TITLES } from '@/lib/navConfig'
-import { getPreviousSnapshot, type KpiSnapshot } from '@/lib/kpiSnapshotHistory'
+import { getPreviousSnapshot, getKpiSnapshots, type KpiSnapshot } from '@/lib/kpiSnapshotHistory'
 import { ChartReveal } from '@/components/ui/chart-reveal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ChartCardSkeleton, KpiCardSkeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { Button } from '@/components/ui/button'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
+
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  if (values.length < 2) {
+    return <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>—</span>
+  }
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  const w = 60, h = 24, pad = 2
+  const points = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (w - pad * 2)
+    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    return `${x},${y}`
+  }).join(' ')
+  const lastX = pad + ((values.length - 1) / (values.length - 1)) * (w - pad * 2)
+  const lastY = h - pad - ((values[values.length - 1] - min) / range) * (h - pad * 2)
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastX} cy={lastY} r="2.5" fill={color} />
+    </svg>
+  )
+}
 
 function DashboardPageInner() {
   const searchParams = useSearchParams()
@@ -115,6 +138,44 @@ function DashboardPageInner() {
     prevSnapshot && kpis.pricing_index > 0
       ? Math.min(2, Math.max(0.5, prevSnapshot.pricing_index / kpis.pricing_index))
       : 1
+
+  const kpiTrendSnapshots = useMemo(() => {
+    try {
+      if (typeof window === 'undefined') return []
+      return getKpiSnapshots()
+        .filter(s => s.store_key === selectedRetailer?.store_key && s.source === dataSource)
+        .slice(-5)
+    } catch {
+      return []
+    }
+  }, [selectedRetailer?.store_key, dataSource])
+
+  const kpiTrendIndicators = useMemo(() => [
+    {
+      key: 'performance_score',
+      label_ar: 'درجة الأداء',
+      label_en: 'Performance Score',
+      values: kpiTrendSnapshots.map(s => s.performance_score),
+    },
+    {
+      key: 'competitive_index',
+      label_ar: 'تنافسية %',
+      label_en: 'Competitive %',
+      values: kpiTrendSnapshots.map(s => s.competitive_index),
+    },
+    {
+      key: 'pricing_index',
+      label_ar: 'مؤشر السعر',
+      label_en: 'Pricing Index',
+      values: kpiTrendSnapshots.map(s => s.pricing_index),
+    },
+    {
+      key: 'coverage_index',
+      label_ar: 'تغطية %',
+      label_en: 'Coverage %',
+      values: kpiTrendSnapshots.map(s => s.coverage_index),
+    },
+  ], [kpiTrendSnapshots])
 
   const catChartData = topCats.map(c => ({
     name: isAr ? c.name_ar.slice(0, 14) : c.name_en.slice(0, 14),
@@ -318,6 +379,56 @@ function DashboardPageInner() {
             tooltip_en="% of market-listed products that are present in your chain's catalog. Source: comparison of market catalog vs your own product list."
           />
         </div>
+
+        {/* KPI Trend Strip */}
+        {kpiTrendSnapshots.length >= 2 && (
+          <Card className="animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-sm">
+                {isAr
+                  ? 'اتجاه الأداء (آخر 5 جلسات)'
+                  : 'Performance Trend (Last 5 Sessions)'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {kpiTrendIndicators.map(ind => {
+                  const { values } = ind
+                  const hasData = values.length >= 2
+                  const first = values[0] ?? 0
+                  const last = values[values.length - 1] ?? 0
+                  const delta = last - first
+                  const trendColor = !hasData
+                    ? 'var(--color-text-muted)'
+                    : delta > 0
+                      ? 'var(--color-trend-up)'
+                      : delta < 0
+                        ? 'var(--color-trend-down)'
+                        : 'var(--color-text-muted)'
+                  return (
+                    <div key={ind.key} className="flex flex-col gap-1.5 p-2 rounded-lg" style={{ background: 'var(--color-surface-muted)' }}>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                        {isAr ? ind.label_ar : ind.label_en}
+                      </p>
+                      {hasData ? (
+                        <>
+                          <Sparkline values={values} color={trendColor} />
+                          <p className="text-xs font-semibold tabular-nums" style={{ color: trendColor }}>
+                            {delta >= 0 ? '+' : ''}{delta.toFixed(1)}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                          {isAr ? 'لا يوجد تاريخ' : 'No history'}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Secondary KPI Cards */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">

@@ -130,6 +130,8 @@ export interface Recommendation {
   priority: number
   type: 'pricing' | 'coverage' | 'expansion' | 'competitive'
   value_estimate?: number
+  competitor_hint_ar?: string
+  competitor_hint_en?: string
 }
 
 export interface Alert {
