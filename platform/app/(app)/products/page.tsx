@@ -26,8 +26,8 @@ const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
 function exportCsv(data: ProductComparison[], lang: string) {
   const isAr = lang === 'ar'
   const headers = isAr
-    ? ['المنتج', 'الصنف', 'الماركة', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية']
-    : ['Product', 'Category', 'Brand', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action']
+    ? ['المنتج', 'الصنف', 'الماركة', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية', 'الترتيب', 'الفجوة (ريال)', 'أرخص متجر']
+    : ['Product', 'Category', 'Brand', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action', 'Rank', 'Gap (SAR)', 'Cheapest Store']
   const escCsv = (v: unknown) => {
     const s = String(v ?? '')
     return s.includes(',') || s.includes('"') || s.includes('\n')
@@ -45,6 +45,9 @@ function exportCsv(data: ProductComparison[], lang: string) {
     d.price_gap_pct,
     d.tag,
     d.recommended_action,
+    d.price_rank ? `${d.price_rank} / ${d.price_rank_out_of}` : '',
+    d.price_gap_sar != null ? d.price_gap_sar.toFixed(2) : '',
+    isAr ? d.cheapest_store_name_ar : d.cheapest_store_name_en,
   ])
   const csv = [headers, ...rows].map(r => r.map(escCsv).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
@@ -59,7 +62,7 @@ function exportCsv(data: ProductComparison[], lang: string) {
 function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
   const isAr = lang === 'ar'
   const [search, setSearch] = useState('')
   const [filterTag, setFilterTag] = useState('')
@@ -236,6 +239,9 @@ function ProductsPageContent() {
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'فجوة %' : 'Gap %'}</th>
                   <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الحالة' : 'Status'}</th>
                   <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'التوصية' : 'Action'}</th>
+                  <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الترتيب' : 'Rank'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الفجوة (ريال)' : 'Gap (SAR)'}</th>
+                  <th className="text-start px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'أرخص متجر' : 'Cheapest Store'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -294,6 +300,59 @@ function ProductsPageContent() {
                         >
                           {isAr ? action.ar : action.en}
                         </span>
+                      </td>
+
+                      {/* Rank */}
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-center">
+                        {row.price_rank ? (
+                          <span
+                            className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold tabular-nums"
+                            style={
+                              row.price_rank === 1
+                                ? { background: '#fef9c3', color: '#854d0e' }
+                                : row.price_rank === 2
+                                ? { background: 'var(--color-surface-muted)', color: 'var(--color-text-secondary)' }
+                                : undefined
+                            }
+                          >
+                            {row.price_rank} / {row.price_rank_out_of}
+                          </span>
+                        ) : '—'}
+                      </td>
+
+                      {/* SAR Gap */}
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end text-xs tabular-nums">
+                        {row.price_gap_sar != null ? (
+                          row.price_gap_sar > 0 ? (
+                            <span style={{ color: fareeqChart.coral }} className="font-semibold">
+                              ▲ +{row.price_gap_sar.toFixed(2)}
+                            </span>
+                          ) : row.price_gap_sar < 0 ? (
+                            <span style={{ color: fareeqChart.green }} className="font-semibold">
+                              {row.price_gap_sar.toFixed(2)}
+                            </span>
+                          ) : (
+                            <span style={{ color: fareeqChart.green }} className="font-semibold">✓</span>
+                          )
+                        ) : '—'}
+                      </td>
+
+                      {/* Cheapest Store */}
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-xs text-neutral-600">
+                        {(() => {
+                          const storeName = isAr ? row.cheapest_store_name_ar : row.cheapest_store_name_en
+                          if (!storeName) return '—'
+                          const myBrand = isAr ? selectedRetailer?.brand_ar : selectedRetailer?.brand_en
+                          const isOurs = myBrand && storeName.toLowerCase() === myBrand.toLowerCase()
+                          return isOurs ? (
+                            <span style={{ color: fareeqChart.green }} className="font-semibold inline-flex items-center gap-1">
+                              {storeName}
+                              <span className="text-[10px] px-1 py-0.5 rounded" style={{ background: `${fareeqChart.green}18` }}>
+                                {isAr ? '⭐ أنت' : '⭐ You'}
+                              </span>
+                            </span>
+                          ) : storeName
+                        })()}
                       </td>
                     </tr>
                   )
