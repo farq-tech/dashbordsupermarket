@@ -60,6 +60,45 @@ function DashboardPageInner() {
     })
   }, [focusKpi, dashboardData])
 
+  // These useMemo hooks MUST be declared before any early returns (Rules of Hooks).
+  const kpiTrendSnapshots = useMemo(() => {
+    try {
+      if (typeof window === 'undefined') return []
+      return getKpiSnapshots()
+        .filter(s => s.store_key === selectedRetailer?.store_key && s.source === dataSource)
+        .slice(-5)
+    } catch {
+      return []
+    }
+  }, [selectedRetailer?.store_key, dataSource])
+
+  const kpiTrendIndicators = useMemo(() => [
+    {
+      key: 'performance_score',
+      label_ar: 'درجة الأداء',
+      label_en: 'Performance Score',
+      values: kpiTrendSnapshots.map(s => s.performance_score),
+    },
+    {
+      key: 'competitive_index',
+      label_ar: 'تنافسية %',
+      label_en: 'Competitive %',
+      values: kpiTrendSnapshots.map(s => s.competitive_index),
+    },
+    {
+      key: 'pricing_index',
+      label_ar: 'مؤشر السعر',
+      label_en: 'Pricing Index',
+      values: kpiTrendSnapshots.map(s => s.pricing_index),
+    },
+    {
+      key: 'coverage_index',
+      label_ar: 'تغطية %',
+      label_en: 'Coverage %',
+      values: kpiTrendSnapshots.map(s => s.coverage_index),
+    },
+  ], [kpiTrendSnapshots])
+
   const dashTopbar = (
     <Topbar
       title_ar={PAGE_TITLES['/dashboard'].ar}
@@ -138,44 +177,6 @@ function DashboardPageInner() {
     prevSnapshot && kpis.pricing_index > 0
       ? Math.min(2, Math.max(0.5, prevSnapshot.pricing_index / kpis.pricing_index))
       : 1
-
-  const kpiTrendSnapshots = useMemo(() => {
-    try {
-      if (typeof window === 'undefined') return []
-      return getKpiSnapshots()
-        .filter(s => s.store_key === selectedRetailer?.store_key && s.source === dataSource)
-        .slice(-5)
-    } catch {
-      return []
-    }
-  }, [selectedRetailer?.store_key, dataSource])
-
-  const kpiTrendIndicators = useMemo(() => [
-    {
-      key: 'performance_score',
-      label_ar: 'درجة الأداء',
-      label_en: 'Performance Score',
-      values: kpiTrendSnapshots.map(s => s.performance_score),
-    },
-    {
-      key: 'competitive_index',
-      label_ar: 'تنافسية %',
-      label_en: 'Competitive %',
-      values: kpiTrendSnapshots.map(s => s.competitive_index),
-    },
-    {
-      key: 'pricing_index',
-      label_ar: 'مؤشر السعر',
-      label_en: 'Pricing Index',
-      values: kpiTrendSnapshots.map(s => s.pricing_index),
-    },
-    {
-      key: 'coverage_index',
-      label_ar: 'تغطية %',
-      label_en: 'Coverage %',
-      values: kpiTrendSnapshots.map(s => s.coverage_index),
-    },
-  ], [kpiTrendSnapshots])
 
   const catChartData = topCats.map(c => ({
     name: isAr ? c.name_ar.slice(0, 14) : c.name_en.slice(0, 14),
