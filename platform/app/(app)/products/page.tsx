@@ -26,8 +26,8 @@ const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
 function exportCsv(data: ProductComparison[], lang: string) {
   const isAr = lang === 'ar'
   const headers = isAr
-    ? ['المنتج', 'الصنف', 'الماركة', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية', 'الترتيب', 'الفجوة (ريال)', 'أرخص متجر']
-    : ['Product', 'Category', 'Brand', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action', 'Rank', 'Gap (SAR)', 'Cheapest Store']
+    ? ['المنتج', 'الصنف', 'الماركة', 'الوحدة', 'الكمية', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية', 'الترتيب', 'الفجوة (ريال)', 'أرخص متجر']
+    : ['Product', 'Category', 'Brand', 'Unit', 'Pack Size', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action', 'Rank', 'Gap (SAR)', 'Cheapest Store']
   const escCsv = (v: unknown) => {
     const s = String(v ?? '')
     return s.includes(',') || s.includes('"') || s.includes('\n')
@@ -38,6 +38,8 @@ function exportCsv(data: ProductComparison[], lang: string) {
     isAr ? d.title_ar : d.title_en,
     isAr ? d.category_ar : d.category_en,
     isAr ? d.brand_ar : d.brand_en,
+    d.attr_unit ?? '',
+    d.attr_val ?? '',
     d.your_price ?? 'N/A',
     d.market_avg,
     d.min_price,
@@ -263,6 +265,11 @@ function ProductsPageContent() {
                       >
                         <p className="font-medium text-neutral-800 leading-tight">
                           {isAr ? row.title_ar : row.title_en}
+                          {row.attr_val && row.attr_unit ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 ms-1">{row.attr_val} {row.attr_unit}</span>
+                          ) : row.attr_unit ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 ms-1">{row.attr_unit}</span>
+                          ) : null}
                         </p>
                         <p className="text-xs text-neutral-400">
                           {isAr ? row.brand_ar : row.brand_en}
