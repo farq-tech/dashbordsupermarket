@@ -187,3 +187,134 @@ const DELIVERY: ExperienceBundle = {
 export function getExperience(mode: ExperienceMode): ExperienceBundle {
   return mode === 'supermarket' ? RETAIL : DELIVERY
 }
+
+/** Per-page Topbar descriptions (and optional subtitles) by data source. */
+export interface PageTopbarCopy {
+  description_ar: string
+  description_en: string
+  subtitle_ar?: string
+  subtitle_en?: string
+}
+
+export type AppTopbarRoute =
+  | '/dashboard'
+  | '/pricing'
+  | '/coverage'
+  | '/competitors'
+  | '/categories'
+  | '/products'
+  | '/recommendations'
+  | '/decisions'
+  | '/profile'
+
+const PAGE_TOPBAR: Record<
+  AppTopbarRoute,
+  { supermarket: PageTopbarCopy; restaurants: PageTopbarCopy }
+> = {
+  '/dashboard': {
+    supermarket: {
+      description_ar: 'ماذا يحدث على مستوى السلسلة، لماذا يهم، وما الخطوة التالية — مقارنة مباشرة مع سلاسل التجزئة الأخرى.',
+      description_en: 'What is happening at chain level, why it matters, and what to do next — benchmarked against other retail brands.',
+    },
+    restaurants: {
+      description_ar: 'موضع تطبيقك في السلة والسعر مقابل تطبيقات التوصيل الأخرى — ثم أين تركّز التحسين.',
+      description_en: 'Your app’s basket and price position vs other delivery platforms — then where to focus improvements.',
+    },
+  },
+  '/pricing': {
+    supermarket: {
+      description_ar: 'توزيع تسعير الرف: أين سلسلتك أغلى أو أرخص من السلاسل المجاورة على نفس المنتجات.',
+      description_en: 'Shelf pricing distribution: where your chain is expensive or cheap vs peer chains on the same SKUs.',
+    },
+    restaurants: {
+      description_ar: 'سلة المستخدم عبر التطبيقات: فجوات السعر، والفرص أمام المنافسين على نفس الأصناف.',
+      description_en: 'User basket across apps: price gaps and opportunities vs rivals on the same items.',
+    },
+  },
+  '/coverage': {
+    supermarket: {
+      description_ar: 'أين توجد فروع العلامات — كثافة السوق حسب المدينة لتوسيع الفروع أو مراقبة المنافس.',
+      description_en: 'Where brands have branches — market density by city for expansion or competitive watch.',
+    },
+    restaurants: {
+      description_ar: 'سياق جغرافي مستقل: كثافة السوبرماركت والعلامات يساعدك على فهم السوق خلف الطلب على التوصيل.',
+      description_en: 'Independent geo context: grocery brand density helps you read the market behind delivery demand.',
+    },
+  },
+  '/competitors': {
+    supermarket: {
+      description_ar: 'مقارنة رأساً برأس مع سلسلة منافسة: سلة مشتركة، فئات، وترتيب السعر على مستوى المنتج.',
+      description_en: 'Head-to-head vs a rival chain: shared basket, categories, and SKU-level price outcomes.',
+    },
+    restaurants: {
+      description_ar: 'منافس تطبيق واحد: أين تفوز السلة وأين تخسر أمام منصة أخرى على نفس الكتالوج.',
+      description_en: 'One rival app: where you win or lose the basket against another platform on overlapping catalog.',
+    },
+  },
+  '/categories': {
+    supermarket: {
+      description_ar: 'أداء الأقسام على الرف: حجم التشكيلة، التسعير، والضغط مقابل السلاسل الأخرى.',
+      description_en: 'Category performance on shelf: assortment size, pricing pressure vs other chains.',
+    },
+    restaurants: {
+      description_ar: 'أقسام تهم المستخدم في التطبيق: أين تتفوق منصتك أو تتأخر أمام التطبيقات المنافسة.',
+      description_en: 'Categories that matter in-app: where your platform leads or trails competing apps.',
+    },
+  },
+  '/products': {
+    supermarket: {
+      description_ar: 'كل SKU مع وحدة العرض والفجوة السعرية — لقرارات الرف والتوريد في الفروع.',
+      description_en: 'Every SKU with pack size and price gap — for shelf and branch supply decisions.',
+    },
+    restaurants: {
+      description_ar: 'منتجات تُقارن بين التطبيقات: أين السعر أو التوفر يحرك اختيار المستخدم.',
+      description_en: 'Cross-app compared SKUs: where price or availability drives user choice.',
+    },
+  },
+  '/recommendations': {
+    supermarket: {
+      description_ar: 'إجراءات مرتبة بالأولوية للفروع: تسعير، توريد، ومنافسة على الأصناف الحساسة.',
+      description_en: 'Branch-prioritized actions: pricing, supply, and competition on sensitive SKUs.',
+    },
+    restaurants: {
+      description_ar: 'تحسينات للعروض والسلة والعمولة — جاهزة للتنفيذ على كتالوج التطبيق.',
+      description_en: 'Promo, basket, and fee improvements — ready to ship against your app catalog.',
+    },
+  },
+  '/decisions': {
+    supermarket: {
+      description_ar: 'حوّل التحليل إلى قرارات مسجلة: سياسات، سيناريوهات، وسير عمل للفروع.',
+      description_en: 'Turn analysis into logged decisions: policy, scenarios, and branch workflow.',
+      subtitle_ar: 'طبقة قرار للسلسلة: سياسات، سيناريوهات، سير عمل، تصدير',
+      subtitle_en: 'Retail chain decision layer: policy, scenarios, workflow, export',
+    },
+    restaurants: {
+      description_ar: 'قرارات منتج وعروض مع أثر واضح على السلة — مع تتبع وسيناريوهات.',
+      description_en: 'Product and promo decisions with clear basket impact — tracked with scenarios.',
+      subtitle_ar: 'طبقة قرار للمنصة: سياسات، سيناريوهات، سير عمل، تصدير',
+      subtitle_en: 'Platform decision layer: policy, scenarios, workflow, export',
+    },
+  },
+  '/profile': {
+    supermarket: {
+      description_ar: 'هوية سلسلتك ومصدر بيانات التجزئة المستخدم في كل المقارنات.',
+      description_en: 'Your chain identity and the retail data source powering all comparisons.',
+    },
+    restaurants: {
+      description_ar: 'علامة التطبيق ومصدر بيانات سوق التوصيل المعتمد في اللوحة.',
+      description_en: 'Your app brand and the delivery-market data source used across the dashboard.',
+    },
+  },
+}
+
+export function getPageTopbarCopy(path: string, mode: ExperienceMode): PageTopbarCopy {
+  const key = path.split('?')[0] as AppTopbarRoute
+  const row = PAGE_TOPBAR[key]
+  if (!row) {
+    return {
+      description_ar: 'اتبع المسار من الشريط الجانبي: مراقبة ثم تشخيص ثم إجراء.',
+      description_en: 'Follow the sidebar: monitor, then diagnose, then act.',
+    }
+  }
+  return mode === 'supermarket' ? row.supermarket : row.restaurants
+}

@@ -2,6 +2,7 @@
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -65,15 +66,26 @@ function CompareBar({ label, myVal, competitorVal, myColor, compColor, unit = ''
 }
 
 export default function ProfilePage() {
-  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const profileTb = getPageTopbarCopy('/profile', dataSource)
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} {...profileTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} {...profileTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   const { kpis, all_kpis } = dashboardData
@@ -102,7 +114,7 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} />
+      <Topbar title_ar={PAGE_TITLES['/profile'].ar} title_en={PAGE_TITLES['/profile'].en} {...profileTb} />
       <div className="page-shell">
 
         {/* Profile Header */}

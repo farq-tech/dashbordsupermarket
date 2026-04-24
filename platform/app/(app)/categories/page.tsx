@@ -3,6 +3,7 @@ import { useState, useMemo, useRef } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -20,8 +21,9 @@ function CategoryStatus({ kpi, isAr }: { kpi: CategoryKPI; isAr: boolean }) {
 }
 
 export default function CategoriesPage() {
-  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const categoriesTb = getPageTopbarCopy('/categories', dataSource)
   const [sortBy, setSortBy] = useState<'product_count' | 'pricing_index' | 'competitive_count'>('product_count')
   const [selected, setSelected] = useState<CategoryKPI | null>(null)
   const [quickFilter, setQuickFilter] = useState<'opportunity' | 'risk' | 'sensitive' | null>(null)
@@ -66,16 +68,26 @@ export default function CategoriesPage() {
   })
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} {...categoriesTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} {...categoriesTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} />
+      <Topbar title_ar={PAGE_TITLES['/categories'].ar} title_en={PAGE_TITLES['/categories'].en} {...categoriesTb} />
       <div className="page-shell">
 
         {/* Highlight chips — click to filter table */}

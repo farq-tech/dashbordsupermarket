@@ -4,6 +4,7 @@ import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,8 +19,9 @@ const escCsv = (v: unknown) => {
 }
 
 export default function CompetitorsPage() {
-  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const competitorsTb = getPageTopbarCopy('/competitors', dataSource)
 
   const [selectedCompetitorKey, setSelectedCompetitorKey] = useState<number | null>(null)
   const [tablePage, setTablePage] = useState(0)
@@ -211,16 +213,26 @@ export default function CompetitorsPage() {
   }
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} {...competitorsTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} {...competitorsTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} />
+      <Topbar title_ar={PAGE_TITLES['/competitors'].ar} title_en={PAGE_TITLES['/competitors'].en} {...competitorsTb} />
       <div className="page-shell">
 
         {/* Competitor Cards */}

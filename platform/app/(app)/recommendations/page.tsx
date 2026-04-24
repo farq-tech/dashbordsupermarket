@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -161,8 +162,9 @@ function exportRecs(recs: Recommendation[], lang: string) {
 type SortBy = 'priority' | 'value_desc'
 
 export default function RecommendationsPage() {
-  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const recsTb = getPageTopbarCopy('/recommendations', dataSource)
   const [filterType, setFilterType] = useState<string>('')
   const [filterImpact, setFilterImpact] = useState<string>('')
   const [sortBy, setSortBy] = useState<SortBy>('priority')
@@ -220,16 +222,26 @@ export default function RecommendationsPage() {
   }, [filtered, filterType, filterImpact])
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} {...recsTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} {...recsTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} />
+      <Topbar title_ar={PAGE_TITLES['/recommendations'].ar} title_en={PAGE_TITLES['/recommendations'].en} {...recsTb} />
       <div className="page-shell">
 
         {/* Summary */}

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -66,6 +67,7 @@ function pillarColor(score: number) {
 export default function DecisionsPage() {
   const { lang, dashboardData, loading, error, forceRefresh, fetchData, selectedRetailer, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const decisionsTb = getPageTopbarCopy('/decisions', dataSource)
   const [kindFilter, setKindFilter] = useState<string>('')
   const [wfTick, setWfTick] = useState(0)
   const [scenarioStrategy, setScenarioStrategy] = useState<'match_cheapest' | 'lift_to_market_avg'>('match_cheapest')
@@ -147,7 +149,7 @@ export default function DecisionsPage() {
   if (!loading && error && !dashboardData) {
     return (
       <div>
-        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
+        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} {...decisionsTb} />
         <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
       </div>
     )
@@ -156,7 +158,7 @@ export default function DecisionsPage() {
   if (loading || !dashboardData) {
     return (
       <div>
-        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
+        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} {...decisionsTb} />
         <LoadingOverlay lang={lang} />
       </div>
     )
@@ -165,7 +167,7 @@ export default function DecisionsPage() {
   if (!brief) {
     return (
       <div className="animate-fade-in">
-        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} />
+        <Topbar title_ar={PAGE_TITLES['/decisions'].ar} title_en={PAGE_TITLES['/decisions'].en} {...decisionsTb} />
         <div className="max-w-lg mx-auto page-shell">
           <Card>
             <CardContent className="pt-6 text-center text-sm text-neutral-600">
@@ -185,8 +187,7 @@ export default function DecisionsPage() {
         <Topbar
           title_ar={PAGE_TITLES['/decisions'].ar}
           title_en={PAGE_TITLES['/decisions'].en}
-          subtitle_ar="طبقة قرار كاملة: سياسات، سيناريوهات، سير عمل، تاريخ، تصدير"
-          subtitle_en="Full decision layer: policy, scenarios, workflow, history, export"
+          {...decisionsTb}
         />
       </div>
 

@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
 import { CustomerJourneyCard } from '@/components/layout/CustomerJourneyCard'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) {
@@ -101,12 +102,13 @@ function DashboardPageInner() {
     },
   ], [kpiTrendSnapshots])
 
+  const dashTb = getPageTopbarCopy('/dashboard', dataSource)
   const dashTopbar = (
     <Topbar
       title_ar={PAGE_TITLES['/dashboard'].ar}
       title_en={PAGE_TITLES['/dashboard'].en}
-      description_ar="ملخص تنفيذي لأداء السلسلة مقارنة بالسوق."
-      description_en="Executive view of your chain's performance vs the market."
+      description_ar={dashTb.description_ar}
+      description_en={dashTb.description_en}
     />
   )
 
@@ -126,8 +128,7 @@ function DashboardPageInner() {
         <Topbar
           title_ar={t.ar}
           title_en={t.en}
-          description_ar="ملخص تنفيذي لأداء السلسلة مقارنة بالسوق."
-          description_en="Executive view of your chain’s performance vs the market."
+          {...getPageTopbarCopy('/dashboard', dataSource)}
         />
         <div className="page-shell">
           <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">
@@ -275,8 +276,7 @@ function DashboardPageInner() {
         title_en={pageTitle.en}
         subtitle_ar={selectedRetailer ? `الشركة: ${selectedRetailer.brand_ar}` : undefined}
         subtitle_en={selectedRetailer ? `Business: ${selectedRetailer.brand_en}` : undefined}
-        description_ar="ماذا يحدث، لماذا يهم، وما الخطوة التالية — في نظرة واحدة."
-        description_en="What is happening, why it matters, and what to do next — in one view."
+        {...getPageTopbarCopy('/dashboard', dataSource)}
       />
 
       <div className="page-shell">
@@ -802,13 +802,15 @@ function DashboardPageInner() {
 
 function DashboardPageFallback() {
   const t = PAGE_TITLES['/dashboard']
+  const dataSource = useAppStore(s => s.dataSource)
+  const tb = getPageTopbarCopy('/dashboard', dataSource)
   return (
     <div>
       <Topbar
         title_ar={t.ar}
         title_en={t.en}
-        description_ar="ملخص تنفيذي لأداء السلسلة مقارنة بالسوق."
-        description_en="Executive view of your chain’s performance vs the market."
+        description_ar={tb.description_ar}
+        description_en={tb.description_en}
       />
       <div className="page-shell">
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">

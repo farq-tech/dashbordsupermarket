@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { KpiCard } from '@/components/ui/kpi-card'
 import { SimpleBarChart } from '@/components/charts/BarChartComponent'
@@ -70,7 +71,7 @@ const BRAND_COLORS = [
 ]
 
 export default function CoveragePage() {
-  const { lang } = useAppStore()
+  const { lang, dataSource } = useAppStore()
   const isAr = lang === 'ar'
   const t = PAGE_TITLES['/coverage']
 
@@ -110,14 +111,17 @@ export default function CoveragePage() {
     return data.brands.find(b => b.brand_en === selectedBrand) ?? null
   }, [data, selectedBrand])
 
-  const coverageTopbar = (
-    <Topbar
-      title_ar={t.ar}
-      title_en={t.en}
-      description_ar="تغطية السوبرماركتات والعلامات التجارية في السوق — بيانات مسح ميداني مستقلة."
-      description_en="Supermarket and grocery brand coverage — independent field survey data."
-    />
-  )
+  const coverageTopbar = useMemo(() => {
+    const tb = getPageTopbarCopy('/coverage', dataSource)
+    return (
+      <Topbar
+        title_ar={t.ar}
+        title_en={t.en}
+        description_ar={tb.description_ar}
+        description_en={tb.description_en}
+      />
+    )
+  }, [t.ar, t.en, dataSource])
 
   if (!loading && fetchError) {
     return (

@@ -5,6 +5,7 @@ import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card } from '@/components/ui/card'
 import { TagBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -65,7 +66,7 @@ function exportCsv(data: ProductComparison[], lang: string) {
 function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, selectedRetailer, dataSource } = useAppStore()
   const isAr = lang === 'ar'
   const [search, setSearch] = useState('')
   const [filterTag, setFilterTag] = useState('')
@@ -110,13 +111,24 @@ function ProductsPageContent() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const effectivePage = deepLinkOnly && filtered.length <= PAGE_SIZE ? 1 : Math.min(page, totalPages)
   const paged = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE)
+  const productsTb = getPageTopbarCopy('/products', dataSource)
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} {...productsTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} {...productsTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   const tagCounts = {
@@ -130,7 +142,7 @@ function ProductsPageContent() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} />
+      <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} {...productsTb} />
       <div className="page-shell">
 
         {deepLinkOnly && (
@@ -407,15 +419,20 @@ function ProductsPageContent() {
   )
 }
 
+function ProductsPageSuspenseFallback() {
+  const dataSource = useAppStore(s => s.dataSource)
+  const tb = getPageTopbarCopy('/products', dataSource)
+  return (
+    <div>
+      <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} {...tb} />
+      <LoadingOverlay />
+    </div>
+  )
+}
+
 export default function ProductsPage() {
   return (
-    <Suspense fallback={(
-      <div>
-        <Topbar title_ar={PAGE_TITLES['/products'].ar} title_en={PAGE_TITLES['/products'].en} />
-        <LoadingOverlay />
-      </div>
-    )}
-    >
+    <Suspense fallback={<ProductsPageSuspenseFallback />}>
       <ProductsPageContent />
     </Suspense>
   )

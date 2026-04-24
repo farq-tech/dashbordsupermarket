@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
 import { PAGE_TITLES } from '@/lib/navConfig'
+import { getPageTopbarCopy } from '@/lib/experienceCopy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/ui/spinner'
@@ -12,8 +13,9 @@ import { PriceScatterChart } from '@/components/charts/ScatterChartComponent'
 import { fareeqChart } from '@/lib/design-system'
 
 export default function PricingPage() {
-  const { lang, dashboardData, loading, error, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, forceRefresh, dataSource } = useAppStore()
   const isAr = lang === 'ar'
+  const pricingTb = getPageTopbarCopy('/pricing', dataSource)
 
   const comparisons = useMemo(
     () => dashboardData?.comparisons ?? [],
@@ -100,11 +102,21 @@ export default function PricingPage() {
   const pricingRecs = dashboardData?.recommendations.filter(r => r.type === 'pricing') ?? []
 
   if (!loading && error && !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} {...pricingTb} />
+        <div className="page-shell"><ErrorState lang={lang} onRetry={forceRefresh} /></div>
+      </div>
+    )
   }
 
   if (loading || !dashboardData) {
-    return <div><Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} /><LoadingOverlay lang={lang} /></div>
+    return (
+      <div>
+        <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} {...pricingTb} />
+        <LoadingOverlay lang={lang} />
+      </div>
+    )
   }
 
   const stocked = comparisons.filter(c => c.your_price !== null)
@@ -114,7 +126,7 @@ export default function PricingPage() {
 
   return (
     <div className="animate-fade-in">
-      <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} />
+      <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} {...pricingTb} />
       <div className="page-shell">
 
         {/* Top volatile product insight */}
