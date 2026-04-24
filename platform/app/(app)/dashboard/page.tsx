@@ -48,7 +48,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
 function DashboardPageInner() {
   const searchParams = useSearchParams()
   const focusKpi = searchParams.get('kpi')
-  const { lang, dashboardData, loading, error, selectedRetailer, fetchData, dataSource, forceRefresh, businessPersona } = useAppStore()
+  const { lang, dashboardData, loading, error, selectedRetailer, fetchData, dataSource, forceRefresh } = useAppStore()
 
   useEffect(() => {
     if (!dashboardData && !loading) fetchData()
@@ -289,7 +289,7 @@ function DashboardPageInner() {
           body_en={insightBlock.body_en}
         />
 
-        <CustomerJourneyCard lang={lang} persona={businessPersona} />
+        <CustomerJourneyCard lang={lang} dataSource={dataSource} />
 
         {alerts.length > 0 && (
           <div

@@ -1,7 +1,15 @@
 'use client'
 import { useEffect } from 'react'
-import { readStoredPersona } from '@/lib/businessPersona'
 import { useAppStore, readStoredDataSource, readStoredDensity, applyDensityToDom } from '@/store/useAppStore'
+
+function ExperienceDomSync() {
+  const dataSource = useAppStore(s => s.dataSource)
+  useEffect(() => {
+    document.documentElement.dataset.experience =
+      dataSource === 'supermarket' ? 'retail' : 'delivery'
+  }, [dataSource])
+  return null
+}
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const fetchData = useAppStore(s => s.fetchData)
@@ -12,11 +20,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     applyDensityToDom(density)
     useAppStore.setState({ uiDensity: density })
 
-    const savedPersona = readStoredPersona()
-    if (savedPersona) {
-      useAppStore.setState({ businessPersona: savedPersona })
-    }
-
     const saved = readStoredDataSource()
     if (saved) {
       setDataSource(saved)
@@ -25,5 +28,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <>{children}</>
+  return (
+    <>
+      <ExperienceDomSync />
+      {children}
+    </>
+  )
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { getJourneyMetaForPath } from '@/lib/navJourney'
+import { getExperience } from '@/lib/experienceCopy'
 import { Button } from '@/components/ui/button'
 import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu, LayoutDashboard, Rows3 } from 'lucide-react'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
@@ -27,6 +28,7 @@ export function Topbar({
 }: TopbarProps) {
   const pathname = usePathname()
   const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden, uiDensity, setUiDensity } = useAppStore()
+  const xp = getExperience(dataSource)
   const [scrolled, setScrolled] = useState(false)
   const journeyMeta = getJourneyMetaForPath(pathname)
 
@@ -243,9 +245,7 @@ export function Topbar({
             <span>{lang === 'ar' ? journeyMeta.label_ar : journeyMeta.label_en}</span>
           </span>
           <span className="text-[11px] leading-snug" style={{ color: 'var(--color-text-muted)' }}>
-            {lang === 'ar'
-              ? 'اتبع القائمة من الأعلى: مراقبة ← تشخيص ← إجراء ← سياق'
-              : 'Use the sidebar flow: Monitor → Diagnose → Act → Context'}
+            {lang === 'ar' ? xp.topbarFlow_ar : xp.topbarFlow_en}
           </span>
         </div>
       )}

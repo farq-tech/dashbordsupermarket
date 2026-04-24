@@ -150,6 +150,16 @@ html[data-density="compact"] {
   --density-kpi-title-mb: 0.125rem;
 }
 
+/* B2B experience: supermarket chains vs delivery apps (set on <html> in DataProvider) */
+html[data-experience="retail"] {
+  --experience-accent: var(--color-trend-up);
+  --experience-canvas-tint: rgba(22, 163, 74, 0.05);
+}
+html[data-experience="delivery"] {
+  --experience-accent: var(--fareeq-amber);
+  --experience-canvas-tint: color-mix(in srgb, var(--color-interactive) 7%, transparent);
+}
+
 * {
   box-sizing: border-box;
 }

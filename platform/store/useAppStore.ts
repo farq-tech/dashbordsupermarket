@@ -2,7 +2,6 @@
 import { create } from 'zustand'
 import type { RetailerKPIs, ProductComparison, Recommendation, Alert, Retailer, DecisionBrief } from '@/lib/types'
 import { pushKpiSnapshot } from '@/lib/kpiSnapshotHistory'
-import { PERSONA_STORAGE_KEY, type BusinessPersona } from '@/lib/businessPersona'
 
 const DATA_SOURCE_STORAGE_KEY = 'dash_data_source'
 const DENSITY_STORAGE_KEY = 'dash_ui_density'
@@ -60,9 +59,6 @@ export interface DashboardData {
 interface AppState {
   lang: 'ar' | 'en'
   dir: 'rtl' | 'ltr'
-  /** B2B buyer persona — frames copy and journey hints (independent of data source). */
-  businessPersona: BusinessPersona
-  setBusinessPersona: (persona: BusinessPersona) => void
   dataSource: 'restaurants' | 'supermarket'
   retailers: Retailer[]
   selectedRetailer: Retailer | null
@@ -97,17 +93,6 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   lang: 'ar',
   dir: 'rtl',
-  businessPersona: 'supermarket_owner',
-  setBusinessPersona: (persona) => {
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(PERSONA_STORAGE_KEY, persona)
-      }
-    } catch {
-      /* ignore */
-    }
-    set({ businessPersona: persona })
-  },
   dataSource: 'restaurants',
   retailers: [],
   selectedRetailer: null,

@@ -9,6 +9,8 @@ import { cn } from '@/components/ui/cn'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
 import { Bell, ChevronDown } from 'lucide-react'
 import { NAV_SECTIONS } from '@/lib/navConfig'
+import { getExperience } from '@/lib/experienceCopy'
+import { fareeqChart, fareeqHex } from '@/lib/design-system'
 
 type Variant = 'desktop' | 'drawer'
 
@@ -20,17 +22,8 @@ interface SidebarPanelProps {
 
 export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelProps) {
   const pathname = usePathname()
-  const {
-    lang,
-    retailers,
-    selectedRetailer,
-    setRetailer,
-    dashboardData,
-    dataSource,
-    setDataSource,
-    businessPersona,
-    setBusinessPersona,
-  } = useAppStore()
+  const { lang, retailers, selectedRetailer, setRetailer, dashboardData, dataSource, setDataSource } = useAppStore()
+  const xp = getExperience(dataSource)
   const alertsCount = dashboardData?.alerts?.length ?? 0
   const [businessOpen, setBusinessOpen] = useState(true)
 
@@ -57,18 +50,24 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
               className="text-base font-bold leading-snug sm:text-[1.05rem]"
               style={{ color: 'var(--color-brand)', fontFamily: 'var(--font-brand)' }}
             >
-              {lang === 'ar' ? 'ذكاء التجزئة' : 'Retail Intelligence'}
+              {lang === 'ar' ? xp.productTitle_ar : xp.productTitle_en}
             </p>
             <p className="mt-1 text-xs font-medium leading-snug sm:text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              {lang === 'ar' ? 'مراقبة ← تشخيص ← إجراء — في مسار واحد' : 'Monitor → Diagnose → Act — one clear path'}
+              {lang === 'ar' ? xp.tagline_ar : xp.tagline_en}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="px-3 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+      <div
+        className="px-3 py-3 border-b rounded-none"
+        style={{
+          borderColor: 'var(--color-border)',
+          borderInlineStart: `4px solid ${dataSource === 'supermarket' ? fareeqChart.green : fareeqHex.amber}`,
+        }}
+      >
         <p className="text-xs mb-2 px-0.5 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-          {lang === 'ar' ? 'مصدر البيانات' : 'Data source'}
+          {lang === 'ar' ? 'مصدر البيانات (يغيّر التجربة بالكامل)' : 'Data source (switches the full experience)'}
         </p>
         <div
           className="flex items-center gap-0.5 p-1 rounded-lg border w-full"
@@ -107,55 +106,8 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
             {lang === 'ar' ? 'تطبيقات التوصيل' : 'Delivery Apps'}
           </button>
         </div>
-      </div>
-
-      <div className="px-3 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <p className="text-xs mb-2 px-0.5 font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-          {lang === 'ar' ? 'من أنت؟ (لتخصيص التجربة)' : 'Who you are (tailors guidance)'}
-        </p>
-        <div
-          className="flex flex-col gap-1.5 p-1.5 rounded-lg border w-full"
-          style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              setBusinessPersona('supermarket_owner')
-              onInteract?.()
-            }}
-            className={cn(
-              'w-full text-start rounded-md px-2 py-2 text-[11px] leading-snug transition-colors touch-manipulation',
-              businessPersona === 'supermarket_owner' ? 'font-semibold' : 'opacity-85',
-            )}
-            style={{
-              background: businessPersona === 'supermarket_owner' ? 'var(--color-surface-muted)' : 'transparent',
-              color: businessPersona === 'supermarket_owner' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
-            }}
-          >
-            {lang === 'ar' ? 'مالك سلسلة سوبرماركت' : 'Supermarket / retail chain'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setBusinessPersona('delivery_platform')
-              onInteract?.()
-            }}
-            className={cn(
-              'w-full text-start rounded-md px-2 py-2 text-[11px] leading-snug transition-colors touch-manipulation',
-              businessPersona === 'delivery_platform' ? 'font-semibold' : 'opacity-85',
-            )}
-            style={{
-              background: businessPersona === 'delivery_platform' ? 'var(--color-surface-muted)' : 'transparent',
-              color: businessPersona === 'delivery_platform' ? 'var(--color-interactive)' : 'var(--color-text-primary)',
-            }}
-          >
-            {lang === 'ar' ? 'منصة أو تطبيق توصيل' : 'Delivery platform / app'}
-          </button>
-        </div>
         <p className="text-[10px] mt-2 px-0.5 leading-snug" style={{ color: 'var(--color-text-muted)' }}>
-          {lang === 'ar'
-            ? 'لا يغيّر البيانات — يوضّح لك المسار والنصوص فقط.'
-            : 'Does not change data — only clarifies flow and copy.'}
+          {lang === 'ar' ? xp.dataSourceHint_ar : xp.dataSourceHint_en}
         </p>
       </div>
 
@@ -232,7 +184,7 @@ export function SidebarPanel({ onInteract, variant = 'desktop' }: SidebarPanelPr
               {lang === 'ar' ? section.title_ar : section.title_en}
             </p>
             <p className="text-[10px] leading-snug px-3 mb-1.5" style={{ color: 'var(--color-text-subtle)' }}>
-              {lang === 'ar' ? section.hint_ar : section.hint_en}
+              {lang === 'ar' ? xp.navHints[section.id].ar : xp.navHints[section.id].en}
             </p>
             <div className="space-y-0.5">
               {section.items.map(item => {
