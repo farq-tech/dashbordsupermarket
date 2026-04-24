@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
+import { getJourneyMetaForPath } from '@/lib/navJourney'
 import { Button } from '@/components/ui/button'
 import { PanelRightOpen, PanelRightClose, RefreshCw, Globe, Menu, LayoutDashboard, Rows3 } from 'lucide-react'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
@@ -23,8 +25,10 @@ export function Topbar({
   description_ar,
   description_en,
 }: TopbarProps) {
+  const pathname = usePathname()
   const { lang, setLang, refreshing, forceRefresh, lastUpdated, selectedRetailer, dataSource, setDataSource, mobileNavOpen, setMobileNavOpen, desktopSidebarHidden, setDesktopSidebarHidden, uiDensity, setUiDensity } = useAppStore()
   const [scrolled, setScrolled] = useState(false)
+  const journeyMeta = getJourneyMetaForPath(pathname)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -217,6 +221,34 @@ export function Topbar({
           {lang === 'ar' ? 'EN' : 'عر'}
         </button>
       </div>
+
+      {journeyMeta && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 px-0 sm:px-0">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+            style={{
+              borderColor: 'var(--color-border)',
+              background: 'color-mix(in srgb, var(--color-interactive) 6%, transparent)',
+              color: 'var(--color-interactive)',
+            }}
+          >
+            <span className="tabular-nums opacity-90">
+              {lang === 'ar'
+                ? `${journeyMeta.step} من ${journeyMeta.totalSteps}`
+                : `${journeyMeta.step} / ${journeyMeta.totalSteps}`}
+            </span>
+            <span className="opacity-40" aria-hidden>
+              ·
+            </span>
+            <span>{lang === 'ar' ? journeyMeta.label_ar : journeyMeta.label_en}</span>
+          </span>
+          <span className="text-[11px] leading-snug" style={{ color: 'var(--color-text-muted)' }}>
+            {lang === 'ar'
+              ? 'اتبع القائمة من الأعلى: مراقبة ← تشخيص ← إجراء ← سياق'
+              : 'Use the sidebar flow: Monitor → Diagnose → Act → Context'}
+          </span>
+        </div>
+      )}
     </header>
   )
 }

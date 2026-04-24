@@ -20,6 +20,7 @@ import { ErrorState } from '@/components/ui/error-state'
 import { Button } from '@/components/ui/button'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
 import { RetailerLogo } from '@/components/ui/RetailerLogo'
+import { CustomerJourneyCard } from '@/components/layout/CustomerJourneyCard'
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) {
@@ -47,7 +48,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
 function DashboardPageInner() {
   const searchParams = useSearchParams()
   const focusKpi = searchParams.get('kpi')
-  const { lang, dashboardData, loading, error, selectedRetailer, fetchData, dataSource, forceRefresh } = useAppStore()
+  const { lang, dashboardData, loading, error, selectedRetailer, fetchData, dataSource, forceRefresh, businessPersona } = useAppStore()
 
   useEffect(() => {
     if (!dashboardData && !loading) fetchData()
@@ -287,6 +288,8 @@ function DashboardPageInner() {
           body_ar={insightBlock.body_ar}
           body_en={insightBlock.body_en}
         />
+
+        <CustomerJourneyCard lang={lang} persona={businessPersona} />
 
         {alerts.length > 0 && (
           <div

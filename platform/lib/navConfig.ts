@@ -25,6 +25,9 @@ export interface NavSection {
   id: NavSectionId
   title_ar: string
   title_en: string
+  /** One-line: why this block exists in the journey (shown under section title in sidebar). */
+  hint_ar: string
+  hint_en: string
   items: NavItem[]
 }
 
@@ -33,6 +36,8 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'overview',
     title_ar: 'نظرة شاملة',
     title_en: 'Overview',
+    hint_ar: 'الخطوة ١ — أين أنت الآن مقابل السوق؟',
+    hint_en: 'Step 1 — Where you stand vs the market',
     items: [
       {
         href: '/dashboard',
@@ -46,6 +51,8 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'diagnosis',
     title_ar: 'التشخيص',
     title_en: 'Diagnosis',
+    hint_ar: 'الخطوة ٢ — فهم السعر، التغطية، والمنافسين',
+    hint_en: 'Step 2 — Price, coverage & competitor depth',
     items: [
       { href: '/pricing', icon: DollarSign, label_ar: 'استراتيجية التسعير', label_en: 'Pricing Strategy' },
       { href: '/coverage', icon: Map, label_ar: 'تغطية السوق', label_en: 'Market Coverage' },
@@ -58,6 +65,8 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'action',
     title_ar: 'الإجراءات',
     title_en: 'Action',
+    hint_ar: 'الخطوة ٣ — حوّل التحليل إلى قرارات وتنفيذ',
+    hint_en: 'Step 3 — Turn analysis into decisions',
     items: [
       { href: '/recommendations', icon: Lightbulb, label_ar: 'التوصيات التشغيلية', label_en: 'Action Recommendations' },
       { href: '/decisions', icon: Scale, label_ar: 'مركز اتخاذ القرار', label_en: 'Decision Hub' },
@@ -67,6 +76,8 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'context',
     title_ar: 'سياق العمل',
     title_en: 'Business context',
+    hint_ar: 'الخطوة ٤ — هوية العلامة والإعدادات',
+    hint_en: 'Step 4 — Brand identity & settings',
     items: [
       { href: '/profile', icon: Store, label_ar: 'ملف الشركة', label_en: 'Business Profile' },
     ],
