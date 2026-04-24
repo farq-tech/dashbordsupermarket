@@ -26,8 +26,8 @@ const ACTION_MAP: Record<string, { ar: string; en: string; color: string }> = {
 function exportCsv(data: ProductComparison[], lang: string) {
   const isAr = lang === 'ar'
   const headers = isAr
-    ? ['المنتج', 'الصنف', 'الماركة', 'الوحدة', 'الكمية', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'فجوة %', 'الحالة', 'التوصية', 'الترتيب', 'الفجوة (ريال)', 'أرخص متجر']
-    : ['Product', 'Category', 'Brand', 'Unit', 'Pack Size', 'Your Price', 'Market Avg', 'Min', 'Max', 'Gap %', 'Status', 'Action', 'Rank', 'Gap (SAR)', 'Cheapest Store']
+    ? ['المنتج', 'الصنف', 'الماركة', 'الوحدة', 'الكمية', 'سعرك', 'متوسط السوق', 'الأرخص', 'الأغلى', 'تشتت السعر', 'فجوة %', 'الحالة', 'التوصية', 'الترتيب', 'الفجوة (ريال)', 'أرخص متجر']
+    : ['Product', 'Category', 'Brand', 'Unit', 'Pack Size', 'Your Price', 'Market Avg', 'Min', 'Max', 'Price Spread', 'Gap %', 'Status', 'Action', 'Rank', 'Gap (SAR)', 'Cheapest Store']
   const escCsv = (v: unknown) => {
     const s = String(v ?? '')
     return s.includes(',') || s.includes('"') || s.includes('\n')
@@ -44,6 +44,7 @@ function exportCsv(data: ProductComparison[], lang: string) {
     d.market_avg,
     d.min_price,
     d.max_price,
+    d.price_spread != null ? d.price_spread.toFixed(2) : '',
     d.price_gap_pct,
     d.tag,
     d.recommended_action,
@@ -238,6 +239,7 @@ function ProductsPageContent() {
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'سعرك' : 'Your Price'}</th>
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'متوسط السوق' : 'Market Avg'}</th>
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الأرخص' : 'Lowest'}</th>
+                  <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'تشتت السعر' : 'Price Spread'}</th>
                   <th className="text-end px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'فجوة %' : 'Gap %'}</th>
                   <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'الحالة' : 'Status'}</th>
                   <th className="text-center px-4 py-[var(--density-table-cell-y)] font-semibold text-neutral-600 text-xs">{isAr ? 'التوصية' : 'Action'}</th>
@@ -286,6 +288,22 @@ function ProductsPageContent() {
                       </td>
                       <td className="px-4 py-[var(--density-table-cell-y)] text-end font-medium tabular-nums text-[color:var(--color-trend-up)]">
                         {row.min_price.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-[var(--density-table-cell-y)] text-end tabular-nums text-xs">
+                        {row.price_spread != null ? (
+                          <span
+                            className="font-semibold"
+                            style={{
+                              color: row.price_spread > 10
+                                ? fareeqChart.coral
+                                : row.price_spread > 3
+                                ? fareeqHex.amber
+                                : fareeqChart.green,
+                            }}
+                          >
+                            {row.price_spread.toFixed(2)} {isAr ? 'ر.س' : 'SAR'}
+                          </span>
+                        ) : '—'}
                       </td>
                       <td className="px-4 py-[var(--density-table-cell-y)] text-end">
                         {row.your_price !== null ? (
