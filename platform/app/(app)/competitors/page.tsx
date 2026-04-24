@@ -229,6 +229,13 @@ export default function CompetitorsPage() {
             const myScore = myKpis?.performance_score ?? 0
             const compScore = comp.performance_score
             const iAhead = myScore >= compScore
+            const marketEntry = dashboardData?.market?.find(m => m.retailer?.store_key === comp.retailer.store_key)
+            const cheapestColor =
+              marketEntry && marketEntry.cheapest_pct >= 40
+                ? fareeqChart.green
+                : marketEntry && marketEntry.cheapest_pct >= 20
+                ? fareeqHex.amber
+                : fareeqChart.coral
             return (
               <Card key={comp.retailer.store_key} className="card-hover">
                 <div className="flex items-start gap-4">
@@ -247,11 +254,14 @@ export default function CompetitorsPage() {
                         {iAhead ? (isAr ? 'أنت متقدم' : 'You Lead') : (isAr ? 'متأخر' : 'Behind')}
                       </Badge>
                     </div>
-                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+                    {/* 5 KPI stats — 2 rows × 3 cols */}
+                    <div className="mt-3 grid grid-cols-3 gap-2">
                       {[
                         { label: isAr ? 'الأداء' : 'Performance', val: comp.performance_score.toFixed(0), unit: '' },
                         { label: isAr ? 'متوسط سعر' : 'Avg Price', val: comp.avg_price.toFixed(1), unit: ' SAR' },
                         { label: isAr ? 'التغطية' : 'Coverage', val: comp.coverage_index.toFixed(0), unit: '%' },
+                        { label: isAr ? 'التنافسية' : 'Competitive', val: comp.competitive_index.toFixed(0), unit: '%' },
+                        { label: isAr ? 'مؤشر السعر' : 'Pricing Index', val: comp.pricing_index.toFixed(0), unit: '%' },
                       ].map((item, i) => (
                         <div key={i} className="text-center p-2 bg-neutral-50 rounded-lg">
                           <p className="text-lg font-bold tabular-nums" style={{ color: comp.retailer.color }}>
@@ -261,6 +271,36 @@ export default function CompetitorsPage() {
                         </div>
                       ))}
                     </div>
+                    {/* Market stats: Assortment & Cheapest % */}
+                    {marketEntry && (
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                          <p className="text-lg font-bold tabular-nums" style={{ color: comp.retailer.color }}>
+                            {marketEntry.products.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-neutral-400">
+                            {isAr ? 'حجم التشكيلة / Assortment' : 'Assortment / حجم التشكيلة'}
+                          </p>
+                        </div>
+                        <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                          <div className="flex justify-center">
+                            <span
+                              className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-bold tabular-nums"
+                              style={{
+                                backgroundColor: `${cheapestColor}20`,
+                                color: cheapestColor,
+                                border: `1px solid ${cheapestColor}40`,
+                              }}
+                            >
+                              {marketEntry.cheapest_pct.toFixed(1)}%
+                            </span>
+                          </div>
+                          <p className="text-xs text-neutral-400 mt-1">
+                            {isAr ? 'نسبة الأرخص / Price Win Rate' : 'Price Win Rate / نسبة الأرخص'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>

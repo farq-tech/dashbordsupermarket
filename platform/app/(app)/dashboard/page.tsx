@@ -19,6 +19,7 @@ import { ChartCardSkeleton, KpiCardSkeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { Button } from '@/components/ui/button'
 import { fareeqChart, fareeqHex } from '@/lib/design-system'
+import { RetailerLogo } from '@/components/ui/RetailerLogo'
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) {
@@ -519,6 +520,71 @@ function DashboardPageInner() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Market SKU & Cheapest % Stats */}
+        {market.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {isAr ? 'إحصائيات السوق — التشكيلة ونسبة الأرخص' : 'Market Stats — Assortment & Cheapest %'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {market.map((m) => {
+                  const cheapestColor =
+                    m.cheapest_pct >= 40
+                      ? 'var(--color-trend-up)'
+                      : m.cheapest_pct >= 20
+                      ? fareeqHex.amber
+                      : fareeqChart.coral
+                  return (
+                    <div
+                      key={m.retailer.store_key}
+                      className="rounded-xl border p-3 flex flex-col gap-2"
+                      style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-muted)' }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <RetailerLogo
+                          retailer={m.retailer}
+                          label={isAr ? m.retailer.brand_ar : m.retailer.brand_en}
+                          size={32}
+                          rounded="lg"
+                        />
+                        <p className="text-xs font-semibold text-[var(--color-text-primary)] truncate">
+                          {isAr ? m.retailer.brand_ar : m.retailer.brand_en}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">
+                          {isAr ? 'عدد المنتجات / SKU Count' : 'SKU Count / عدد المنتجات'}
+                        </p>
+                        <p className="text-lg font-bold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
+                          {m.products.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">
+                          {isAr ? 'الأرخص % / Cheapest %' : 'Cheapest % / الأرخص %'}
+                        </p>
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold tabular-nums"
+                          style={{
+                            backgroundColor: `${cheapestColor}20`,
+                            color: cheapestColor,
+                            border: `1px solid ${cheapestColor}40`,
+                          }}
+                        >
+                          {m.cheapest_pct.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-3">
