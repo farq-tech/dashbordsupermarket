@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useEffect, useMemo } from 'react'
+import React, { Suspense, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { Topbar } from '@/components/layout/Topbar'
@@ -9,7 +9,7 @@ import { InsightCard } from '@/components/ui/insight-card'
 import { Badge } from '@/components/ui/badge'
 import { SimpleBarChart, CategoryPerformanceComboChart } from '@/components/charts/BarChartComponent'
 import { SimplePieChart } from '@/components/charts/PieChartComponent'
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Lightbulb, Target } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Lightbulb, Target, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { PAGE_TITLES } from '@/lib/navConfig'
 import { getPreviousSnapshot, getKpiSnapshots, type KpiSnapshot } from '@/lib/kpiSnapshotHistory'
@@ -144,7 +144,7 @@ function DashboardPageInner() {
     )
   }
 
-  const { kpis, recommendations, alerts, market, all_kpis } = dashboardData
+  const { kpis, recommendations, alerts, market, all_kpis, decision_brief } = dashboardData
   const isAr = lang === 'ar'
   const hasCriticalAlerts = alerts.some(a => a.severity === 'high')
 
@@ -212,6 +212,26 @@ function DashboardPageInner() {
   const _rankIdx = [...all_kpis].sort((a, b) => b.performance_score - a.performance_score)
     .findIndex(k => k.retailer.store_key === selectedRetailer?.store_key)
   const marketRank = _rankIdx === -1 ? null : _rankIdx + 1
+
+  // Prefer authoritative server-computed rank; fall back to client-side derivation
+  const effectiveRank = decision_brief?.market_rank ?? marketRank
+  const effectiveParticipants = decision_brief?.market_participants ?? all_kpis.length
+
+  const rankContextLine =
+    effectiveRank == null
+      ? ''
+      : effectiveRank === 1
+        ? (isAr ? 'أنت الأفضل أداءً في السوق 🎯' : 'You lead the market 🎯')
+        : effectiveRank <= 3
+          ? (isAr ? 'قريب من القمة — ركّز على التسعير' : 'Close to the top — focus on pricing')
+          : (isAr ? 'فرصة للارتقاء — راجع التوصيات' : 'Opportunity to climb — review recommendations')
+
+  const rankBadgeStyle: React.CSSProperties =
+    effectiveRank === 1
+      ? { background: 'linear-gradient(135deg, #fef9c3, #fde68a)', color: '#854d0e' }
+      : effectiveRank != null && effectiveRank <= 3
+        ? { background: 'var(--color-surface-muted)', color: 'var(--color-text-primary)' }
+        : { background: 'var(--color-surface-muted)', color: 'var(--color-text-secondary)' }
 
   const pageTitle = PAGE_TITLES['/dashboard']
   let insightBlock: {
@@ -433,7 +453,42 @@ function DashboardPageInner() {
         )}
 
         {/* Secondary KPI Cards */}
-        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          {/* Market Rank — prominent badge */}
+          <Card elevation="nested" className="flex flex-col">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Trophy
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: effectiveRank === 1 ? '#854d0e' : 'var(--color-text-muted)' }}
+              />
+              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                {isAr ? 'ترتيبك في السوق' : 'Your Market Rank'}
+              </p>
+            </div>
+            {effectiveRank != null ? (
+              <div
+                className="mt-1 inline-flex items-center justify-center rounded-xl px-3 py-1 font-extrabold text-2xl tabular-nums self-start"
+                style={rankBadgeStyle}
+              >
+                #{effectiveRank}
+              </div>
+            ) : (
+              <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-text-muted)' }}>—</p>
+            )}
+            <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-subtle)' }}>
+              {effectiveRank != null
+                ? (isAr ? `من أصل ${effectiveParticipants} متنافسين` : `out of ${effectiveParticipants} chains`)
+                : (isAr ? 'لا يوجد ترتيب' : 'No rank data')}
+            </p>
+            {rankContextLine && (
+              <p
+                className="text-[11px] mt-1 leading-snug"
+                style={{ color: effectiveRank === 1 ? '#854d0e' : 'var(--color-text-muted)' }}
+              >
+                {rankContextLine}
+              </p>
+            )}
+          </Card>
           <Card elevation="nested">
             <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? 'متوسط سعرك' : 'Your Avg Price'}</p>
             <p className="text-xl font-bold mt-1 tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
