@@ -42,6 +42,26 @@ export default function PricingPage() {
     cheapest: comparisons.filter(c => c.price_rank === 1),
   }), [comparisons])
 
+  const topSpreadProduct = useMemo(() => {
+    const withSpread = comparisons.filter(c => c.price_spread != null && c.price_spread > 0)
+    if (withSpread.length === 0) return null
+    return withSpread.reduce((best, c) => (c.price_spread! > best.price_spread! ? c : best))
+  }, [comparisons])
+
+  const avgSpreadBySegment = useMemo(() => {
+    const avg = (arr: typeof comparisons) => {
+      const valid = arr.filter(c => c.price_spread != null)
+      return valid.length > 0 ? valid.reduce((s, c) => s + c.price_spread!, 0) / valid.length : null
+    }
+    return {
+      overpriced: avg(segments.overpriced),
+      risk: avg(segments.risk),
+      competitive: avg(segments.competitive),
+      underpriced: avg(segments.underpriced),
+      cheapest: avg(segments.cheapest),
+    }
+  }, [segments])
+
   // Gap distribution
   const gapBuckets = useMemo(() => {
     const stocked = comparisons.filter(c => c.your_price !== null)
@@ -97,18 +117,47 @@ export default function PricingPage() {
       <Topbar title_ar={PAGE_TITLES['/pricing'].ar} title_en={PAGE_TITLES['/pricing'].en} />
       <div className="page-shell">
 
+        {/* Top volatile product insight */}
+        {topSpreadProduct && (
+          <div
+            className="flex items-center gap-2 text-xs rounded-lg border px-3 py-2"
+            style={{ background: `${fareeqChart.coral}0d`, borderColor: `${fareeqChart.coral}40`, color: 'var(--color-text-secondary)' }}
+          >
+            <span style={{ color: fareeqChart.coral }} className="text-base">⚡</span>
+            <span>
+              {isAr
+                ? `أعلى تشتت في الأسعار: `
+                : `Highest price volatility: `}
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                {isAr ? topSpreadProduct.title_ar : topSpreadProduct.title_en}
+              </span>
+              {' — '}
+              <span className="font-semibold tabular-nums" style={{ color: fareeqChart.coral }}>
+                {topSpreadProduct.price_spread!.toFixed(2)} {isAr ? 'ر.س' : 'SAR'}
+              </span>
+              {' '}
+              {isAr ? 'فرق بين المتاجر' : 'spread across stores'}
+            </span>
+          </div>
+        )}
+
         {/* Summary KPI row */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: fareeqChart.coral },
-            { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: fareeqChart.orange },
-            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: fareeqChart.blue },
-            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: fareeqChart.green },
-            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: fareeqChart.deepBlue },
+            { label: isAr ? 'مرتفع السعر' : 'Overpriced', value: segments.overpriced.length, color: fareeqChart.coral, avgSpread: avgSpreadBySegment.overpriced },
+            { label: isAr ? 'خطر' : 'At Risk', value: segments.risk.length, color: fareeqChart.orange, avgSpread: avgSpreadBySegment.risk },
+            { label: isAr ? 'تنافسي' : 'Competitive', value: segments.competitive.length, color: fareeqChart.blue, avgSpread: avgSpreadBySegment.competitive },
+            { label: isAr ? 'منخفض' : 'Underpriced', value: segments.underpriced.length, color: fareeqChart.green, avgSpread: avgSpreadBySegment.underpriced },
+            { label: isAr ? 'الأرخص' : 'Cheapest', value: segments.cheapest.length, color: fareeqChart.deepBlue, avgSpread: avgSpreadBySegment.cheapest },
           ].map(item => (
             <div key={item.label} className="bg-white rounded-xl border border-neutral-100 p-4 text-center">
               <p className="text-2xl font-bold tabular-nums" style={{ color: item.color }}>{item.value}</p>
               <p className="text-xs text-neutral-500 mt-1">{item.label}</p>
+              {item.avgSpread != null && (
+                <p className="text-[10px] text-neutral-400 mt-1 tabular-nums">
+                  {isAr ? `متوسط تشتت السعر: ${item.avgSpread.toFixed(1)} ر.س` : `Avg spread: ${item.avgSpread.toFixed(1)} SAR`}
+                </p>
+              )}
             </div>
           ))}
         </div>
