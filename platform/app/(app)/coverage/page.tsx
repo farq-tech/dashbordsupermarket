@@ -174,6 +174,9 @@ export default function CoveragePage() {
 
   const totalBranches = data.brands.reduce((s, b) => s + b.total_branches, 0)
   const totalBrands = data.brands_count
+  const identifiedPct = data.total_grocery_pois > 0
+    ? Math.round(data.identified_brand_pois / data.total_grocery_pois * 100)
+    : 0
   const avgCoverage = totalBranches > 0
     ? Math.round(data.brands.reduce((s, b) => s + b.coverage_pct * b.total_branches, 0) / totalBranches * 10) / 10
     : 0
@@ -335,6 +338,126 @@ export default function CoveragePage() {
             countDecimals={1}
           />
         </div>
+
+        {/* Data Coverage Quality */}
+        {data.total_grocery_pois > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {isAr ? 'جودة تغطية البيانات' : 'Data Coverage Quality'}
+              </CardTitle>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                {isAr
+                  ? 'نسبة نقاط الاهتمام التي تم تحديد علامتها التجارية'
+                  : 'Share of surveyed POIs with an identified brand'}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Total count */}
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                {isAr ? 'إجمالي نقاط الاهتمام المسحوبة:' : 'Total POIs surveyed:'}
+                {' '}
+                <span className="font-bold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
+                  {data.total_grocery_pois.toLocaleString()}
+                </span>
+              </p>
+
+              {/* Progress bar */}
+              <div className="space-y-1.5">
+                <div
+                  className="relative h-4 w-full rounded-full overflow-hidden"
+                  style={{ background: 'var(--color-surface-muted)' }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${identifiedPct}%`,
+                      background: 'var(--color-trend-up)',
+                    }}
+                  />
+                </div>
+                <p className="text-base font-bold tabular-nums" style={{ color: 'var(--color-trend-up)' }}>
+                  {identifiedPct}%{' '}
+                  <span className="text-sm font-normal" style={{ color: 'var(--color-text-secondary)' }}>
+                    {isAr ? 'معرّف / Identified' : 'Identified'}
+                  </span>
+                </p>
+              </div>
+
+              {/* Stat blocks */}
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  className="rounded-[var(--radius-lg)] border p-3"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+                >
+                  <p className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                    ✅ {isAr ? 'نقاط معرّفة (علامة تجارية)' : 'Identified (known brands)'}
+                  </p>
+                  <p
+                    className="text-xl font-bold tabular-nums mt-0.5"
+                    style={{ color: 'var(--color-trend-up)' }}
+                  >
+                    {data.identified_brand_pois.toLocaleString()}
+                  </p>
+                </div>
+                <div
+                  className="rounded-[var(--radius-lg)] border p-3"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+                >
+                  <p className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                    {'❓'} {isAr ? 'نقاط غير معرّفة' : 'Generic / Unmatched'}
+                  </p>
+                  <p
+                    className="text-xl font-bold tabular-nums mt-0.5"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {data.generic_pois.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Contextual insight */}
+              <div
+                className="rounded-[var(--radius-lg)] border-s-4 px-4 py-3"
+                style={{
+                  borderColor: identifiedPct >= 75
+                    ? 'var(--color-trend-up)'
+                    : identifiedPct >= 50
+                      ? fareeqHex.amber
+                      : 'var(--color-trend-down)',
+                  background: identifiedPct >= 75
+                    ? 'color-mix(in srgb, var(--color-trend-up) 6%, transparent)'
+                    : identifiedPct >= 50
+                      ? `color-mix(in srgb, ${fareeqHex.amber} 8%, transparent)`
+                      : 'color-mix(in srgb, var(--color-trend-down) 6%, transparent)',
+                }}
+              >
+                <p
+                  className="text-sm"
+                  style={{
+                    color: identifiedPct >= 75
+                      ? 'var(--color-trend-up)'
+                      : identifiedPct >= 50
+                        ? fareeqHex.amber
+                        : 'var(--color-trend-down)',
+                  }}
+                >
+                  {identifiedPct >= 75
+                    ? (isAr
+                      ? 'تغطية بيانات ممتازة — 3/4 من نقاط السوق مُصنّفة.'
+                      : 'Excellent data coverage — 3 in 4 market locations are branded.')
+                    : identifiedPct >= 50
+                      ? (isAr
+                        ? 'تغطية جيدة. الجزء غير المعرّف فرصة للرصد المستقبلي.'
+                        : 'Good coverage. Unidentified POIs represent future monitoring opportunity.')
+                      : (isAr
+                        ? 'تغطية جزئية. قد تكون هناك علامات تجارية غير ممثّلة في التحليل.'
+                        : 'Partial coverage. Some brands may be underrepresented in the analysis.')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Charts */}
         <div className="grid grid-cols-1 gap-[var(--density-grid-gap)] md:grid-cols-2">
